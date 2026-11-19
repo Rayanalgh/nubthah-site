@@ -527,13 +527,17 @@ footer a:hover{color:var(--lime)}
 .skel i:nth-child(3n){width:120px}.skel i:nth-child(3n+1){width:90px}.skel i:nth-child(3n+2){width:150px}
 @keyframes sh{to{background-position:-200% 0}}
 .crg{display:grid;gap:10px}
-#cv.demo>*:not(.demo-tag){opacity:.42;filter:grayscale(.35)}
+#cv.demo>*:not(.demo-tag){opacity:.6}
 .demo-tag{position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:6;background:linear-gradient(90deg,#8242E5,#5639C9);color:#fff;font-size:22px;font-weight:700;padding:10px 22px;border-radius:99px;white-space:nowrap;box-shadow:0 8px 24px rgba(86,57,201,.35);font-family:inherit}
 #printRoot .demo-tag{display:none}
-#cardBox.demo .flip{opacity:.5;filter:grayscale(.3)}
-.pv-demo .pv-wrap{opacity:.5;filter:grayscale(.3);pointer-events:none}
-.pv-demobar{max-width:520px;margin:12px auto 0;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,rgba(130,66,229,.25),rgba(86,57,201,.1));border:1px solid #8242E5;display:grid;gap:6px;text-align:center;justify-items:center;color:#fff}
-.pv-demobar span{font-size:13px;opacity:.75}.pv-demobar .btn{margin-top:6px}
+#cardBox.demo .flip{opacity:.75}
+.pv-demo .pv-wrap{pointer-events:none}
+.pv-demobar{max-width:520px;margin:14px auto 0;padding:12px 14px;border-radius:14px;background:#fff;border:1.5px solid #8242E5;box-shadow:0 6px 20px rgba(86,57,201,.12);display:flex;gap:12px;align-items:center;justify-content:space-between;color:#2A2038;width:calc(100% - 32px)}
+.pv-demobar b{display:block;font-size:14.5px;color:#2A2038}
+.pv-demobar span{display:block;font-size:12.5px;color:#6b6380;margin-top:2px}
+.pv-demobar a{flex:none;background:linear-gradient(90deg,#8242E5,#5639C9);color:#fff;font-weight:700;font-size:13.5px;padding:9px 16px;border-radius:99px;white-space:nowrap}
+.pv-card{position:relative}
+.pv-ex{position:absolute;top:12px;left:12px;z-index:3;background:#2A2038;color:#fff;font-size:12px;font-weight:700;padding:4px 12px;border-radius:99px}
 .pv-warn{max-width:520px;margin:10px auto 0;padding:10px 14px;border-radius:12px;background:rgba(255,190,60,.12);border:1px solid rgba(255,190,60,.35);color:#ffd88a;font-size:13.5px;text-align:center}
 .pv-warn a{color:#fff;font-weight:700}
 .crc{padding:14px;border-radius:14px;border:1px solid var(--line2);background:var(--raised)}
@@ -2387,7 +2391,8 @@ function vcard(){
 function renderProfile(){
   if(isBlankCV()&&!renderProfile.demo){renderProfile.demo=1;try{withSample(renderProfile)}finally{renderProfile.demo=0}
     const pv=$('#profileView');pv.classList.add('pv-demo');
-    pv.querySelector('.pv-owner').insertAdjacentHTML('afterend',`<div class="pv-demobar"><b>هذا مثال لشكل صفحتك العامة</b><span>تتعبّى تلقائيًا من سيرتك — اكتب بياناتك مرة وحدة وتطلع هنا وفي الباركود.</span><a class="btn btn-lime btn-sm" href="#build">ابدأ سيرتك ←</a></div>`);return}
+    pv.querySelector('.pv-owner').insertAdjacentHTML('afterend',`<div class="pv-demobar"><div><b>هذا مثال لشكل صفحتك</b><span>تتعبّى تلقائيًا من سيرتك، ما تحتاج تبنيها من جديد.</span></div><a href="#build">ابدأ سيرتك ←</a></div>`);
+    const card=pv.querySelector('.pv-card');card&&card.insertAdjacentHTML('afterbegin','<span class="pv-ex">مثال</span>');return}
   $('#profileView').classList.remove('pv-demo');
   const P=S.p,D=(S.docs||[]),link='nubthah.com/cv/'+ensureId(),ini=esc(P.name.trim()[0]||'ن');
   const sk=(S.secs.find(s=>s.type==='skills')||{tags:[]}).tags.slice(0,8);
@@ -2395,7 +2400,7 @@ function renderProfile(){
   const links=S.links.filter(l=>l.u);
   $('#profileView').innerHTML=`
    <div class="pv-owner"><span>👁 هذا اللي يشوفه أي أحد يمسح باركودك</span><a href="#build">← رجوع للتعديل</a></div>
-   ${isSample(S)?`<div class="pv-warn">هذي بيانات <b>المثال</b> وليست بياناتك. <a href="#build" data-act="blank">ابدأ ببياناتك ←</a></div>`:''}
+   ${isSample(S)&&!renderProfile.demo?`<div class="pv-warn">هذي بيانات <b>المثال</b> وليست بياناتك. <a href="#build" data-act="blank">ابدأ ببياناتك ←</a></div>`:''}
    <div class="pv-wrap">
     <header class="pv-top"><img src="${$('#logoL').src}" alt="نُبذة"><span>ملف مهني على نُبذة</span></header>
     <section class="pv-card">
