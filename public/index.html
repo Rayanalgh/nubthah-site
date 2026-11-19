@@ -527,6 +527,9 @@ footer a:hover{color:var(--lime)}
 .skel i:nth-child(3n){width:120px}.skel i:nth-child(3n+1){width:90px}.skel i:nth-child(3n+2){width:150px}
 @keyframes sh{to{background-position:-200% 0}}
 .crg{display:grid;gap:10px}
+.pv-empty{text-align:center;padding:40px 22px}.pv-empty h1{margin-top:0}.pv-empty .btn{margin-top:18px;display:inline-flex}
+.pv-warn{max-width:520px;margin:10px auto 0;padding:10px 14px;border-radius:12px;background:rgba(255,190,60,.12);border:1px solid rgba(255,190,60,.35);color:#ffd88a;font-size:13.5px;text-align:center}
+.pv-warn a{color:#fff;font-weight:700}
 .crc{padding:14px;border-radius:14px;border:1px solid var(--line2);background:var(--raised)}
 .crc.have{opacity:.6;border-style:dashed}
 .crc-h b{font-size:15px}.crc-h small{display:block;color:var(--muted);font-size:12px;margin-top:2px;direction:ltr;text-align:start}
@@ -2376,12 +2379,17 @@ function vcard(){
   return ['BEGIN:VCARD','VERSION:3.0','FN:'+P.name,'TITLE:'+P.title,P.company?'ORG:'+P.company:'',P.phone?'TEL;TYPE=CELL:'+P.phone.replace(/\s/g,''):'',P.email?'EMAIL:'+P.email:'',P.city?'ADR:;;'+P.city+';;;;':'',li?'URL:https://'+li.u.replace(/^https?:\/\//,''):'','NOTE:nubthah.com/cv/'+ensureId(),'END:VCARD'].filter(Boolean).join('\r\n');
 }
 function renderProfile(){
+  if(!S.p.name.trim()){$('#profileView').innerHTML=`<div class="pv-owner"><span>صفحتك العامة</span><a href="#build">← رجوع للتصميم</a></div>
+   <div class="pv-wrap"><header class="pv-top"><img src="${$('#logoL').src}" alt="نُبذة"><span>ملف مهني على نُبذة</span></header>
+   <section class="pv-card pv-empty"><h1>صفحتك لسه فاضية</h1><p class="pv-ti">اكتب اسمك وبياناتك في صفحة التصميم، وتطلع هنا تلقائيًا ويقدر أي أحد يشوفها من الباركود.</p>
+   <a class="btn btn-lime" href="#build">ابدأ سيرتك ←</a></section></div>`;return}
   const P=S.p,D=(S.docs||[]),link='nubthah.com/cv/'+ensureId(),ini=esc(P.name.trim()[0]||'ن');
   const sk=(S.secs.find(s=>s.type==='skills')||{tags:[]}).tags.slice(0,8);
   const xp=(S.secs.find(s=>s.type==='xp')||{items:[]}).items.filter(filled)[0];
   const links=S.links.filter(l=>l.u);
   $('#profileView').innerHTML=`
    <div class="pv-owner"><span>👁 هذا اللي يشوفه أي أحد يمسح باركودك</span><a href="#build">← رجوع للتعديل</a></div>
+   ${isSample(S)?`<div class="pv-warn">هذي بيانات <b>المثال</b> وليست بياناتك. <a href="#build" data-act="blank">ابدأ ببياناتك ←</a></div>`:''}
    <div class="pv-wrap">
     <header class="pv-top"><img src="${$('#logoL').src}" alt="نُبذة"><span>ملف مهني على نُبذة</span></header>
     <section class="pv-card">
@@ -2464,8 +2472,13 @@ function sampleData(){return{
 function blankData(){return{p:{name:'',title:'',email:'',phone:'',city:'',photo:''},summary:'',links:[{t:'LinkedIn',u:''}],extra:[],
   secs:[sec('xp',{items:[empty('xp')]}),sec('edu',{items:[empty('edu')]}),sec('skills'),sec('langs',{items:[{a:'العربية',b:'اللغة الأم'}]})],docs:[]}}
 
-const S={tpl:'modern',card:'noir',color:'#6b3fd4',dir:'rtl',mode:'cv',pro:false,...sampleData()};
-try{const sv=JSON.parse(localStorage.getItem('nubthah_v2')||'null');if(sv&&sv.p&&Array.isArray(sv.secs)){Object.assign(S,sv,{mode:'cv',pro:false});const dv=JSON.parse(localStorage.getItem('nubthah_docs')||'null');S.docs=Array.isArray(dv)?dv:[]}}catch(e){}
+/* المثال (سارة القحطاني) للعرض فقط — ما يصير بيانات أحد */
+const isSample=d=>!!(d&&d.p&&d.p.name==='سارة القحطاني'&&(!d.p.email||d.p.email==='sara@email.com'));
+const S={tpl:'modern',card:'noir',color:'#6b3fd4',dir:'rtl',mode:'cv',pro:false,...blankData()};
+try{const sv=JSON.parse(localStorage.getItem('nubthah_v2')||'null');
+  if(sv&&sv.p&&Array.isArray(sv.secs)){
+    if(isSample(sv)){['tpl','card','color','dir','font'].forEach(k=>{if(sv[k]!=null)S[k]=sv[k]});S.docs=[]}
+    else{Object.assign(S,sv,{mode:'cv',pro:false});const dv=JSON.parse(localStorage.getItem('nubthah_docs')||'null');S.docs=Array.isArray(dv)?dv.filter(d=>d&&d.id!=='demo'):[]}}}catch(e){}
 if(!Array.isArray(S.docs))S.docs=[];
 
 /* ---------- FORM ---------- */
@@ -2797,7 +2810,7 @@ document.addEventListener('click',e=>{
     case 'addSec':{const s=sec(v,TYPES[v].tags?{}:{items:[empty(v)]});S.secs.push(s);drawForm();schedule();
       requestAnimationFrame(()=>{const el=document.getElementById('b-'+s.id);form.scrollTo({top:el.offsetTop-form.offsetTop-8,behavior:'smooth'});const i=el.querySelector('input:not(.ttl),textarea');i&&i.focus({preventScroll:true})});return}
     case 'blank':Object.assign(S,blankData());toast('صفحة جديدة — ابدأ بكتابة اسمك');drawForm();schedule();focusLater('[data-p="name"]');return;
-    case 'sample':Object.assign(S,sampleData());break;
+    case 'sample':Object.assign(S,sampleData());toast('هذا مثال للتجربة — بدّله ببياناتك قبل ما تشاركه');break;
     case 'ai':location.hash='#build';setTimeout(()=>{form.scrollTo({top:0,behavior:'smooth'});focusLater('[data-sum]')},250);return;
     case 'arrange':arrange();return;
     case 'addDoc':$('#docIn').click();return;
@@ -3044,9 +3057,11 @@ async function onGoogleCredential(resp){
 function finishLogin(u){
   setUser(u);close();
   /* نعبّي بياناته في السيرة إذا كانت فاضية */
-  let f=0;if(u.name&&(!S.p.name||S.p.name==='سارة القحطاني')&&S.p.name!==u.name&&!S.p.email){S.p.name=u.name;f=1}
+  let f=0;if(isSample(S)){Object.assign(S,blankData());f=1}
+  if(u.name&&!S.p.name){S.p.name=u.name;f=1}
   if(u.email&&!S.p.email){S.p.email=u.email;f=1}
-  if(f&&builder&&!builder.hidden){drawForm();schedule()}
+  if(f)schedule();
+  if(f&&builder&&!builder.hidden)drawForm();
   toast('أهلًا '+((u.name||'').split(' ')[0]||'')+' 👋 تم تسجيل دخولك');
   const n=authNext;authNext=null;n&&n();
 }
