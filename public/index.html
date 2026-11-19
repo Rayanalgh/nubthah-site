@@ -2606,6 +2606,7 @@ Omit keys whose arrays would be empty.`;
 async function askAI(path,body,prompt){
   if(window.NUBTHAH_API){
     const r=await fetch(window.NUBTHAH_API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(r.status===402){openUpsell('خلصت تجاربك المجانية الثلاث للذكاء الاصطناعي');throw {code:'upgrade'}}
     if(!r.ok)throw {code:'http_'+r.status};return r.json();
   }
   const sample=window.claude&&window.claude.use?await window.claude.use('sample'):null;
@@ -3465,6 +3466,7 @@ async function aiKeywords(field){
   let v=null;
   if(window.NUBTHAH_API){ /* موقعك الحقيقي */
     const r=await fetch(window.NUBTHAH_API+'/keywords',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({field})});
+    if(r.status===402){toast('خلصت تجاربك المجانية للذكاء الاصطناعي — عرضنا لك من قائمة نُبذة، ورقّ لـ Pro لأي تخصص');return null}
     if(!r.ok)throw {code:'http_'+r.status};v=await r.json();
   }else{ /* المعاينة: Claude مباشرة */
     const sample=window.claude&&window.claude.use?await window.claude.use('sample'):null;
@@ -3681,6 +3683,7 @@ async function aiCourses(field){
   let v=null;
   if(window.NUBTHAH_API){
     const r=await fetch(window.NUBTHAH_API+'/courses',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({field})});
+    if(r.status===402){toast('خلصت تجاربك المجانية للذكاء الاصطناعي — عرضنا لك من قائمة نُبذة، ورقّ لـ Pro لأي تخصص');return null}
     if(!r.ok)throw {code:'http_'+r.status};v=await r.json();
   }else{
     const sample=window.claude&&window.claude.use?await window.claude.use('sample'):null;

@@ -90,16 +90,29 @@ async function askClaude(env, prompt, maxTokens){
   return JSON.parse(m[0]);
 }
 
+/* حصة الذكاء الاصطناعي: لما تكون الحسابات مفعّلة، المجاني له ٣ تجارب */
+const FREE_AI = 3;
+const accountsOn = env => !!(env.DB && (env.RESEND_API_KEY || env.GOOGLE_CLIENT_ID));
+async function aiGate(req, env){
+  if (!accountsOn(env)) return { ok: true };
+  const u = await sessionUser(req, env);
+  if (!u) return { res: json({ error: 'login_required' }, 401) };
+  if (u.plan !== 'pro' && (u.ai_used || 0) >= FREE_AI) return { res: json({ error: 'upgrade_required', used: u.ai_used, limit: FREE_AI }, 402) };
+  return { ok: true, u };
+}
+async function aiCount(env, g){ if (g && g.u && g.u.plan !== 'pro') await env.DB.prepare('UPDATE users SET ai_used=ai_used+1 WHERE id=?').bind(g.u.id).run(); }
+
 async function keywords(req, env, ip, ctx){
   if (!env.ANTHROPIC_API_KEY) return json({ error: 'ai_not_configured' }, 503);
   const { field = '' } = await req.json().catch(() => ({}));
   const f = String(field).replace(/[«»<>]/g, '').trim().slice(0, 120);
   if (f.length < 2) return json({ error: 'field_required' }, 400);
+  const g = await aiGate(req, env); if (g.res) return g.res;
   const cache = caches.default, ck = new Request('https://cache.nubthah/kw/' + encodeURIComponent(normKey(f)));
   const hit = await cache.match(ck); if (hit) return hit;
   if (limited(ip, 'kw', 30)) return json({ error: 'rate_limited' }, 429);
   try {
-    const out = await askClaude(env, kwPrompt(f), 1800);
+    const out = await askClaude(env, kwPrompt(f), 1800); if (!out.error) await aiCount(env, g);
     const res = json(out, 200, { 'cache-control': 'public, max-age=2592000' });
     if (!out.error) ctx.waitUntil(cache.put(ck, res.clone()));
     return res;
@@ -111,11 +124,12 @@ async function courses(req, env, ip, ctx){
   const { field = '' } = await req.json().catch(() => ({}));
   const f = String(field).replace(/[«»<>]/g, '').trim().slice(0, 120);
   if (f.length < 2) return json({ error: 'field_required' }, 400);
+  const g = await aiGate(req, env); if (g.res) return g.res;
   const cache = caches.default, ck = new Request('https://cache.nubthah/cr/' + encodeURIComponent(normKey(f)));
   const hit = await cache.match(ck); if (hit) return hit;
   if (limited(ip, 'cr', 30)) return json({ error: 'rate_limited' }, 429);
   try {
-    const out = await askClaude(env, crPrompt(f), 2200);
+    const out = await askClaude(env, crPrompt(f), 2200); if (!out.error) await aiCount(env, g);
     const res = json(out, 200, { 'cache-control': 'public, max-age=2592000' });
     if (!out.error) ctx.waitUntil(cache.put(ck, res.clone()));
     return res;
@@ -127,8 +141,9 @@ async function arrange(req, env, ip){
   const { text = '', lang = 'rtl' } = await req.json().catch(() => ({}));
   const t = String(text).trim();
   if (t.length < 15) return json({ error: 'text_too_short' }, 400);
+  const g = await aiGate(req, env); if (g.res) return g.res;
   if (limited(ip, 'arr', 20)) return json({ error: 'rate_limited' }, 429);
-  try { return json(await askClaude(env, arrPrompt(t, lang === 'ltr' ? 'ltr' : 'rtl'), 3000)); }
+  try { const out = await askClaude(env, arrPrompt(t, lang === 'ltr' ? 'ltr' : 'rtl'), 3000); await aiCount(env, g); return json(out); }
   catch (e) { return json({ error: 'ai_failed' }, 502); }
 }
 
