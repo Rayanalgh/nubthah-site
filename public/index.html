@@ -962,7 +962,7 @@ body.noscroll{overflow:hidden}
   <div class="gridbg"></div>
   <div class="wrap">
     <div>
-      <span class="pill rv"><b>جديد</b> باركود لسيرتك تحفظه في Apple Wallet</span>
+      <span class="pill rv"><b>جديد</b> صفحة مهنية وباركود لسيرتك</span>
       <h1 class="rv">نُبذة عنك<br>تليق بطموحك</h1>
       <p class="lead rv">صمّم سيرة ذاتية متوافقة مع أنظمة التوظيف ATS، وبطاقة أعمال بهويتك، بالعربي والإنجليزي، في دقائق.</p>
       <div class="hero-cta rv">
@@ -1023,11 +1023,11 @@ body.noscroll{overflow:hidden}
     <div class="rv">
       <span class="eyebrow">باركود السيرة</span>
       <h2>سيرتك <span class="g">في جيبك</span></h2>
-      <p class="sub">بعد ما تنزّل سيرتك يطلع لك باركود خاص فيك. احفظه في Apple Wallet، ولما أحد يطلب سيرتك ورّه إياه، يمسحه بكاميرا جواله وتنفتح له على طول.</p>
+      <p class="sub">بعد ما تنزّل سيرتك يطلع لك باركود خاص فيك. احفظه في جوالك، ولما أحد يطلب سيرتك ورّه إياه، يمسحه بكاميرا جواله وتنفتح له على طول.</p>
       <ul class="ticks"><li>يفتح دائمًا أحدث نسخة من سيرتك</li><li>ما يحتاج تطبيق، أي كاميرا جوال تكفي</li><li>مثالي للمعارض الوظيفية والمقابلات والفعاليات</li></ul>
       <a href="#build" class="btn btn-lime">صمّم سيرتك واحصل على الباركود ←</a>
     </div>
-    <div class="rv"><div class="phone"><span class="ptime">9:41</span><div id="demoPass"></div><p class="wallet-hint">Apple Wallet</p></div></div>
+    <div class="rv"><div class="phone"><span class="ptime">9:41</span><div id="demoPass"></div><p class="wallet-hint">باركود سيرتك</p></div></div>
   </div>
 </section>
 
@@ -3220,7 +3220,7 @@ function shareModal(kind){
    <h3>${kind==='card'?'بطاقتك جاهزة للمشاركة':'سيرتك جاهزة!'}</h3>
    <p class="muted">احفظ الباركود، ولما أحد يطلب ${kind==='card'?'بطاقتك':'سيرتك'} ورّه إياه — يمسحه بكاميرا جواله وتنفتح له على طول.</p>
    ${passHTML(kind,link)}
-   <button class="wallet-btn" data-wallet="apple">${WALLET_SVG}<span><small>إضافة إلى</small><b>Apple Wallet</b></span>${S.pro?'':'<em class="pro">PRO</em>'}</button>
+   <button class="wallet-btn" data-wallet="apple">${WALLET_SVG}<span><small>إضافة إلى</small><b>Apple Wallet</b></span><em class="pro">قريبًا</em></button>
    <div class="share-row">
      <button class="btn btn-ghost btn-sm" id="saveQr">⤓ حفظ الباركود</button>
      <button class="btn btn-ghost btn-sm" id="copyLink">نسخ الرابط</button>
@@ -3229,7 +3229,7 @@ function shareModal(kind){
    <a href="#profile" class="pvlink" data-close style="justify-content:center;margin-top:12px">${ic('eye',16)} شوف الصفحة اللي تطلع لمن يمسح الباركود ←</a>
    <p class="note">الباركود يفتح دائمًا أحدث نسخة من ${kind==='card'?'بطاقتك':'سيرتك'}، حتى لو عدّلتها بعدين.</p></div>`);
   $('#saveQr').onclick=()=>{
-    const url=qrCanvas(link,S.p.name,link.replace('https://',''));
+    const url=qrCanvas(qrOf(link),S.p.name,link.replace('https://',''));
     const box=mbox.querySelector('.pass-qr');box.innerHTML=`<img src="${url}" alt="باركود" style="display:block;width:100%">`;
     (async()=>{const bin=atob(url.split(',')[1]),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);const blob=new Blob([u8],{type:'image/png'});
       const dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;
@@ -3238,8 +3238,7 @@ function shareModal(kind){
   };
   $('#copyLink').onclick=async()=>{try{await navigator.clipboard.writeText(link);toast('تم نسخ الرابط')}catch(e){toast(link)}};
   mbox.querySelectorAll('[data-wallet]').forEach(b=>b.onclick=()=>{
-    if(!S.pro){openUpsell('إضافة '+(kind==='card'?'البطاقة':'السيرة')+' إلى المحفظة');return}
-    toast(b.dataset.wallet==='apple'?'في الموقع الفعلي ينزل ملف المحفظة ويفتح في Apple Wallet مباشرة':'في الموقع الفعلي تنضاف لـ Google Wallet مباشرة');
+    toast('الإضافة للمحفظة قريبًا — حاليًا اضغط «حفظ الباركود» واحفظه في صورك');
   });
 }
 
@@ -3249,7 +3248,7 @@ function shareModal(kind){
    window.NUBTHAH_GOOGLE_CLIENT_ID='xxxx.apps.googleusercontent.com'
    window.NUBTHAH_API='/api'   (للتحقق من التوكن في الخادم: api/auth/google.js) */
 let user=null;try{user=JSON.parse(localStorage.getItem('nubthah_user')||'null')}catch(e){}
-function setUser(u){user=u;try{u?localStorage.setItem('nubthah_user',JSON.stringify(u)):localStorage.removeItem('nubthah_user')}catch(e){}drawAccount()}
+function setUser(u){user=u;if(!PUB){S.pro=!!(u&&u.plan==='pro');try{schedule()}catch(e){}}try{u?localStorage.setItem('nubthah_user',JSON.stringify(u)):localStorage.removeItem('nubthah_user')}catch(e){}drawAccount()}
 const G_SVG='<svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.2-.1-2.3-.4-3.5z"/></svg>';
 const GCID=()=>window.NUBTHAH_GOOGLE_CLIENT_ID||'';
 let gisReady=null;
@@ -4227,7 +4226,7 @@ $('#mtabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;$$('#mta
 /* ---------- PRICING ---------- */
 const PLANS=[
  {n:'مجاني',d:'كل اللي تحتاجه عشان تبدأ',m:0,f:['سيرة كاملة بقالبي ATS وحديث','تحميل PDF','بطاقة أعمال وصفحة عامة وباركود','فحص ATS الأساسي','كلمات مفتاحية ودورات من قائمة نُبذة','٣ تجارب مجانية للذكاء الاصطناعي'],no:['قوالب PRO','الذكاء الاصطناعي بلا حدود'],cta:'ابدأ مجانًا'},
- {n:'Pro',d:'للباحث عن عمل بجدية',m:29,hot:1,f:['كل ميزات المجاني','كل القوالب المميزة بدون علامة مائية','الذكاء الاصطناعي بلا حدود: رتّب سيرتي، والكلمات المفتاحية لأي تخصص، والدورات','فحص ATS مقابل الوظيفة','إضافة السيرة لـ Apple Wallet','الميزات الجديدة أول بأول'],cta:'اشترك في Pro'}
+ {n:'Pro',d:'للباحث عن عمل بجدية',m:29,hot:1,f:['كل ميزات المجاني','كل القوالب المميزة بدون علامة مائية','الذكاء الاصطناعي بلا حدود: رتّب سيرتي، والكلمات المفتاحية لأي تخصص، والدورات','فحص ATS مقابل الوظيفة','رابط باسمك وإحصائيات الزيارات','تذكير قبل انتهاء الرخص','تتبع التقديمات وتجهيز المقابلة','الميزات الجديدة أول بأول'],cta:'اشترك في Pro'}
 ];
 function drawPlans(){
   $('#plans').innerHTML=PLANS.map(p=>{
