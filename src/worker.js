@@ -276,7 +276,7 @@ export default {
     if (p.startsWith('/api/')) {
       const ip = req.headers.get('cf-connecting-ip') || 'x', m = req.method;
       try {
-        if (p === '/api/auth/config' && m === 'GET') return json({ google: !!(env.GOOGLE_CLIENT_ID && env.DB), email: !!(env.RESEND_API_KEY && env.DB), googleClientId: env.GOOGLE_CLIENT_ID || '' });
+        if (p === '/api/auth/config' && m === 'GET') return json({ google: !!(env.GOOGLE_CLIENT_ID && env.DB), email: !!(env.RESEND_API_KEY && env.DB), googleClientId: env.GOOGLE_CLIENT_ID || '', db: !!env.DB, ai: !!env.ANTHROPIC_API_KEY });
         if (p === '/api/me' && m === 'GET') { const u = await sessionUser(req, env); return u ? json({ user: pub(u) }) : json({ user: null }); }
         if (p === '/api/cv' && m === 'GET') return await cvGet(req, env);
         if (p === '/api/cv' && m === 'PUT') return await cvPut(req, env);
