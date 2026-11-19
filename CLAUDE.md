@@ -13,5 +13,7 @@ Cloudflare مربوط فيه (Workers Builds للـ Worker `nubthah`): أي push
 - لا ترفع أي مفتاح أو سر. الأسرار (ANTHROPIC_API_KEY, SESSION_SECRET) محفوظة في Cloudflare فقط.
 - لا تغيّر DNS أو إعدادات Cloudflare/Namecheap بدون موافقة ريان.
 - الإيميل على الدومين يتحوّل عن طريق Cloudflare Email Routing: info@nubthah.com و help@nubthah.com ← nubthah.app@gmail.com (إيميل نُبذة). لا تحذف سجلات MX/SPF/DKIM/DMARC اللي حطها Cloudflare.
-- حساب Cloudflare: dev.rayanalgh@gmail.com (حساب ريان الخاص). الدومين مسجّل في Namecheap والـ Nameservers على Cloudflare. لا تستخدم أي حساب يخص جمعة.
+- كل شيء يخص نُبذة تحت إيميل نُبذة: حساب Cloudflare هو **Nubthah.app@gmail.com's Account** (id 385a91a95ad5eb02406bb8b5d2b0aaa9)، والـ Nameservers فيه aaron و sloan. الدومين مسجّل في Namecheap. لا تستخدم حساب dev.rayanalgh القديم ولا أي حساب يخص جمعة.
+- قاعدة البيانات D1 اسمها `nubthah` (الحسابات والسير)، وتنشأ جداولها تلقائيًا من `src/worker.js`.
+- الأسرار في Cloudflare فقط: ANTHROPIC_API_KEY، RESEND_API_KEY (رموز التحقق بالإيميل)، و SESSION_SECRET اختياري. GOOGLE_CLIENT_ID متغير عادي في wrangler.toml.
 - الواجهة عربية، والردود على ريان بالعربي دائمًا.
