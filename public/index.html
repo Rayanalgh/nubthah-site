@@ -526,6 +526,25 @@ footer a:hover{color:var(--lime)}
 .skel i{height:32px;border-radius:99px;background:linear-gradient(90deg,var(--raised),var(--hover),var(--raised));background-size:200% 100%;animation:sh 1.2s linear infinite}
 .skel i:nth-child(3n){width:120px}.skel i:nth-child(3n+1){width:90px}.skel i:nth-child(3n+2){width:150px}
 @keyframes sh{to{background-position:-200% 0}}
+.crg{display:grid;gap:10px}
+.crc{padding:14px;border-radius:14px;border:1px solid var(--line2);background:var(--raised)}
+.crc.have{opacity:.6;border-style:dashed}
+.crc-h b{font-size:15px}.crc-h small{display:block;color:var(--muted);font-size:12px;margin-top:2px;direction:ltr;text-align:start}
+.crc-m{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;font-size:12px;color:var(--muted)}
+.crc-m span{padding:2px 9px;border-radius:99px;background:var(--bg)}
+.crc-m .lv{color:#cbb6f5}.crc-m .fr{background:rgba(52,199,89,.15);color:#7ee2a0}
+.crc p{font-size:13px;color:#d6cce3;margin-top:8px;line-height:1.7}
+.crc-a{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.crc-a .btn-sm{padding:7px 12px;font-size:12.5px}
+.crc-a .btn-ghost.on{border-color:var(--lime);color:var(--lime)}
+.crc-a .ok{font-size:12.5px;color:#7ee2a0;font-weight:600}
+.plan{margin-top:14px;padding:12px 14px;border-radius:14px;border:1px solid var(--lime);background:linear-gradient(135deg,rgba(130,66,229,.16),rgba(86,57,201,.05))}
+.plan summary{cursor:pointer;font-weight:700;font-size:14px;list-style:none}.plan summary::-webkit-details-marker{display:none}
+.plan-l{display:grid;gap:8px;margin-top:10px}
+.plan-i{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:13px;flex-wrap:wrap}
+.plan-i small{color:var(--muted)}
+.plan-i button{font-size:12px;color:var(--lime);font-weight:600;margin-inline-start:8px}
+.plan-i button[data-prm]{color:var(--muted);font-size:16px}
 
 .smart{border-color:var(--line2);background:linear-gradient(160deg,rgba(130,66,229,.14),rgba(255,255,255,.01) 60%)}
 .smart textarea{min-height:140px}
@@ -884,6 +903,7 @@ body.noscroll{overflow:hidden}
       <div class="tile rv"><div class="ic">▣</div><h3>بطاقة أعمال + QR</h3><p>بطاقة رقمية من نفس بياناتك، برابط شخصي تشاركه.</p></div>
       <div class="tile rv"><div class="ic">＋</div><h3>أقسام بلا حدود</h3><p>مشاريع، شهادات، دورات، تطوع، روابط، أو قسم بتسميتك.</p></div>
       <a href="#build-kw" class="tile lnk rv"><div class="ic">✦</div><h3>كلمات مفتاحية لكل تخصص</h3><p>اكتب تخصصك ونطلع لك المهارات والأدوات والشهادات المطلوبة، وتنضاف لسيرتك بضغطة. ←</p></a>
+      <a href="#build-courses" class="tile lnk rv"><div class="ic">◆</div><h3>دورات وشهادات لتخصصك</h3><p>اكتب تخصصك ونطلع لك الرخص والشهادات والدورات اللي ترفع قيمة سيرتك، وتحفظها في خطتك. ←</p></a>
       <div class="tile rv"><div class="ic">✦</div><h3>كتابة بالذكاء الاصطناعي</h3><p>حوّل وصف مهامك إلى إنجازات مقنعة بأرقام واضحة.</p></div>
     </div>
   </div>
@@ -2705,6 +2725,7 @@ function drawForm(){
   <div class="blk kwblk" id="b-kw"><div class="blk-h"><b>✦ الكلمات المفتاحية لتخصصك</b></div>
    <p class="muted" style="margin:-4px 0 10px;font-size:13px">أنظمة التوظيف تفرز السير حسب الكلمات المفتاحية. اكتب تخصصك ونطلع لك المهارات والأدوات والشهادات المطلوبة في مجالك، وتنضاف لسيرتك بضغطة.</p>
    <div class="kwq" style="margin:0"><input id="kwInline" placeholder="تخصصك أو مسماك — مثال: محاسب، ممرضة، مهندس مدني" aria-label="التخصص" value="${esc(P.title)}"><button class="btn btn-lime btn-sm" data-kwgo>اطلع الكلمات</button></div>
+   <button class="ai" data-crgo style="margin-top:10px">◆ وش الدورات والشهادات المهمة لتخصصي؟</button>
   </div>`+ph+docsBlock();
   S.secs.forEach((s,si)=>{
     const T=TYPES[s.type];
@@ -2717,7 +2738,8 @@ function drawForm(){
       h+=tagSecEditor(si);
     }else{
       h+=s.items.map((it,ii)=>`<div class="item"><button class="ib x" data-act="rmItem" data-v="${si},${ii}" aria-label="حذف">×</button><div class="fields">${T.f.map(f=>fld(si,ii,it,f)).join('')}</div></div>`).join('')
-       +`<button class="add" data-act="addItem" data-v="${si}">+ إضافة ${T.one}</button>`;
+       +`<button class="add" data-act="addItem" data-v="${si}">+ إضافة ${T.one}</button>`
+       +(s.type==='certs'||s.type==='courses'?'<button class="ai" data-cr>◆ اقتراحات دورات وشهادات لتخصصك</button>':'');
     }
     h+='</div>';
   });
@@ -3343,6 +3365,218 @@ document.addEventListener('click',e=>{
   if(e.target.closest('#addMiss')){const ws=[...document.querySelectorAll('.kws.miss span')].map(s=>s.textContent);addKeywords(ws);setTimeout(runAts,50)}
 });
 
+
+/* ---------- COURSES & CERTIFICATIONS ---------- */
+/* قاعدة محلية لأشهر التخصصات (تشتغل بدون ذكاء اصطناعي). الصيغة: نوع|عربي|English|الجهة|المستوى|ليش مهمة|مجاني
+   النوع: L رخصة أو تسجيل مهني مطلوب، C شهادة احترافية، S دورة قصيرة أو مهارة */
+const CR_DB={
+'المحاسبة':`L|زمالة الهيئة السعودية للمراجعين والمحاسبين|SOCPA|الهيئة السعودية للمراجعين والمحاسبين|متقدم|أقوى شهادة محلية للمحاسب، ومطلوبة لمزاولة المراجعة في السعودية
+C|محاسب إداري معتمد|CMA|IMA|متقدم|مطلوبة بقوة في المحاسبة الإدارية والتخطيط المالي في الشركات الكبيرة
+C|محاسب قانوني معتمد|CPA|AICPA|متقدم|معترف فيها عالميًا وترفع فرصك في شركات المراجعة الكبرى
+C|ACCA|ACCA|ACCA|متقدم|شهادة دولية شاملة مبنية على المعايير الدولية
+C|شهادة المعايير الدولية للتقارير المالية|IFRS Certificate|ACCA|متوسط|السعودية تطبّق IFRS، فالشهادة تثبت تمكّنك منها
+S|الزكاة وضريبة القيمة المضافة|Zakat & VAT|دورات متخصصة|مبتدئ|مهارة يُسأل عنها المحاسب في كل شركة سعودية
+S|إكسل المتقدم|Advanced Excel|Coursera / LinkedIn Learning|مبتدئ|أكثر أداة يختبرونها في مقابلات المحاسبة
+S|SAP FICO|SAP FICO|SAP|متوسط|نظام ERP منتشر في الشركات الكبيرة والجهات الحكومية`,
+'المالية والتحليل المالي':`C|محلل مالي معتمد|CFA|CFA Institute|متقدم|الشهادة الأقوى في الاستثمار وإدارة الأصول
+C|محلل النمذجة والتقييم المالي|FMVA|Corporate Finance Institute|متوسط|عملية جدًا في النمذجة على إكسل والتقييم
+C|اختبار الشهادة العامة للتعامل في الأوراق المالية|CME-1|الأكاديمية المالية|مبتدئ|مطلوبة للعمل في شركات الوساطة والاستثمار المرخّصة من هيئة السوق المالية
+C|مدير مخاطر مالية|FRM|GARP|متقدم|قيّمة في البنوك وإدارات المخاطر
+C|محاسب إداري معتمد|CMA|IMA|متقدم|مناسبة للتخطيط المالي والموازنات
+S|النمذجة المالية على إكسل|Financial Modeling in Excel|Coursera / CFI|مبتدئ|أساس أي وظيفة تحليل مالي
+S|Power BI للتقارير المالية|Power BI|Microsoft|مبتدئ|لوحات التقارير صارت مطلوبة في أغلب الإعلانات`,
+'المراجعة والتدقيق':`C|مدقق داخلي معتمد|CIA|IIA|متقدم|الشهادة الأساسية لإدارات المراجعة الداخلية
+L|زمالة الهيئة السعودية للمراجعين والمحاسبين|SOCPA|الهيئة السعودية للمراجعين والمحاسبين|متقدم|مطلوبة لمزاولة المراجعة الخارجية في السعودية
+C|مدقق نظم معلومات معتمد|CISA|ISACA|متقدم|مطلوبة في تدقيق الأنظمة التقنية والأمن
+C|فاحص احتيال معتمد|CFE|ACFE|متقدم|قيّمة في مكافحة الاحتيال والتحقيقات
+C|محاسب قانوني معتمد|CPA|AICPA|متقدم|ترفع فرصك في شركات المراجعة الكبرى
+S|تحليل بيانات المراجعة|Audit Data Analytics|دورات متخصصة|متوسط|المراجعة صارت تعتمد على تحليل البيانات`,
+'الموارد البشرية':`C|أخصائي موارد بشرية معتمد|SHRM-CP|SHRM|متوسط|من أكثر الشهادات طلبًا في إعلانات الموارد البشرية
+C|أخصائي موارد بشرية مشارك|aPHR|HRCI|مبتدئ|مناسبة لحديثي التخرج وبداية المسار
+C|أخصائي موارد بشرية محترف|PHR|HRCI|متوسط|معترف فيها عالميًا للمستوى المتوسط
+C|شهادات المعهد البريطاني للأفراد والتطوير|CIPD|CIPD|متوسط|منتشرة في الشركات الخليجية الكبيرة
+S|نظام العمل السعودي|Saudi Labor Law|دورات معتمدة|مبتدئ|أساسي لأي وظيفة موارد بشرية في السعودية
+S|تحليلات الموارد البشرية|People Analytics|Coursera|متوسط|مهارة صاعدة تميّزك عن غيرك`,
+'التسويق الرقمي':`C|شهادة إعلانات قوقل|Google Ads Certification|Google Skillshop|مبتدئ|أكثر شهادة يطلبها أصحاب العمل في الإعلانات المدفوعة|1
+C|شهادة قوقل أناليتكس|Google Analytics (GA4) Certification|Google Skillshop|مبتدئ|تثبت قدرتك على قياس النتائج وتحليلها|1
+C|شهادة ميتا للتسويق الرقمي|Meta Certified Digital Marketing Associate|Meta|مبتدئ|مهمة لإعلانات انستقرام وفيسبوك
+C|التسويق بالمحتوى من HubSpot|HubSpot Content Marketing|HubSpot Academy|مبتدئ|سريعة وتقوّي فهمك لصناعة المحتوى|1
+S|تحسين محركات البحث|SEO|Semrush Academy|مبتدئ|مهارة مطلوبة في أغلب وظائف التسويق الرقمي|1
+S|التسويق الرقمي من قوقل|Google Digital Marketing & E-commerce|Coursera|مبتدئ|برنامج شامل مناسب للبداية`,
+'إدارة المشاريع':`C|محترف إدارة مشاريع|PMP|PMI|متقدم|الأقوى والأكثر طلبًا في إدارة المشاريع بالسعودية
+C|مشارك معتمد في إدارة المشاريع|CAPM|PMI|مبتدئ|بداية ممتازة قبل PMP إذا خبرتك قليلة
+C|برنس 2|PRINCE2 Foundation|PeopleCert|متوسط|منتشرة في الجهات الحكومية والاستشارية
+C|ممارس الأجايل|PMI-ACP|PMI|متوسط|مطلوبة في المشاريع التقنية
+C|سكرم ماستر|Professional Scrum Master (PSM I)|Scrum.org|مبتدئ|مهمة لفرق التطوير والمنتجات
+S|إدارة المشاريع من قوقل|Google Project Management|Coursera|مبتدئ|برنامج عملي يجهّزك للوظيفة الأولى
+S|بريمافيرا|Primavera P6|Oracle|متوسط|مطلوبة في مشاريع البناء والطاقة`,
+'سلاسل الإمداد واللوجستيات':`C|محترف سلاسل إمداد معتمد|CSCP|ASCM|متقدم|من أقوى شهادات سلاسل الإمداد عالميًا
+C|التخطيط وإدارة المخزون|CPIM|ASCM|متوسط|مناسبة للتخطيط والمخزون والإنتاج
+C|اللوجستيات والنقل والتوزيع|CLTD|ASCM|متوسط|مخصصة للوجستيات والمستودعات
+C|المعهد القانوني للمشتريات والتوريد|CIPS|CIPS|متوسط|منتشرة في المشتريات بالخليج
+S|SAP MM|SAP MM|SAP|متوسط|نظام المخزون والمشتريات في الشركات الكبيرة
+S|إكسل المتقدم|Advanced Excel|Coursera / LinkedIn Learning|مبتدئ|أداة يومية في التخطيط والتقارير`,
+'هندسة البرمجيات والتطوير':`C|مطوّر AWS|AWS Certified Developer – Associate|Amazon Web Services|متوسط|السحابة صارت أساس أغلب الوظائف التقنية
+C|مطوّر Azure|Microsoft Azure Developer (AZ-204)|Microsoft|متوسط|مطلوبة في الجهات اللي تعتمد على مايكروسوفت
+C|مهندس سحابة قوقل|Google Cloud Associate Cloud Engineer|Google Cloud|متوسط|سحابة قوقل حاضرة بقوة في السعودية
+C|شهادة أوراكل جافا|Oracle Certified Professional: Java|Oracle|متوسط|قيّمة لمطوري جافا والأنظمة البنكية
+S|معسكرات أكاديمية طويق|Tuwaiq Academy Bootcamps|أكاديمية طويق|مبتدئ|برامج سعودية قوية ومعروفة عند أصحاب العمل|1
+S|مقدمة علوم الحاسب|CS50|Harvard (edX)|مبتدئ|أساس قوي ومعروف عالميًا|1`,
+'تحليل البيانات وعلم البيانات':`C|تحليل البيانات من قوقل|Google Data Analytics|Coursera|مبتدئ|أشهر بداية لمسار تحليل البيانات
+C|محلل بيانات Power BI|Microsoft PL-300|Microsoft|متوسط|Power BI أكثر أداة مطلوبة في إعلانات التحليل
+C|علم البيانات من IBM|IBM Data Science|Coursera|متوسط|برنامج شامل لبايثون وتعلّم الآلة
+C|أخصائي تابلو|Tableau Desktop Specialist|Tableau|مبتدئ|مطلوبة في جهات كثيرة للوحات البيانات
+S|SQL للمحللين|SQL|Coursera / Kaggle|مبتدئ|أهم مهارة يختبرونها في مقابلات البيانات|1
+S|بايثون لتحليل البيانات|Python for Data Analysis|Kaggle|مبتدئ|مختصرة وعملية|1`,
+'الأمن السيبراني':`C|سيكيورتي بلس|CompTIA Security+|CompTIA|مبتدئ|أشهر شهادة لبداية مسار الأمن السيبراني
+C|معتمد في الأمن السيبراني|ISC2 Certified in Cybersecurity (CC)|ISC2|مبتدئ|مناسبة للمبتدئين وتعطيك أساس قوي
+C|الهاكر الأخلاقي المعتمد|CEH|EC-Council|متوسط|معروفة في اختبار الاختراق وتطلبها جهات كثيرة
+C|محترف أمن نظم المعلومات|CISSP|ISC2|متقدم|الأقوى للمناصب القيادية في الأمن
+C|محترف اختبار الاختراق|OSCP|OffSec|متقدم|عملية جدًا ويحترمها المختصين
+C|مدير أمن المعلومات|CISM|ISACA|متقدم|لإدارة برامج الأمن والحوكمة`,
+'تقنية المعلومات والدعم الفني':`C|كومبتيا A+|CompTIA A+|CompTIA|مبتدئ|البداية الأشهر للدعم الفني
+C|سيسكو CCNA|CCNA|Cisco|متوسط|أساسية لوظائف الشبكات
+C|إطار ITIL|ITIL 4 Foundation|PeopleCert|مبتدئ|مطلوبة في إدارات تقنية المعلومات وخدمات الدعم
+C|أساسيات سحابة AWS|AWS Certified Cloud Practitioner|Amazon Web Services|مبتدئ|مدخل سريع للسحابة
+C|مسؤول أجهزة مايكروسوفت|Microsoft 365 Endpoint Administrator (MD-102)|Microsoft|متوسط|مهمة لإدارة أجهزة وحسابات الموظفين`,
+'تصميم تجربة المستخدم UX/UI':`C|تصميم تجربة المستخدم من قوقل|Google UX Design|Coursera|مبتدئ|أشهر بداية لمسار UX
+C|شهادة نيلسن نورمان|NN/g UX Certification|Nielsen Norman Group|متقدم|من أقوى الشهادات في المجال
+S|دورات مؤسسة تصميم التفاعل|IxDF Courses|Interaction Design Foundation|متوسط|محتوى عميق بسعر مناسب
+S|فيقما للمحترفين|Figma|Figma|مبتدئ|الأداة الأساسية في المجال|1`,
+'الهندسة المدنية':`L|اعتماد الهيئة السعودية للمهندسين|Saudi Council of Engineers Accreditation|الهيئة السعودية للمهندسين|مبتدئ|مطلوب نظاميًا لمزاولة الهندسة في السعودية
+C|محترف إدارة مشاريع|PMP|PMI|متقدم|مطلوبة بقوة في المشاريع الكبرى
+C|محترف المباني الخضراء|LEED AP|USGBC|متوسط|قيّمة في مشاريع الاستدامة والمدن الجديدة
+S|بريمافيرا|Primavera P6|Oracle|متوسط|أهم أداة لتخطيط مشاريع البناء
+S|أوتوكاد سيفيل 3D|AutoCAD Civil 3D|Autodesk|مبتدئ|مطلوبة في التصميم والإشراف
+S|ريفيت|Revit|Autodesk|متوسط|نمذجة BIM صارت شرط في مشاريع كثيرة`,
+'التمريض':`L|تصنيف الهيئة السعودية للتخصصات الصحية|SCFHS Classification|الهيئة السعودية للتخصصات الصحية|مبتدئ|مطلوب نظاميًا لمزاولة التمريض في السعودية
+C|الإنعاش القلبي الأساسي|BLS|American Heart Association|مبتدئ|شرط في أغلب المستشفيات
+C|الإنعاش القلبي المتقدم|ACLS|American Heart Association|متوسط|مطلوبة في الطوارئ والعناية المركزة
+C|إنعاش الأطفال المتقدم|PALS|American Heart Association|متوسط|مهمة لأقسام الأطفال والطوارئ
+S|مكافحة العدوى|Infection Control|دورات معتمدة|مبتدئ|أساسية في كل المنشآت الصحية`,
+'القانون والمحاماة':`L|رخصة مزاولة المحاماة|Law License|وزارة العدل|متقدم|مطلوبة نظاميًا للترافع ومزاولة المحاماة
+C|برامج الهيئة السعودية للمحامين|SBA Professional Programs|الهيئة السعودية للمحامين|متوسط|تطوّر مهاراتك وتُحسب في التطوير المهني
+C|عضوية معهد المحكّمين المعتمد|CIArb|Chartered Institute of Arbitrators|متقدم|قيّمة في التحكيم التجاري
+S|صياغة العقود|Contract Drafting|دورات متخصصة|مبتدئ|أكثر مهارة يطلبونها في الإدارات القانونية
+S|نظام الشركات السعودي|Saudi Companies Law|دورات متخصصة|مبتدئ|أساسي للعمل في الشركات`,
+'التعليم والتدريس':`L|الرخصة المهنية للمعلمين|Teaching License|هيئة تقويم التعليم والتدريب|مبتدئ|مطلوبة لمزاولة التدريس في السعودية
+C|سيلتا لتدريس الإنجليزي|CELTA|Cambridge English|متوسط|الأقوى لمعلمي اللغة الإنجليزية
+C|تيسول|TESOL|جهات معتمدة|مبتدئ|مناسبة لتدريس الإنجليزي كلغة ثانية
+S|معلّم قوقل المعتمد|Google Certified Educator|Google for Education|مبتدئ|يثبت تمكّنك من أدوات التعليم الرقمي|1`,
+'العقارات':`L|رخصة فال|FAL License|الهيئة العامة للعقار|مبتدئ|مطلوبة نظاميًا للوساطة والتسويق العقاري
+C|مقيّم معتمد|Taqeem Certified Valuer|الهيئة السعودية للمقيّمين المعتمدين|متقدم|مطلوبة لمزاولة التقييم العقاري
+S|إدارة الأملاك|Property Management|دورات متخصصة|مبتدئ|مهارة مطلوبة في شركات التطوير وإدارة الأصول`,
+'الصحة والسلامة المهنية':`C|نيبوش|NEBOSH IGC|NEBOSH|متوسط|الأكثر طلبًا في السلامة بالخليج
+C|أوشا ٣٠ ساعة|OSHA 30-Hour|OSHA|مبتدئ|معروفة في المقاولات والصناعة
+C|الإدارة الآمنة|IOSH Managing Safely|IOSH|مبتدئ|سريعة ومناسبة للمشرفين
+C|مدقق رئيسي ISO 45001|ISO 45001 Lead Auditor|جهات معتمدة|متقدم|لتدقيق أنظمة السلامة
+S|الإسعافات الأولية|First Aid|هيئة الهلال الأحمر السعودي|مبتدئ|شرط في أغلب مواقع العمل`,
+'الجودة':`C|مدقق رئيسي ISO 9001|ISO 9001 Lead Auditor|جهات معتمدة|متوسط|الأساس لوظائف أنظمة الجودة
+C|الحزام الأخضر لستة سيجما|Six Sigma Green Belt|ASQ / IASSC|متوسط|مطلوبة في تحسين العمليات
+C|مهندس جودة معتمد|CQE|ASQ|متقدم|قيّمة في الصناعة والتصنيع
+C|محترف جودة الرعاية الصحية|CPHQ|NAHQ|متقدم|الأهم للجودة في القطاع الصحي`,
+'البنوك والخدمات المصرفية':`C|شهادات الأكاديمية المالية|Financial Academy Certificates|الأكاديمية المالية|مبتدئ|مطلوبة في البنوك وشركات الاستثمار المرخّصة
+C|أخصائي مكافحة غسل الأموال|CAMS|ACAMS|متوسط|مطلوبة بقوة في إدارات الالتزام
+C|محلل مالي معتمد|CFA|CFA Institute|متقدم|للاستثمار وإدارة الثروات
+S|الالتزام المصرفي|Banking Compliance|دورات متخصصة|مبتدئ|مجال يتوسع في كل البنوك`
+};
+const CR_T={L:'رخص ومتطلبات نظامية',C:'شهادات احترافية ترفع قيمتك',S:'دورات ومهارات سريعة'};
+const crParse=txt=>txt.split('\n').map(l=>{const[t,ar,en,by,lvl,why,free]=l.split('|');return{t,ar,en,by,lvl,why,free:free==='1'}});
+function crFromDb(f){
+  if(CR_DB[f.n])return{n:f.n,items:crParse(CR_DB[f.n]),src:'db'};
+  return{n:f.n,items:parseKW(f.c).map(k=>({t:/رخص|تصنيف|عضوية|License|Membership/i.test(k.ar+k.en)?'L':'C',ar:k.ar,en:k.en,by:'',lvl:'',why:''})),src:'db'};
+}
+function crPrompt(field){
+  return `You are a senior career advisor for the Saudi Arabia / GCC job market who knows which credentials employers actually value.
+The user typed their field, specialization or job title: «${field.replace(/[«»]/g,'').slice(0,120)}»
+List the licenses, professional certifications and short courses that add the most value to a CV in this field.
+Only real, widely recognized credentials; never invent. Saudi requirements first when they exist. Include a few free or affordable beginner courses. No prices, no URLs.
+Return ONLY JSON: {"field":"<Arabic name>","items":[{"t":"L|C|S","ar":"","en":"","by":"<issuer>","lvl":"مبتدئ|متوسط|متقدم","why":"<one short Arabic sentence>","free":false}]}
+8-12 items ordered by value. If not a real field return {"error":"not_a_field"}.`;
+}
+const crCache=new Map();
+async function aiCourses(field){
+  const key=norm(field).trim();if(crCache.has(key))return crCache.get(key);
+  let v=null;
+  if(window.NUBTHAH_API){
+    const r=await fetch(window.NUBTHAH_API+'/courses',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({field})});
+    if(!r.ok)throw {code:'http_'+r.status};v=await r.json();
+  }else{
+    const sample=window.claude&&window.claude.use?await window.claude.use('sample'):null;
+    if(!sample)return null;
+    const r=await sample(crPrompt(field),{modelTier:'default'});const m=(r.text||'').match(/\{[\s\S]*\}/);v=m?JSON.parse(m[0]):null;
+  }
+  if(!v)return null;if(v.error)return{error:v.error};
+  const items=(Array.isArray(v.items)?v.items:[]).map(x=>({t:['L','C','S'].includes(x.t)?x.t:'C',ar:String(x.ar||x.en||'').trim(),en:String(x.en||x.ar||'').trim(),
+    by:String(x.by||'').trim(),lvl:String(x.lvl||'').trim(),why:String(x.why||'').trim(),free:!!x.free})).filter(x=>x.ar).slice(0,14);
+  if(!items.length)return null;
+  const out={n:String(v.field||field).slice(0,60),items,src:'ai'};crCache.set(key,out);return out;
+}
+/* خطة التطوير: الدورات اللي يبيها المستخدم (تنحفظ في المتصفح) */
+const planGet=()=>{try{return JSON.parse(localStorage.getItem('nubthah_plan')||'[]')}catch(e){return[]}};
+const planSet=a=>{try{localStorage.setItem('nubthah_plan',JSON.stringify(a))}catch(e){}};
+const planHas=it=>planGet().some(p=>p.en===it.en);
+let crField=null,crBusy=0;
+const CR_SKEL=`<div class="kwload"><div class="kwspin">✦</div><b>نجمع لك الدورات والشهادات المهمة لتخصصك…</b><span class="muted">نختار اللي يرفع قيمة سيرتك في سوق العمل السعودي</span><div class="skel">${'<i></i>'.repeat(9)}</div></div>`;
+async function crSearch(q){
+  q=q.trim();if(!q)return;const my=++crBusy;$('#crRes').innerHTML=CR_SKEL;
+  let res=null,err=null;try{res=await aiCourses(q)}catch(e){err=e}
+  if(my!==crBusy||!$('#crRes'))return;
+  if(res&&!res.error){crField=res;renderCR();return}
+  const r=findFields(q);
+  if(r.length){crField=crFromDb(r[0]);renderCR();if(err)toast('عرضنا لك من قاعدة نُبذة');return}
+  $('#crRes').innerHTML=`<div class="kwempty">${res&&res.error?'ما تعرّفنا على هذا التخصص — اكتبه بشكل أوضح (مثال: "محاسبة" أو "مهندس مدني").':'ما قدرنا نجهّز القائمة الحين. جرّب كلمة أعم أو اختر من القائمة تحت.'}</div>`;
+}
+function crModal(q){
+  q=q??(S.p.title||'');
+  open(`<h3>◆ دورات وشهادات لتخصصك</h3><p class="muted">اكتب تخصصك، ونطلع لك الرخص والشهادات والدورات اللي ترفع قيمة سيرتك في سوق العمل.</p>
+   <form class="kwq" id="crF"><input id="crIn" value="${esc(q)}" placeholder="مثال: محاسبة، تمريض، أمن سيبراني، تسويق رقمي" aria-label="التخصص"><button class="btn btn-lime btn-sm">اعرض</button></form>
+   <div id="crPlan"></div><div id="crRes"></div>
+   <details class="allf"><summary>تصفّح كل التخصصات (${ar(KW.length)})</summary><div class="near">${KW.map((f,i)=>`<button data-crf="${i}">${f.n}</button>`).join('')}</div></details>`,'wide');
+  renderPlan();
+  $('#crF').onsubmit=e=>{e.preventDefault();crSearch($('#crIn').value)};
+  mbox.querySelector('.allf').onclick=e=>{const b=e.target.closest('[data-crf]');if(b){crBusy++;crField=crFromDb(KW[+b.dataset.crf]);renderCR();$('#crRes').scrollIntoView({behavior:'smooth'})}};
+  if(q.trim())crSearch(q);else $('#crIn').focus();
+}
+function crHave(it){const cs=S.secs.filter(s=>s.type==='certs'||s.type==='courses');const pool=cs.flatMap(s=>s.items.map(i=>norm(i.a).trim()));return pool.includes(norm(it.ar).trim())||pool.includes(norm(it.en).trim())}
+function crCard(it,i){
+  const have=crHave(it),inPlan=planHas(it);
+  return `<div class="crc${have?' have':''}"><div class="crc-h"><b>${esc(it.ar)}</b>${it.en&&it.en!==it.ar?`<small>${esc(it.en)}</small>`:''}</div>
+   <div class="crc-m">${it.by?`<span>${esc(it.by)}</span>`:''}${it.lvl?`<span class="lv">${esc(it.lvl)}</span>`:''}${it.free?'<span class="fr">مجاني</span>':''}</div>
+   ${it.why?`<p>${esc(it.why)}</p>`:''}
+   <div class="crc-a">${have?'<span class="ok">✓ موجودة في سيرتك</span>':`<button class="btn btn-lime btn-sm" data-crhave="${i}">عندي ✓ أضفها لسيرتي</button><button class="btn btn-ghost btn-sm${inPlan?' on':''}" data-crplan="${i}">${inPlan?'★ في خطتي':'☆ أبيها في خطتي'}</button>`}</div></div>`;
+}
+function renderCR(){
+  const f=crField;
+  $('#crRes').innerHTML=`<div class="kwhead"><b>${esc(f.n)}</b>${f.src==='ai'?'<span class="aibadge">✦ بالذكاء الاصطناعي</span><button class="regen" id="crRegen">↻ ولّد من جديد</button>':'<span class="aibadge db">من قاعدة نُبذة</span>'}</div>
+   ${['L','C','S'].map(t=>{const g=f.items.map((it,i)=>[it,i]).filter(([it])=>it.t===t);return g.length?`<div class="kg"><div class="kg-h"><b>${CR_T[t]}</b></div><div class="crg">${g.map(([it,i])=>crCard(it,i)).join('')}</div></div>`:''}).join('')}
+   <p class="muted" style="font-size:12px;margin-top:14px">اضغط «عندي» بس للشهادات اللي حصلت عليها فعلًا. وتأكد من الشروط والرسوم من الجهة المانحة قبل التسجيل.</p>`;
+  $('#crRes').onclick=e=>{
+    const h=e.target.closest('[data-crhave]');if(h){addCredential(f.items[+h.dataset.crhave]);renderCR();renderPlan();return}
+    const p=e.target.closest('[data-crplan]');if(p){togglePlan(f.items[+p.dataset.crplan]);renderCR();return}
+    if(e.target.closest('#crRegen')){crCache.delete(norm($('#crIn').value).trim());crSearch($('#crIn').value)}};
+}
+function togglePlan(it){let a=planGet();if(a.some(p=>p.en===it.en)){a=a.filter(p=>p.en!==it.en);toast('شلناها من خطتك')}else{a.push({t:it.t,ar:it.ar,en:it.en,by:it.by});toast('انحفظت في خطتك ★')}planSet(a);renderPlan()}
+function renderPlan(){
+  const box=$('#crPlan');if(!box)return;const a=planGet();
+  box.innerHTML=a.length?`<details class="plan" open><summary>★ خطتي للتطوير (${ar(a.length)})</summary><div class="plan-l">${a.map((it,i)=>`<div class="plan-i"><span><b>${esc(it.ar)}</b>${it.by?` <small>— ${esc(it.by)}</small>`:''}</span><span><button data-pdone="${i}">خلّصتها ← أضف لسيرتي</button><button data-prm="${i}" aria-label="حذف">×</button></span></div>`).join('')}</div></details>`:'';
+  box.onclick=e=>{const d=e.target.closest('[data-pdone]'),r=e.target.closest('[data-prm]');const a2=planGet();
+    if(d){const it=a2[+d.dataset.pdone];addCredential(it);planSet(a2.filter((_,i)=>i!==+d.dataset.pdone));renderPlan();crField&&renderCR()}
+    else if(r){planSet(a2.filter((_,i)=>i!==+r.dataset.prm));renderPlan();crField&&renderCR()}};
+}
+function addCredential(it){
+  const type=it.t==='S'?'courses':'certs',lang=S.dir==='ltr'?'en':'ar';
+  let cs=S.secs.find(s=>s.type===type);if(!cs){cs=sec(type);S.secs.push(cs)}
+  cs.items=cs.items.filter(filled);
+  const name=lang==='en'?it.en:it.ar;
+  if(!cs.items.some(i=>norm(i.a).trim()===norm(it.ar).trim()||norm(i.a).trim()===norm(it.en).trim()))cs.items.push({a:name,b:it.by||'',c:'',d:''});
+  drawForm();schedule();toast(`أضفناها لقسم ${type==='certs'?'الشهادات':'الدورات'} — اكتب السنة ✓`);
+}
+document.addEventListener('click',e=>{
+  if(e.target.closest('[data-crgo]')){e.preventDefault();const v=($('#kwInline')||{}).value||'';crModal(v);return}
+  if(e.target.closest('[data-cr]')){e.preventDefault();crModal();return}
+});
+
 function countUp(el,to){let v=0;const st=performance.now();const f=t=>{v=Math.min(1,(t-st)/900);el.textContent=ar(Math.round(to*(1-Math.pow(1-v,3))));if(v<1)requestAnimationFrame(f)};requestAnimationFrame(f)}
 function runAts(){
   const text=atsSrc==='mine'?cvText():atsSrc==='file'?fileText:$('#srcPaste').value;
@@ -3419,9 +3653,9 @@ function route(){
   const pv=$('#profileView');
   if(location.hash==='#profile'){site.hidden=true;builder.hidden=true;pv.hidden=false;document.body.style.overflow='';renderProfile();scrollTo(0,0);return}
   pv.hidden=true;
-  const h=location.hash, b=h==='#build'||h==='#build-card'||h==='#build-ats'||h==='#build-kw';
+  const h=location.hash, b=h==='#build'||h==='#build-card'||h==='#build-ats'||h==='#build-kw'||h==='#build-courses';
   if(b){if(builder.hidden){lastSiteY=scrollY;site.hidden=true;builder.hidden=false;document.body.style.overflow='hidden'}
-    setMode(h==='#build-card'?'card':h==='#build-ats'?'ats':'cv');requestAnimationFrame(fit);if(h==='#build-kw')setTimeout(()=>kwModal(),150)}
+    setMode(h==='#build-card'?'card':h==='#build-ats'?'ats':'cv');requestAnimationFrame(fit);if(h==='#build-kw')setTimeout(()=>kwModal(),150);if(h==='#build-courses')setTimeout(()=>crModal(),150)}
   else if(site.hidden){builder.hidden=true;site.hidden=false;document.body.style.overflow='';
     if(h&&h!=='#top'){const t=document.querySelector(h);t&&t.scrollIntoView()}else scrollTo(0,0)}
 }

@@ -1,7 +1,7 @@
 // نُبذة — سيرفر Cloudflare Worker
 // الصفحات (public/) يخدمها Cloudflare مباشرة، وهذا الملف يستقبل /api فقط.
 // المفاتيح أسرار في Cloudflare (ما تنحط في الملفات):
-//   ANTHROPIC_API_KEY  — للذكاء الاصطناعي (الكلمات المفتاحية + ترتيب السيرة)
+//   ANTHROPIC_API_KEY  — للذكاء الاصطناعي (الكلمات المفتاحية + ترتيب السيرة + الدورات والشهادات)
 //   GOOGLE_CLIENT_ID   — لتسجيل الدخول بـ Google (متغير عادي في wrangler.toml)
 //   SESSION_SECRET     — لتوقيع جلسة الدخول
 // بدون المفاتيح الموقع يشتغل عادي، والذكاء الاصطناعي يرجع للقاعدة المحلية.
@@ -21,6 +21,23 @@ Return ONLY a JSON object, no prose, no markdown fences:
  "c":[3-6 recognized professional certifications or licenses for this field; include Saudi licensing bodies when relevant, e.g. SCFHS, SCE, SOCPA, FAL]}
 Every item is {"ar":"<Arabic phrasing used in Saudi job postings>","en":"<standard English term>"}. For brand names (software, certifications) "ar" may equal "en".
 Keep each item 1-5 words. No duplicates across groups. Prefer specific, searchable terms over generic ones.
+If the input is not a real field, profession or job title, return {"error":"not_a_field"}.`;
+}
+function crPrompt(field){
+  return `You are a senior career advisor for the Saudi Arabia / GCC job market who knows which credentials employers actually value.
+The user typed their field, specialization or job title: «${field.replace(/[«»]/g,'').slice(0,120)}»
+
+List the licenses, professional certifications and short courses that add the most value to a CV in this field.
+Rules:
+- Only real, currently offered, widely recognized credentials and courses. Never invent a certificate, issuer or acronym. If unsure about something, leave it out.
+- Put Saudi requirements first when they exist (e.g. SCFHS classification, Saudi Council of Engineers accreditation, SOCPA, FAL license, Ministry of Justice law license, ETEC teaching license).
+- Include a few quick, affordable or free courses for beginners (e.g. Google Skillshop, HubSpot Academy, Coursera, Doroob, Tuwaiq Academy) when relevant.
+- No prices, no URLs.
+Return ONLY a JSON object, no prose, no markdown:
+{"field":"<the specialization name in Arabic, short>",
+ "items":[{"t":"L|C|S","ar":"<Arabic name as used in Saudi job postings>","en":"<official English name or acronym>","by":"<issuing body>","lvl":"مبتدئ|متوسط|متقدم","why":"<one short Arabic sentence: why it is valuable for this field in Saudi Arabia>","free":false}]}
+t: L = license or mandatory professional registration, C = professional certification, S = short course or practical skill program.
+Return 8-12 items ordered by value. For brand names "ar" may equal "en".
 If the input is not a real field, profession or job title, return {"error":"not_a_field"}.`;
 }
 function arrPrompt(text, lang){
@@ -89,6 +106,22 @@ async function keywords(req, env, ip, ctx){
   } catch (e) { return json({ error: 'ai_failed' }, 502); }
 }
 
+async function courses(req, env, ip, ctx){
+  if (!env.ANTHROPIC_API_KEY) return json({ error: 'ai_not_configured' }, 503);
+  const { field = '' } = await req.json().catch(() => ({}));
+  const f = String(field).replace(/[«»<>]/g, '').trim().slice(0, 120);
+  if (f.length < 2) return json({ error: 'field_required' }, 400);
+  const cache = caches.default, ck = new Request('https://cache.nubthah/cr/' + encodeURIComponent(normKey(f)));
+  const hit = await cache.match(ck); if (hit) return hit;
+  if (limited(ip, 'cr', 30)) return json({ error: 'rate_limited' }, 429);
+  try {
+    const out = await askClaude(env, crPrompt(f), 2200);
+    const res = json(out, 200, { 'cache-control': 'public, max-age=2592000' });
+    if (!out.error) ctx.waitUntil(cache.put(ck, res.clone()));
+    return res;
+  } catch (e) { return json({ error: 'ai_failed' }, 502); }
+}
+
 async function arrange(req, env, ip){
   if (!env.ANTHROPIC_API_KEY) return json({ error: 'ai_not_configured' }, 503);
   const { text = '', lang = 'rtl' } = await req.json().catch(() => ({}));
@@ -131,6 +164,7 @@ export default {
       if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
       try {
         if (p === '/api/keywords') return await keywords(req, env, ip, ctx);
+        if (p === '/api/courses') return await courses(req, env, ip, ctx);
         if (p === '/api/arrange') return await arrange(req, env, ip);
         if (p === '/api/auth/google') return await googleAuth(req, env);
         if (p === '/api/auth/logout') return json({ ok: true }, 200, { 'set-cookie': 'nb_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0' });
