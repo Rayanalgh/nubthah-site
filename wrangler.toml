@@ -1,0 +1,19 @@
+name = "nubthah"
+main = "src/worker.js"
+compatibility_date = "2025-09-01"
+
+# الدومين (يتفعّل بعد ما يصير nubthah.com على Cloudflare)
+# routes = [
+#   { pattern = "nubthah.com", custom_domain = true },
+#   { pattern = "www.nubthah.com", custom_domain = true }
+# ]
+
+# الصفحات يخدمها Cloudflare مباشرة، والسيرفر يستقبل /api بس
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
+
+[vars]
+# Client ID حق Google (مو سر) — نفس القيمة اللي في public/index.html
+GOOGLE_CLIENT_ID = ""
