@@ -3022,7 +3022,7 @@ document.addEventListener('click',e=>{
     case 'addSec':{const s=sec(v,TYPES[v].tags?{}:{items:[empty(v)]});S.secs.push(s);drawForm();schedule();
       requestAnimationFrame(()=>{const el=document.getElementById('b-'+s.id);form.scrollTo({top:el.offsetTop-form.offsetTop-8,behavior:'smooth'});const i=el.querySelector('input:not(.ttl),textarea');i&&i.focus({preventScroll:true})});return}
     case 'blank':Object.assign(S,blankData());toast('صفحة جديدة — ابدأ بكتابة اسمك');drawForm();schedule();focusLater('[data-p="name"]');return;
-    case 'sample':Object.assign(S,sampleData());toast('هذا مثال للتجربة — بدّله ببياناتك قبل ما تشاركه');break;
+    case 'sample':Object.assign(S,sampleData());toast('هذا مثال للتجربة وما ينحفظ في حسابك — اضغط «صفحة فاضية» وابدأ ببياناتك');break;
     case 'ai':location.hash='#build';setTimeout(()=>{form.scrollTo({top:0,behavior:'smooth'});focusLater('[data-sum]')},250);return;
     case 'arrange':arrange();return;
     case 'addDoc':$('#docIn').click();return;
@@ -3339,11 +3339,12 @@ function authOn(){return AUTH.google||AUTH.email}
 const API=(p,o={})=>fetch(window.NUBTHAH_API+p,{credentials:'include',...o,headers:{'Content-Type':'application/json',...(o.headers||{})}});
 let cvSyncT=0,serverLoaded=false;
 function cvPayload(){const{mode,pro,docs,...data}=S;return JSON.stringify({data,docs:docs||[]})}
-function syncCV(now){if(!user||!user.id||!authOn()||!serverLoaded)return;clearTimeout(cvSyncT);
+function syncCV(now){if(!user||!user.id||!authOn()||!serverLoaded||isSample(S))return;clearTimeout(cvSyncT);
   cvSyncT=setTimeout(()=>{API('/cv',{method:'PUT',body:cvPayload()}).then(r=>{if(r.status===413)toast('الوثائق المرفقة كبيرة — صغّر حجمها عشان تنحفظ في حسابك')}).catch(()=>{})},now?0:1500)}
 async function loadServerCV(){
   try{const r=await API('/cv');if(!r.ok)return;const d=await r.json();
-    if(d.data&&d.data.p&&Array.isArray(d.data.secs)){const keep={mode:S.mode,pro:S.pro};Object.assign(S,d.data,keep);S.docs=Array.isArray(d.docs)?d.docs:[];serverLoaded=true}
+    if(d.data&&d.data.p&&Array.isArray(d.data.secs)&&!isSample(d.data)){const keep={mode:S.mode,pro:S.pro};Object.assign(S,d.data,keep);S.docs=(Array.isArray(d.docs)?d.docs:[]).filter(x=>x&&x.id!=='demo');serverLoaded=true}
+    else if(d.data&&isSample(d.data)){Object.assign(S,blankData());if(user.name)S.p.name=user.name;if(user.email)S.p.email=user.email;serverLoaded=true;syncCV(true)}
     else{if(isSample(S))Object.assign(S,blankData());if(!S.p.name&&user.name)S.p.name=user.name;if(!S.p.email&&user.email)S.p.email=user.email;serverLoaded=true;syncCV(true)}
     drawForm();schedule();
   }catch(e){}
