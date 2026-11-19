@@ -2,11 +2,11 @@ name = "nubthah"
 main = "src/worker.js"
 compatibility_date = "2025-09-01"
 
-# الدومين (يتفعّل بعد ما يصير nubthah.com على Cloudflare)
+# الدومين
 routes = [
-#   { pattern = "nubthah.com", custom_domain = true },
-#   { pattern = "www.nubthah.com", custom_domain = true }
-# ]
+  { pattern = "nubthah.com", custom_domain = true },
+  { pattern = "www.nubthah.com", custom_domain = true }
+]
 
 # الصفحات يخدمها Cloudflare مباشرة، والسيرفر يستقبل /api بس
 [assets]
