@@ -212,6 +212,85 @@ a.feat:hover{border-color:rgba(193,163,255,.5);transform:translateY(-4px)}
 .dup b{display:block}.dup span{font-size:13px;color:var(--muted)}
 @media (max-width:820px){.dgrid{grid-template-columns:1fr 1fr}}
 @media (max-width:520px){.dgrid{grid-template-columns:1fr}.dhello h1{font-size:24px}}
+
+.dash{min-height:100vh;background:var(--bg)}
+.dshell{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+.dside{position:sticky;top:0;height:100vh;overflow-y:auto;background:linear-gradient(180deg,#151124,#100d1a);border-inline-end:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column;gap:6px}
+.dside .dlogo img{height:32px;margin:4px 8px 14px}
+.dside nav{display:grid;gap:2px}
+.dsec{font-size:11.5px;color:var(--muted);font-weight:700;padding:14px 10px 6px;letter-spacing:.3px}
+.dnav{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;font-size:14px;color:#d9cfe8;transition:background .2s,color .2s}
+.dnav svg{color:var(--muted);flex-shrink:0}.dnav span{flex:1}
+.dnav:hover{background:var(--raised);color:#fff}.dnav:hover svg{color:var(--lime)}
+.dnav.on{background:linear-gradient(115deg,rgba(130,66,229,.35),rgba(86,57,201,.18));color:#fff;box-shadow:inset 0 0 0 1px rgba(193,163,255,.3)}.dnav.on svg{color:#fff}
+.dpro{font-style:normal;font-size:9.5px;font-weight:800;padding:1px 6px;border-radius:6px;background:var(--grad);color:#fff}.dpro.ai{background:var(--raised);color:var(--lime)}
+.dsfoot{margin-top:auto;padding-top:14px}
+.dpcard{display:grid;gap:8px;padding:14px;border-radius:16px;background:linear-gradient(135deg,rgba(130,66,229,.22),rgba(86,57,201,.08));border:1px solid rgba(193,163,255,.3);font-size:13px}
+.dpcard span{color:var(--muted);font-size:12px}.dpcard.pro{display:flex;align-items:center;gap:8px;color:#fff}
+.dmain{min-width:0;display:flex;flex-direction:column}
+.dbar{display:flex;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(13,12,21,.85);backdrop-filter:blur(12px);z-index:5}
+.dbar h2{font-size:18px;flex:1}.dmenu{display:none}
+.dbody{padding:26px 28px 60px;width:min(1040px,100%);display:grid;gap:18px;align-content:start}
+.dlead{color:var(--muted);font-size:14.5px;max-width:720px}
+.dstats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.dstat{display:grid;gap:6px;padding:16px;border-radius:18px;border:1px solid var(--line);background:var(--card);transition:border-color .2s}
+.dstat:hover{border-color:rgba(193,163,255,.45)}.dstat span{font-size:12.5px;color:var(--muted)}.dstat b{font-size:26px;font-family:var(--fd);display:flex;align-items:center;min-height:34px}.dstat b svg{color:var(--lime)}
+.dstat small{font-size:12px;color:var(--muted);line-height:1.5}.dstat.alert{border-color:rgba(227,163,245,.55);background:linear-gradient(180deg,rgba(227,163,245,.08),transparent),var(--card)}
+.dh3{font-size:16px;margin-top:6px}
+.dpanel{padding:18px;border-radius:18px;border:1px solid var(--line);background:var(--card);display:grid;gap:12px}
+.dpanel textarea,.dpanel input,.dpanel select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line2);background:var(--bg);font-size:14.5px;outline:none}
+.dpanel textarea:focus,.dpanel input:focus{border-color:var(--lime)}
+.dpanel .btn{justify-self:start}
+.dnote{font-size:12.5px;color:var(--muted)}
+.dres-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.dres-h b{font-size:17px}
+.dmatch{font-size:12.5px;padding:4px 12px;border-radius:99px;background:var(--raised);color:var(--lime);font-weight:700}
+.dpanel h4{font-size:14.5px;margin-top:6px}
+.dq{padding:12px 14px;border-radius:12px;background:var(--raised);font-size:14px;line-height:1.8}.dq ul{padding-inline-start:18px;margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips span{padding:5px 12px;border-radius:99px;background:rgba(193,163,255,.14);color:#e2d4ff;font-size:13px}
+.chips.miss span{background:rgba(227,163,245,.12);color:#EBC6F8}
+.iq{border-radius:14px;background:var(--raised);padding:12px 14px}.iq summary{cursor:pointer;font-weight:600;list-style:none;display:flex;gap:8px;align-items:baseline;line-height:1.7}
+.iq summary::-webkit-details-marker{display:none}.iq p{font-size:13.5px;color:#d6cce3;margin-top:8px;line-height:1.8}
+.ityp{flex-shrink:0;font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg);color:var(--lime);font-weight:700}
+.dlock{display:grid;justify-items:center;gap:8px;text-align:center;padding:30px 20px;border-radius:18px;border:1px dashed rgba(193,163,255,.4);background:linear-gradient(180deg,rgba(130,66,229,.1),transparent)}
+.dlock svg{color:var(--lime)}.dlock b{font-size:17px}.dlock p{color:var(--muted);font-size:14px;max-width:460px}
+.dok{display:flex;gap:8px;align-items:center;padding:12px 14px;border-radius:14px;background:rgba(193,163,255,.1);border:1px solid rgba(193,163,255,.3);font-size:13.5px}.dok svg{color:var(--lime)}.dok a{color:var(--lime);font-weight:700}
+.dok.soft{background:var(--card);border-color:var(--line)}
+.lics{display:grid;gap:10px}
+.lic{display:flex;gap:12px;align-items:center;padding:14px;border-radius:16px;border:1px solid var(--line);background:var(--card);flex-wrap:wrap}
+.lic-t{flex:1;min-width:150px;display:grid}.lic-t small{color:var(--muted);font-size:12px}
+.lic-d{display:grid;gap:2px;font-size:11.5px;color:var(--muted)}.lic-d input{padding:8px 10px;border-radius:10px;border:1px solid var(--line2);background:var(--bg);color-scheme:dark}
+.lst{font-size:12px;font-weight:700;padding:5px 12px;border-radius:99px;background:var(--raised)}
+.lst.ok{color:var(--lime)}.lst.soon{color:#A1A8FF;background:rgba(161,168,255,.12)}.lst.warn{color:#E3A3F5;background:rgba(227,163,245,.14)}.lst.bad{color:#fff;background:#7a3a8f}.lst.none{color:var(--muted)}
+.trsum{display:flex;gap:10px;flex-wrap:wrap}.trsum div{flex:1;min-width:110px;padding:14px;border-radius:16px;background:var(--card);border:1px solid var(--line);display:grid}
+.trsum b{font-size:24px;font-family:var(--fd)}.trsum span{font-size:12.5px;color:var(--muted)}
+.trf{grid-template-columns:1fr 1fr 150px 1fr auto;align-items:center}
+.trcols{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:start}
+.trcol{padding:12px;border-radius:16px;background:rgba(255,255,255,.02);border:1px solid var(--line);display:grid;gap:8px}.trcol h4{font-size:13.5px;color:var(--muted)}
+.tri{padding:12px;border-radius:14px;background:var(--card);border:1px solid var(--line);display:grid;gap:3px;font-size:13px}.tri b{font-size:14px}.tri span,.tri small{color:var(--muted)}
+.tri a{color:var(--lime);font-size:12px}.tri.due{border-color:rgba(227,163,245,.55)}.tri.due small{color:#E3A3F5}
+.trb{display:flex;gap:6px;margin-top:6px}.trb select{flex:1;padding:6px 8px;border-radius:9px;border:1px solid var(--line2);background:var(--bg);font-size:12.5px}.trb button{color:var(--muted)}.trb button:hover{color:#E3A3F5}
+.trem{font-size:12.5px;text-align:center;padding:8px 0}
+.lnk{display:flex;gap:18px;align-items:center;flex-wrap:wrap;grid-template-columns:none}.lnk-qr{width:120px;padding:8px;background:#fff;border-radius:12px}.lnk-qr svg{width:100%;height:auto;display:block}
+.lnk-u{display:block;font-size:18px;margin:4px 0 6px;word-break:break-all}
+.unf{display:flex;align-items:center;gap:8px}.unf .unp{color:var(--muted);font-size:14px}.unf input{flex:1}
+.sbars{display:flex;align-items:flex-end;gap:3px;height:120px;padding-top:6px}.sbars i{flex:1;background:rgba(193,163,255,.35);border-radius:4px 4px 0 0;position:relative;display:flex;align-items:flex-end;min-height:3px}
+.sbars em{display:block;width:100%;background:var(--violet);border-radius:4px 4px 0 0}
+.dplans{grid-template-columns:repeat(2,1fr);max-width:none}
+.dexp{display:grid;gap:2px;font-size:11.5px;color:var(--muted)}.dexp input{color-scheme:dark}
+.pv-valid{color:#5639C9!important;font-weight:700}
+.snapb{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-size:12.5px}
+.dscrim{display:none}
+@media (max-width:1100px){.dstats{grid-template-columns:repeat(2,1fr)}.trcols{grid-template-columns:repeat(2,1fr)}.trf{grid-template-columns:1fr 1fr}}
+@media (max-width:860px){
+  .dshell{grid-template-columns:1fr}
+  .dside{position:fixed;inset-block:0;inset-inline-start:0;width:280px;z-index:60;transform:translateX(100%);transition:transform .3s var(--ease)}
+  .dshell.open .dside{transform:none}
+  .dshell.open .dscrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:55}
+  .dmenu{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--raised)}
+  .dbar{padding:12px 16px}.dbody{padding:18px 16px 50px}
+  .dplans{grid-template-columns:1fr}
+}
+@media (max-width:520px){.dstats{grid-template-columns:1fr 1fr}.trcols,.trf{grid-template-columns:1fr}.dstat b{font-size:22px}}
 footer{border-top:1px solid var(--line);padding:46px 0 28px;color:var(--muted);font-size:14px}
 footer .wrap{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:30px}
 footer h5{color:var(--ink);font-size:14px;margin-bottom:12px}
@@ -2372,7 +2451,8 @@ function docsBlock(){
      <div class="fields" style="flex:1"><input class="w" data-d="${i}" data-df="name" placeholder="اسم الوثيقة — مثال: رخصة SOCPA" value="${esc(d.name)}" aria-label="اسم الوثيقة">
      <select data-d="${i}" data-df="type" aria-label="النوع">${Object.entries(DOC_T).map(([k,v])=>`<option value="${k}"${d.type===k?' selected':''}>${v[0]}</option>`).join('')}</select>
      <input data-d="${i}" data-df="issuer" placeholder="الجهة المانحة" value="${esc(d.issuer)}" aria-label="الجهة">
-     <input class="w" data-d="${i}" data-df="expiry" placeholder="رقم أو تاريخ انتهاء (اختياري)" value="${esc(d.expiry)}" aria-label="تفاصيل"></div>
+     <input data-d="${i}" data-df="expiry" placeholder="رقم الرخصة (اختياري)" value="${esc(d.expiry)}" aria-label="رقم الرخصة">
+     <label class="dexp"><span>تاريخ الانتهاء</span><input type="date" data-d="${i}" data-df="until" value="${esc(d.until||'')}" aria-label="تاريخ الانتهاء"></label></div>
      <button class="ib x" data-act="rmDoc" data-v="${i}" aria-label="حذف">×</button></div>`).join('')}
    <button class="add" data-act="addDoc">＋ ارفع شهادة أو رخصة (صورة أو PDF)</button>
    <a href="#profile" class="pvlink">${ic('eye',16)} شوف صفحتك اللي تطلع لمن يمسح الباركود ←</a>
@@ -2426,18 +2506,18 @@ function vcard(){
   return ['BEGIN:VCARD','VERSION:3.0','FN:'+P.name,'TITLE:'+P.title,P.company?'ORG:'+P.company:'',P.phone?'TEL;TYPE=CELL:'+P.phone.replace(/\s/g,''):'',P.email?'EMAIL:'+P.email:'',P.city?'ADR:;;'+P.city+';;;;':'',li?'URL:https://'+li.u.replace(/^https?:\/\//,''):'','NOTE:nubthah.com/cv/'+ensureId(),'END:VCARD'].filter(Boolean).join('\r\n');
 }
 function renderProfile(){
-  if(isBlankCV()&&!renderProfile.demo){renderProfile.demo=1;try{withSample(renderProfile)}finally{renderProfile.demo=0}
+  if(!PUB&&isBlankCV()&&!renderProfile.demo){renderProfile.demo=1;try{withSample(renderProfile)}finally{renderProfile.demo=0}
     const pv=$('#profileView');pv.classList.add('pv-demo');
     pv.querySelector('.pv-owner').insertAdjacentHTML('afterend',`<div class="pv-demobar"><div><b>هذا مثال لشكل صفحتك</b><span>تتعبّى تلقائيًا من سيرتك، ما تحتاج تبنيها من جديد.</span></div><a href="#build">ابدأ سيرتك ←</a></div>`);
     const card=pv.querySelector('.pv-card');card&&card.insertAdjacentHTML('afterbegin','<span class="pv-ex">مثال</span>');return}
   $('#profileView').classList.remove('pv-demo');
-  const P=S.p,D=(S.docs||[]),link='nubthah.com/cv/'+ensureId(),ini=esc(P.name.trim()[0]||'ن');
+  const P=S.p,D=(S.docs||[]),link=(PUB&&PUB.link?PUB.link:cvLink()).replace('https://',''),ini=esc(P.name.trim()[0]||'ن');
   const sk=(S.secs.find(s=>s.type==='skills')||{tags:[]}).tags.slice(0,8);
   const xp=(S.secs.find(s=>s.type==='xp')||{items:[]}).items.filter(filled)[0];
   const links=S.links.filter(l=>l.u);
   $('#profileView').innerHTML=`
-   <div class="pv-owner"><span>${ic('eye',16)} هذا اللي يشوفه أي أحد يمسح باركودك</span><a href="#build">← رجوع للتعديل</a></div>
-   ${isSample(S)&&!renderProfile.demo?`<div class="pv-warn">هذي بيانات <b>المثال</b> وليست بياناتك. <a href="#build" data-act="blank">ابدأ ببياناتك ←</a></div>`:''}
+   ${PUB?'':`<div class="pv-owner"><span>${ic('eye',16)} هذا اللي يشوفه أي أحد يمسح باركودك</span><a href="${user&&authOn()?'#home':'#build'}">← رجوع</a></div>`}
+   ${!PUB&&isSample(S)&&!renderProfile.demo?`<div class="pv-warn">هذي بيانات <b>المثال</b> وليست بياناتك. <a href="#build" data-act="blank">ابدأ ببياناتك ←</a></div>`:''}
    <div class="pv-wrap">
     <header class="pv-top"><img src="${$('#logoL').src}" alt="نُبذة"><span>ملف مهني على نُبذة</span></header>
     <section class="pv-card">
@@ -2461,10 +2541,10 @@ function renderProfile(){
     </section>
     ${D.length?`<section class="pv-sec"><h2>الشهادات والرخص <small>${ar(D.length)}</small></h2>
       <div class="pv-docs">${D.map((d,i)=>`<button class="pv-doc" data-pvdoc="${i}"><span class="pv-dic">${ic(DOC_T[d.type]?.[1]||'file',22)}</span>
-        <span class="pv-dt"><b>${esc(d.name||'وثيقة')}</b><small>${esc([DOC_T[d.type]?.[0],d.issuer].filter(Boolean).join(' · '))}</small>${d.expiry?`<small>${esc(d.expiry)}</small>`:''}</span>
+        <span class="pv-dt"><b>${esc(d.name||'وثيقة')}</b><small>${esc([DOC_T[d.type]?.[0],d.issuer].filter(Boolean).join(' · '))}</small>${d.expiry?`<small>${esc(d.expiry)}</small>`:''}${d.until?`<small class="pv-valid">${docDays(d)<0?'منتهية':'سارية حتى '+esc(d.until)}</small>`:''}</span>
         <span class="pv-open">${d.file?'عرض':'—'}</span></button>`).join('')}</div>
       <p class="pv-note">الوثائق مرفوعة من صاحب الملف.</p></section>`:''}
-    <footer class="pv-foot"><p dir="ltr">${link}</p><a href="#top" class="pv-cta">✦ سوِّ نُبذتك المهنية مجانًا</a><small>صُنعت بـ نُبذة · nubthah.com</small></footer>
+    <footer class="pv-foot"><p dir="ltr">${link}</p><a href="/" class="pv-cta">✦ سوِّ نُبذتك المهنية مجانًا</a><small>صُنعت بـ نُبذة · nubthah.com</small></footer>
    </div>`;
   const th=$('#profileView .pv-thumb');const cv=th.firstElementChild;const fit2=()=>{cv.style.transform=`scale(${th.clientWidth/794})`};fit2();requestAnimationFrame(fit2);
   $('#pvCv').onclick=viewCV;
@@ -2567,6 +2647,9 @@ try{const sv=JSON.parse(localStorage.getItem('nubthah_v2')||'null');
     if(isSample(sv)){['tpl','card','color','dir','font'].forEach(k=>{if(sv[k]!=null)S[k]=sv[k]});S.docs=[]}
     else{Object.assign(S,sv,{mode:'cv',pro:false});const dv=JSON.parse(localStorage.getItem('nubthah_docs')||'null');S.docs=Array.isArray(dv)?dv.filter(d=>d&&d.id!=='demo'):[]}}}catch(e){}
 if(!Array.isArray(S.docs))S.docs=[];
+/* الصفحة العامة اللي يفتحها الزائر من الرابط أو الباركود (البيانات من الخادم، للقراءة فقط) */
+const PUB=window.NB_PUBLIC||null;
+if(PUB&&PUB.data){Object.assign(S,{tpl:'modern',color:'#6b3fd4',dir:'rtl'},PUB.data,{mode:'cv',pro:true});S.docs=Array.isArray(PUB.docs)?PUB.docs:[];if(!Array.isArray(S.links))S.links=[];if(!Array.isArray(S.extra))S.extra=[]}
 
 /* ---------- FORM ---------- */
 const form=$('#form');
@@ -2858,7 +2941,7 @@ function drawForm(){
   let h=`<div class="blk smart" id="b-sum"><div class="blk-h"><b>الملخص المهني</b><span class="aibadge">✦ ذكاء اصطناعي</span></div>
    <p class="muted" style="margin:-4px 0 10px;font-size:13px">اكتب عن نفسك بأي طريقة: خبراتك، وين اشتغلت، دراستك، مهاراتك، لغاتك، شهاداتك… واضغط <b>رتّبها</b>، ونكتب لك ملخص احترافي ونوزّع الباقي على أقسام سيرتك تلقائيًا.</p>
    <textarea rows="6" data-sum placeholder="مثال: أنا محمد العتيبي من الرياض، محاسب، اشتغلت ٥ سنوات في شركة المراعي وقبلها سنتين في بنك الراجحي، خفّضت المصاريف ١٥٪. عندي بكالوريوس محاسبة من جامعة الملك سعود ٢٠١٦ وشهادة SOCPA. أجيد Excel و SAP، وأتكلم عربي وإنجليزي…" aria-label="الملخص المهني">${esc(S.summary)}</textarea>
-   <button class="btn btn-lime arrange" data-act="arrange">✦ رتّبها في سيرتي</button>${arrMsg}
+   <button class="btn btn-lime arrange" data-act="arrange">✦ رتّبها في سيرتي</button>${arrMsg}${(()=>{try{const sn=JSON.parse(localStorage.getItem('nubthah_snap')||'null');return sn?`<button class="lnk snapb" data-act="restoreSnap">${ic('undo',14)} رجّع النسخة السابقة (${esc(sn.label)})</button>`:''}catch(e){return ''}})()}
    <label class="impbtn">${ic('file',18)}<span><b>عندك سيرة قديمة؟</b> ارفعها (PDF أو Word) وننقلها للتصميم الجديد ونقول لك وش ناقص</span><input type="file" class="cvimp" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" hidden></label>
   </div>
   <div class="blk kwblk" id="b-kw"><div class="blk-h"><b>✦ الكلمات المفتاحية لتخصصك</b></div>
@@ -2943,6 +3026,7 @@ document.addEventListener('click',e=>{
     case 'rmDoc':S.docs.splice(x,1);break;
     case 'viewDoc':viewDoc(S.docs[x]);return;
     case 'undoArr':undoArrange();return;
+    case 'restoreSnap':{try{const sn=JSON.parse(localStorage.getItem('nubthah_snap')||'null');if(sn){Object.assign(S,sn.d);localStorage.removeItem('nubthah_snap');toast('رجّعنا سيرتك مثل ما كانت')}}catch(e){}break}
     default:return;
   }
   drawForm();schedule();
@@ -3055,7 +3139,7 @@ function cardHTML(){
     <div><div class="nm">${esc(P.name||'اسمك هنا')}</div><div class="ti">${esc(P.title||'مسماك الوظيفي')}${P.company?' · '+esc(P.company):''}</div>${P.tagline?`<div class="tg">${esc(P.tagline)}</div>`:''}</div>`;
   const rows=[[ic('mail',13),P.email],[ic('phone',13),P.phone],[ic('pin',13),P.city],...S.links.filter(l=>l.u).slice(0,2).map(l=>[ICO[l.t]||'↗',l.u.replace(/^https?:\/\/(www\.)?/,'')])].filter(r=>r[1]);
   $('#cb').innerHTML=`<div class="brow" style="height:100%"><ul>${rows.map(([i,v])=>`<li><em>${i}</em><span dir="ltr">${esc(v)}</span></li>`).join('')}</ul>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div class="qr">${qrSVG(cardLink(),2)}</div><small style="font-size:11px;opacity:.7" dir="ltr">${cardLink().replace('https://','')}</small></div></div>`;
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div class="qr">${qrSVG(qrOf(cardLink()),2)}</div><small style="font-size:11px;opacity:.7" dir="ltr">${cardLink().replace('https://','')}</small></div></div>`;
 }
 
 function isProSel(){return S.mode==='cv'?TPL.find(t=>t.id===S.tpl).pro:CARDS.find(t=>t.id===S.card).pro}
@@ -3070,6 +3154,7 @@ function render(){
 }
 let raf=0,st=0;
 function schedule(){
+  if(PUB){if(!raf)raf=requestAnimationFrame(()=>{raf=0;render()});return}
   if(!raf)raf=requestAnimationFrame(()=>{raf=0;render()});
   clearTimeout(st);st=setTimeout(()=>{try{const{mode,pro,docs,...keep}=S;localStorage.setItem('nubthah_v2',JSON.stringify(keep));try{localStorage.setItem('nubthah_docs',JSON.stringify(docs||[]))}catch(e){};const s=$('#saved');s.classList.add('on');setTimeout(()=>s.classList.remove('on'),900)}catch(e){};syncCV()},500);
 }
@@ -3115,15 +3200,16 @@ function ensureId(){
     S.cvId=(base||'cv')+'-'+uid().slice(0,4);schedule()}
   return S.cvId;
 }
-const cvLink=()=>'https://nubthah.com/cv/'+ensureId();
-const cardLink=()=>'https://nubthah.com/c/'+ensureId();
+const cvLink=()=>PUB&&PUB.link?PUB.link:(user&&user.link&&authOn()?user.link:'https://nubthah.com/cv/'+ensureId());
+const cardLink=()=>cvLink();
+const qrOf=l=>l+(l.includes('?')?'':'?s=qr');
 const ICON_SRC=()=>$('.btop .back img').src;
 const WALLET_SVG='<svg width="26" height="22" viewBox="0 0 26 22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1.5" y="3.5" width="23" height="17" rx="4"/><path d="M1.5 8.5h23M17 14h4"/><path d="M5 3.5l11-2.5 2 2.5"/></svg>';
 
 function passHTML(kind,link){
   return `<div class="pass"><div class="pass-top"><img src="${ICON_SRC()}" alt=""><span>نُبذة</span><small>${kind==='card'?'بطاقة أعمال':'سيرة ذاتية'}</small></div>
    <div class="pass-mid"><div><small>الاسم</small><b>${esc(S.p.name||'اسمك')}</b></div><div style="text-align:end"><small>المسمى</small><b>${esc(S.p.title||'—')}</b></div></div>
-   <div class="pass-qr">${qrSVG(link,2)}</div><div class="pass-link" dir="ltr">${link.replace('https://','')}</div></div>`;
+   <div class="pass-qr">${qrSVG(qrOf(link),2)}</div><div class="pass-link" dir="ltr">${link.replace('https://','')}</div></div>`;
 }
 function shareModal(kind){
   const link=kind==='card'?cardLink():cvLink();
@@ -3260,7 +3346,7 @@ async function loadServerCV(){
   }catch(e){}
 }
 async function initAuth(){
-  if(!window.NUBTHAH_API||window.claude){AUTH.loaded=true;return}
+  if(PUB||!window.NUBTHAH_API||window.claude){AUTH.loaded=true;return}
   try{const c=await API('/auth/config').then(r=>r.json());AUTH.google=!!c.google;AUTH.email=!!c.email;if(c.googleClientId)window.NUBTHAH_GOOGLE_CLIENT_ID=c.googleClientId}catch(e){}
   AUTH.loaded=true;
   if(authOn()){
@@ -3301,27 +3387,231 @@ function authModal(next,why){
       finishLogin(d.user)}catch(e){toast('تعذّر الاتصال')}finally{b.disabled=false}};
 }
 
-/* ---------- لوحة التحكم ---------- */
+
+/* ---------- لوحة التحكم (قائمة جانبية + صفحات) ---------- */
+const FREE_AI=3;
+const isProU=()=>!!(user&&user.plan==='pro');
+const aiLeft=()=>isProU()?Infinity:Math.max(0,FREE_AI-((user&&user.ai_used)||0));
+const DNAV=[
+  ['',      'home',  'الرئيسية'],
+  ['#',     null,    'أدواتي'],
+  ['@#build','edit', 'سيرتي الذاتية'],
+  ['@#build-card','card','بطاقة الأعمال'],
+  ['@#profile','qr', 'صفحتي العامة'],
+  ['@#build-ats','target','فحص ATS'],
+  ['#',     null,    'طوّر سيرتك'],
+  ['@#build-kw','key','الكلمات المفتاحية'],
+  ['@#build-courses','cap','الدورات والشهادات'],
+  ['tailor','spark', 'نسخة لكل وظيفة','ai'],
+  ['interview','chat','تجهيز المقابلة','ai'],
+  ['translate','globe','ترجمة السيرة','ai'],
+  ['#',     null,    'مساري المهني'],
+  ['tracker','list', 'تتبع التقديمات','pro'],
+  ['licenses','id',  'الرخص والتذكيرات'],
+  ['link',  'chart', 'رابطي والإحصائيات'],
+  ['#',     null,    'الحساب'],
+  ['plan',  'crown', 'الاشتراك']];
+Object.assign(IC_P,{chat:'<path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/>',globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  list:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+  copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',ext:'<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',undo:'<path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>'});
+const dPage=()=>(location.hash.split('/')[1]||'');
+async function refreshMe(){try{const m=await API('/me').then(r=>r.json());if(m.user)setUser(m.user)}catch(e){}}
+function proChip(kind){if(isProU())return '';return kind==='pro'?'<em class="dpro">PRO</em>':kind==='ai'?'<em class="dpro ai">AI</em>':''}
 function renderDash(){
-  const first=((user&&user.name)||S.p.name||'').split(' ')[0];
-  const sc=(()=>{try{return score()}catch(e){return{s:0,tip:''}}})(),pro=user&&user.plan==='pro';
-  const T=[['edit','سيرتي الذاتية','صمّم سيرتك وعدّلها ونزّلها PDF','#build'],
-    ['card','بطاقة الأعمال','بطاقة رقمية بباركود من نفس بياناتك','#build-card'],
-    ['target','فحص ATS','شوف وش متحقق في سيرتك ووش ناقص','#build-ats'],
-    ['key','الكلمات المفتاحية','أهم الكلمات لتخصصك تنضاف بضغطة','#build-kw'],
-    ['cap','الدورات والشهادات','الرخص والدورات اللي ترفع قيمتك','#build-courses'],
-    ['qr','صفحتي العامة','الصفحة اللي تفتح من الباركود','#profile']];
-  $('#dashView').innerHTML=`<header class="dtop"><a href="#top" class="dlogo"><img src="${$('.btop .back img').src}" alt="نُبذة"></a><span class="accslot"></span></header>
-   <main class="dwrap">
-    <div class="dhello"><div><h1>أهلًا${first?' '+esc(first):''}</h1><p class="muted">وش تبي تسوي اليوم؟</p></div>
-     <span class="dplan${pro?' pro':''}">${ic(pro?'crown':'spark',15)} ${pro?'Pro':'الباقة المجانية'}</span></div>
-    <a href="#build" class="dprog"><div><b>سيرتك مكتملة ${ar(sc.s)}٪</b><span>${esc(sc.tip||'سيرتك جاهزة للتقديم')}</span></div><div class="dbar"><i style="width:${sc.s}%"></i></div></a>
-    <label class="dimp">${ic('file',22)}<div><b>ارفع سيرتك القديمة</b><span>PDF أو Word — ننقلها للتصميم الجديد ونقول لك وش ناقص</span></div><input type="file" class="cvimp" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" hidden></label>
-    <div class="dgrid">${T.map(([i,t,d,h])=>`<a href="${h}" class="dcard"><div class="fi">${ic(i,22)}</div><b>${t}</b><span>${d}</span></a>`).join('')}</div>
-    ${pro?'':`<div class="dup"><div><b>رقّ لـ Pro</b><span>كل القوالب، والذكاء الاصطناعي بلا حدود، بـ ٢٩ ريال شهريًا.</span></div><a href="#pricing" class="btn btn-lime btn-sm">اعرف أكثر</a></div>`}
-   </main>`;
+  const pg=dPage(),dv=$('#dashView');
+  const nav=DNAV.map(([k,i,t,kind])=>k==='#'?`<div class="dsec">${t}</div>`:
+    `<a href="${k.startsWith('@')?k.slice(1):'#home'+(k?'/'+k:'')}" class="dnav${!k.startsWith('@')&&k===pg?' on':''}">${ic(i,18)}<span>${t}</span>${proChip(kind)}</a>`).join('');
+  const left=aiLeft();
+  dv.innerHTML=`<div class="dshell${dv.classList.contains('open')?' open':''}">
+   <aside class="dside"><a href="#top" class="dlogo"><img src="${$('.btop .back img').src}" alt="نُبذة"></a>
+    <nav>${nav}</nav>
+    <div class="dsfoot">${isProU()?`<div class="dpcard pro">${ic('crown',16)} <b>أنت على Pro</b></div>`:
+      `<div class="dpcard"><b>الباقة المجانية</b><span>${left===Infinity?'':`باقي لك ${ar(left)} من ${ar(FREE_AI)} تجارب للذكاء الاصطناعي`}</span><a href="#home/plan" class="btn btn-lime btn-sm">رقّ لـ Pro</a></div>`}</div>
+   </aside>
+   <div class="dscrim" data-dmenu></div>
+   <section class="dmain"><header class="dbar"><button class="dmenu" data-dmenu aria-label="القائمة">${ic('menu',22)}</button><h2 id="dTitle"></h2><span class="accslot"></span></header>
+    <div class="dbody" id="dBody"></div></section></div>`;
   drawAccount();
+  const pages={'':dHome,tailor:dTailor,interview:dInterview,translate:dTranslate,tracker:dTracker,licenses:dLicenses,link:dLink,plan:dPlan};
+  (pages[pg]||dHome)();
+  dv.querySelector('.dshell').classList.remove('open');
 }
+const dSet=(title,html)=>{$('#dTitle').textContent=title;$('#dBody').innerHTML=html};
+function lockBox(title,desc){return `<div class="dlock">${ic('crown',26)}<b>${title}</b><p>${desc}</p><a href="#home/plan" class="btn btn-lime">رقّ لـ Pro بـ ٢٩ ريال شهريًا</a></div>`}
+function aiNote(){const l=aiLeft();return l===Infinity?'':`<p class="dnote">${l>0?`باقي لك ${ar(l)} تجارب مجانية للذكاء الاصطناعي.`:'خلصت تجاربك المجانية — رقّ لـ Pro عشان تستخدمها بلا حدود.'}</p>`}
+function docDays(d){if(!/^\d{4}-\d{2}-\d{2}$/.test(d.until||''))return null;return Math.round((Date.parse(d.until)-Date.parse(new Date().toISOString().slice(0,10)))/864e5)}
+function docStatus(d){const n=docDays(d);if(n===null)return['none','بدون تاريخ انتهاء'];if(n<0)return['bad','منتهية'];if(n<=30)return['warn',`تنتهي بعد ${ar(n)} يوم`];if(n<=90)return['soon',`تنتهي بعد ${ar(n)} يوم`];return['ok','سارية حتى '+d.until]}
+
+/* الرئيسية */
+function dHome(){
+  const sc=(()=>{try{return score()}catch(e){return{s:0,tip:''}}})(),first=((user&&user.name)||S.p.name||'').split(' ')[0];
+  const docs=(S.docs||[]).filter(d=>d.until).sort((a,b)=>(a.until>b.until?1:-1)),near=docs.find(d=>{const n=docDays(d);return n!==null&&n<=90});
+  const Q=[['edit','سيرتي الذاتية','صمّم وعدّل ونزّل PDF','#build'],['card','بطاقة الأعمال','بطاقة رقمية بباركود','#build-card'],['target','فحص ATS','وش متحقق ووش ناقص','#build-ats'],
+    ['spark','نسخة لكل وظيفة','طابق سيرتك مع الإعلان','#home/tailor'],['chat','تجهيز المقابلة','أسئلة متوقعة وطريقة الإجابة','#home/interview'],['cap','الدورات والشهادات','وش ترفع فيه قيمتك','#build-courses']];
+  dSet('الرئيسية',`<div class="dhello"><div><h1>أهلًا${first?' '+esc(first):''}</h1><p class="muted">وش تبي تسوي اليوم؟</p></div>
+     <span class="dplan${isProU()?' pro':''}">${ic(isProU()?'crown':'spark',15)} ${isProU()?'Pro':'الباقة المجانية'}</span></div>
+   <div class="dstats">
+    <a href="#build" class="dstat"><span>قوة سيرتك</span><b>${ar(sc.s)}٪</b><div class="dbar"><i style="width:${sc.s}%"></i></div><small>${esc(sc.tip||'سيرتك جاهزة للتقديم')}</small></a>
+    <a href="#home/link" class="dstat" id="stViews"><span>زيارات صفحتك (٣٠ يوم)</span><b>${isProU()?'…':ic('crown',20)}</b><small>${isProU()?'من الرابط والباركود':'متاحة في Pro'}</small></a>
+    <a href="#home/licenses" class="dstat${near?' alert':''}"><span>الرخص والشهادات</span><b>${ar((S.docs||[]).length)}</b><small>${near?esc(near.name)+' — '+docStatus(near)[1]:docs.length?'كلها سارية':'أضف تاريخ انتهاء رخصك'}</small></a>
+    <a href="#home/tracker" class="dstat" id="stApps"><span>تقديماتك</span><b>${isProU()?'…':ic('crown',20)}</b><small>${isProU()?'تابع كل وظيفة قدّمت عليها':'متاحة في Pro'}</small></a>
+   </div>
+   <label class="dimp">${ic('file',22)}<div><b>ارفع سيرتك القديمة</b><span>PDF أو Word — ننقلها للتصميم الجديد ونقول لك وش ناقص</span></div><input type="file" class="cvimp" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" hidden></label>
+   <h3 class="dh3">ابدأ من هنا</h3>
+   <div class="dgrid">${Q.map(([i,t,d,h])=>`<a href="${h}" class="dcard"><div class="fi">${ic(i,22)}</div><b>${t}</b><span>${d}</span></a>`).join('')}</div>`);
+  if(isProU()){
+    API('/stats').then(r=>r.json()).then(d=>{const e=$('#stViews b');if(e)e.textContent=ar(d.views||0)}).catch(()=>{});
+    API('/tracker').then(r=>r.json()).then(d=>{const e=$('#stApps b');if(e)e.textContent=ar((d.items||[]).length)}).catch(()=>{});
+  }
+}
+
+/* نسخة لكل وظيفة */
+let lastTailor=null;
+function dTailor(){
+  dSet('نسخة لكل وظيفة',`<p class="dlead">الصق إعلان الوظيفة، والذكاء الاصطناعي يعدّل ملخصك وترتيب مهاراتك وصياغة خبراتك عشان تطابق الوظيفة — بدون ما يضيف شي ما سويته.</p>
+   <div class="dpanel"><label class="lbl">إعلان الوظيفة</label><textarea id="tJob" rows="8" placeholder="الصق نص الإعلان هنا: المسمى، المهام، المتطلبات…"></textarea>
+   <button class="btn btn-lime" id="tGo">${ic('spark',16)} جهّز نسخة لهذي الوظيفة</button>${aiNote()}</div><div id="tOut"></div>`);
+  $('#tGo').onclick=async()=>{
+    const job=$('#tJob').value.trim();if(job.length<30){toast('الصق إعلان الوظيفة كامل');return}
+    if(isBlankCV()){toast('سيرتك فاضية — اكتبها أو ارفع سيرتك القديمة أول');return}
+    const b=$('#tGo');b.disabled=true;b.innerHTML='<span class="spin"></span> نقارن سيرتك بالإعلان…';
+    const o=await aiCall('/tailor',{job,cv:JSON.parse(cvPayload()).data,lang:S.dir});b.disabled=false;b.innerHTML=ic('spark',16)+' جهّز نسخة لهذي الوظيفة';
+    if(!o)return;lastTailor={...o,job};renderTailor();
+  };
+}
+function renderTailor(){
+  const o=lastTailor,xp=S.secs.find(s=>s.type==='xp');
+  $('#tOut').innerHTML=`<div class="dpanel"><div class="dres-h"><div><b>${esc(o.job_title||'الوظيفة')}</b>${o.company?`<span class="muted"> — ${esc(o.company)}</span>`:''}</div>${o.match!=null?`<span class="dmatch">التطابق قبل التعديل: ${ar(o.match)}٪</span>`:''}</div>
+   ${o.summary?`<h4>الملخص الجديد</h4><p class="dq">${esc(o.summary)}</p>`:''}
+   ${(o.skills_order||[]).length?`<h4>ترتيب مهاراتك للوظيفة</h4><div class="chips">${o.skills_order.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}
+   ${(o.xp||[]).length&&xp?`<h4>صياغة خبراتك</h4>${o.xp.filter(x=>xp.items[x.i]).map(x=>`<div class="dq"><b>${esc(xp.items[x.i].a||'')}</b>${desc(x.d)}</div>`).join('')}`:''}
+   ${(o.missing_keywords||[]).length?`<h4>كلمات من الإعلان مو موجودة في سيرتك</h4><p class="muted" style="font-size:12.5px">أضفها بس إذا كانت فعلًا من خبرتك.</p><div class="chips miss">${o.missing_keywords.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}
+   ${(o.tips||[]).length?`<h4>نصائح للتقديم</h4><ul class="imtips">${o.tips.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}
+   <div class="imact"><button class="btn btn-lime" id="tApply">طبّق على سيرتي</button><button class="btn btn-ghost" id="tTrack">${ic('list',16)} احفظها في المتتبع</button></div></div>`;
+  $('#tApply').onclick=()=>{
+    saveSnap('قبل نسخة '+(o.job_title||'الوظيفة'));
+    if(o.summary)S.summary=o.summary;
+    const sk=S.secs.find(s=>s.type==='skills');if(sk&&Array.isArray(o.skills_order)&&o.skills_order.length){ensureMeta(sk);const ord=o.skills_order.map(x=>norm(x).trim());
+      const idx=sk.tags.map((t,i)=>i).sort((a,b)=>{const ia=ord.indexOf(norm(sk.tags[a]).trim()),ib=ord.indexOf(norm(sk.tags[b]).trim());return (ia<0?999:ia)-(ib<0?999:ib)});
+      ['tags','lv','gr'].forEach(k=>{const v=sk[k].slice();sk[k]=idx.map(i=>v[i])})}
+    if(xp)(o.xp||[]).forEach(x=>{if(xp.items[x.i]&&x.d)xp.items[x.i].d=x.d});
+    drawForm();schedule();toast('طبّقنا النسخة على سيرتك — وتقدر ترجع من «رجّع النسخة السابقة»');location.hash='#build';
+  };
+  $('#tTrack').onclick=()=>{if(!isProU()){openUpsell('متتبع التقديمات');return}
+    trackerAdd({company:o.company||'',role:o.job_title||'',status:'applied',date:new Date().toISOString().slice(0,10),notes:'نسخة مطابقة للإعلان'});location.hash='#home/tracker'};
+}
+function saveSnap(label){try{const{mode,pro,docs,...d}=S;localStorage.setItem('nubthah_snap',JSON.stringify({label,at:Date.now(),d}))}catch(e){}}
+async function aiCall(path,body){
+  try{const r=await API(path,{method:'POST',body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));
+    if(r.status===402){openUpsell('خلصت تجاربك المجانية للذكاء الاصطناعي');return null}
+    if(r.status===401){authModal(null,'سجّل دخولك عشان تستخدم الذكاء الاصطناعي');return null}
+    if(!r.ok||d.error){toast(d.error==='rate_limited'?'طلبات كثيرة — جرّب بعد شوي':'ما قدرنا نجهّزها الحين — حاول مرة ثانية');return null}
+    refreshMe();return d}catch(e){toast('تعذّر الاتصال');return null}
+}
+
+/* تجهيز المقابلة */
+function dInterview(){
+  dSet('تجهيز المقابلة',`<p class="dlead">اكتب المسمى الوظيفي أو الصق إعلان الوظيفة، ونطلع لك أسئلة المقابلة المتوقعة، وليش يسألونها، وكيف تجاوب عليها من خبرتك.</p>
+   <div class="dpanel"><label class="lbl">الوظيفة</label><textarea id="iJob" rows="4" placeholder="مثال: محاسب أول في شركة تجزئة — أو الصق الإعلان كامل">${esc(S.p.title||'')}</textarea>
+   <button class="btn btn-lime" id="iGo">${ic('chat',16)} جهّز أسئلة المقابلة</button>${aiNote()}</div><div id="iOut"></div>`);
+  $('#iGo').onclick=async()=>{const job=$('#iJob').value.trim();if(job.length<3){toast('اكتب الوظيفة');return}
+    const b=$('#iGo');b.disabled=true;b.innerHTML='<span class="spin"></span> نجهّز الأسئلة…';
+    const o=await aiCall('/interview',{job,cv:isBlankCV()?null:JSON.parse(cvPayload()).data});b.disabled=false;b.innerHTML=ic('chat',16)+' جهّز أسئلة المقابلة';
+    if(!o)return;
+    $('#iOut').innerHTML=`<div class="dpanel"><div class="dres-h"><b>${esc(o.role||'')}</b><span class="muted">${ar((o.questions||[]).length)} سؤال</span></div>
+     ${(o.questions||[]).map((q,n)=>`<details class="iq"${n===0?' open':''}><summary><span class="ityp">${esc(q.type||'')}</span>${esc(q.q)}</summary>
+       ${q.why?`<p><b>ليش يسألونه:</b> ${esc(q.why)}</p>`:''}${q.tip?`<p><b>كيف تجاوب:</b> ${esc(q.tip)}</p>`:''}</details>`).join('')}
+     ${(o.advice||[]).length?`<h4>نصائح عامة</h4><ul class="imtips">${o.advice.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}</div>`;
+  };
+}
+
+/* ترجمة السيرة */
+function dTranslate(){
+  const to=S.dir==='rtl'?'en':'ar',other=JSON.parse(localStorage.getItem('nubthah_lang_'+(to==='en'?'ltr':'rtl'))||'null');
+  dSet('ترجمة السيرة',`<p class="dlead">نترجم سيرتك كاملة ${to==='en'?'للإنجليزي':'للعربي'} بصياغة احترافية، ونحتفظ بالنسخة الحالية عشان ترجع لها بضغطة.</p>
+   <div class="dpanel"><div class="dres-h"><b>لغة سيرتك الحين: ${S.dir==='rtl'?'العربي':'الإنجليزي'}</b></div>
+    <button class="btn btn-lime" id="trGo">${ic('globe',16)} ترجم سيرتي ${to==='en'?'للإنجليزي':'للعربي'}</button>
+    ${other?`<button class="btn btn-ghost" id="trBack">${ic('undo',16)} ارجع للنسخة ${to==='en'?'الإنجليزية':'العربية'} المحفوظة</button>`:''}${aiNote()}</div>`);
+  $('#trGo').onclick=async()=>{if(isBlankCV()){toast('سيرتك فاضية');return}
+    const b=$('#trGo');b.disabled=true;b.innerHTML='<span class="spin"></span> نترجم سيرتك…';
+    const o=await aiCall('/translate',{cv:JSON.parse(cvPayload()).data,to});b.disabled=false;b.innerHTML=ic('globe',16)+' ترجم سيرتي';
+    if(!o||!o.p||!Array.isArray(o.secs)){if(o)toast('ما قدرنا نترجمها — حاول مرة ثانية');return}
+    try{localStorage.setItem('nubthah_lang_'+S.dir,JSON.stringify({p:S.p,summary:S.summary,secs:S.secs}))}catch(e){}
+    const keep=S.secs;S.p={...S.p,...o.p};S.summary=o.summary||'';
+    S.secs=o.secs.map((x,i)=>({...(keep[i]||sec(x.type||'custom')),...x,id:(keep[i]&&keep[i].id)||uid()}));
+    S.dir=to==='en'?'ltr':'rtl';drawForm();schedule();toast('ترجمنا سيرتك — راجعها');location.hash='#build';
+  };
+  const bk=$('#trBack');if(bk)bk.onclick=()=>{try{localStorage.setItem('nubthah_lang_'+S.dir,JSON.stringify({p:S.p,summary:S.summary,secs:S.secs}))}catch(e){}
+    Object.assign(S,other);S.dir=to==='en'?'ltr':'rtl';drawForm();schedule();toast('رجّعنا النسخة المحفوظة');location.hash='#build'};
+}
+
+/* تتبع التقديمات */
+const TR_ST=[['applied','قدّمت'],['interview','مقابلة'],['offer','عرض وظيفي'],['rejected','مرفوض']];
+let trItems=null;
+async function trackerLoad(){try{const d=await API('/tracker').then(r=>r.json());trItems=d.items||[]}catch(e){trItems=trItems||[]}}
+async function trackerSave(){try{const r=await API('/tracker',{method:'PUT',body:JSON.stringify({items:trItems})});if(r.status===402)openUpsell('متتبع التقديمات')}catch(e){toast('ما انحفظ — تأكد من الاتصال')}}
+async function trackerAdd(it){if(trItems===null)await trackerLoad();trItems.unshift({id:uid(),...it});await trackerSave();toast('انضافت للمتتبع')}
+async function dTracker(){
+  if(!isProU()){dSet('تتبع التقديمات',lockBox('تتبع كل وظيفة قدّمت عليها','سجّل الشركة والوظيفة وتاريخ التقديم، وحرّك كل طلب بين «قدّمت» و«مقابلة» و«عرض»، ونذكّرك تتابع إذا طال الرد.'));return}
+  dSet('تتبع التقديمات','<div class="kwload"><div class="kwspin">'+ic('list',22)+'</div></div>');
+  if(trItems===null)await trackerLoad();
+  const today=Date.parse(new Date().toISOString().slice(0,10)),cnt=k=>trItems.filter(x=>x.status===k).length;
+  dSet('تتبع التقديمات',`<div class="trsum">${TR_ST.map(([k,t])=>`<div><b>${ar(cnt(k))}</b><span>${t}</span></div>`).join('')}</div>
+   <form class="dpanel trf" id="trF"><input id="trC" placeholder="الشركة" required><input id="trR" placeholder="الوظيفة" required><input id="trD" type="date" value="${new Date().toISOString().slice(0,10)}"><input id="trU" placeholder="رابط الإعلان (اختياري)" dir="ltr"><button class="btn btn-lime">${ic('plus',16)} أضف</button></form>
+   <div class="trcols">${TR_ST.map(([k,t])=>`<div class="trcol"><h4>${t}</h4>${trItems.filter(x=>x.status===k).map(x=>{const old=k==='applied'&&x.date&&(today-Date.parse(x.date))/864e5>=7;
+     return `<div class="tri${old?' due':''}"><b>${esc(x.role)}</b><span>${esc(x.company)}</span><small>${esc(x.date||'')}${old?' — تابع معهم':''}</small>${x.url?`<a href="${esc(/^https?:/.test(x.url)?x.url:'https://'+x.url)}" target="_blank" rel="noopener">الإعلان</a>`:''}
+      <div class="trb"><select data-trs="${x.id}">${TR_ST.map(([v,l])=>`<option value="${v}"${v===x.status?' selected':''}>${l}</option>`).join('')}</select><button data-trdel="${x.id}" aria-label="حذف">${ic('trash',15)}</button></div></div>`}).join('')||'<p class="muted trem">ما فيه</p>'}</div>`).join('')}</div>`);
+  $('#trF').onsubmit=async e=>{e.preventDefault();trItems.unshift({id:uid(),company:$('#trC').value.trim(),role:$('#trR').value.trim(),date:$('#trD').value,url:$('#trU').value.trim(),status:'applied'});await trackerSave();dTracker()};
+  $('#dBody').onchange=async e=>{const s=e.target.closest('[data-trs]');if(s){const it=trItems.find(x=>x.id===s.dataset.trs);it.status=s.value;await trackerSave();dTracker()}};
+  $('#dBody').onclick=async e=>{const d=e.target.closest('[data-trdel]');if(d){trItems=trItems.filter(x=>x.id!==d.dataset.trdel);await trackerSave();dTracker()}};
+}
+
+/* الرخص والتذكيرات */
+function dLicenses(){
+  const D=S.docs||[];
+  dSet('الرخص والتذكيرات',`<p class="dlead">أضف تاريخ انتهاء رخصك وشهاداتك (مثل تصنيف الهيئة السعودية للتخصصات الصحية أو اعتماد هيئة المهندسين أو رخصة فال)، ونذكّرك قبل ما تنتهي.</p>
+   ${isProU()?`<div class="dok">${ic('bell',18)} التذكير بالإيميل مفعّل: نرسل لك قبل الانتهاء بـ ٩٠ يوم و٣٠ يوم و٧ أيام.</div>`:`<div class="dok soft">${ic('bell',18)} تذكير الإيميل قبل انتهاء الرخص متاح في Pro. <a href="#home/plan">رقّ الحين</a></div>`}
+   <div class="lics">${D.length?D.map((d,i)=>{const [cls,txt]=docStatus(d);return `<div class="lic"><span class="pv-dic">${ic(DOC_T[d.type]?.[1]||'file',20)}</span>
+     <div class="lic-t"><b>${esc(d.name||'وثيقة')}</b><small>${esc([DOC_T[d.type]?.[0],d.issuer].filter(Boolean).join(' · '))}</small></div>
+     <label class="lic-d"><span>تاريخ الانتهاء</span><input type="date" data-lic="${i}" value="${esc(d.until||'')}"></label><span class="lst ${cls}">${txt}</span></div>`}).join('')
+     :'<div class="dpanel"><p class="muted">ما أضفت رخص أو شهادات للحين.</p></div>'}</div>
+   <a href="#build" class="btn btn-ghost" id="licAdd">${ic('plus',16)} أضف رخصة أو شهادة</a>`);
+  $('#dBody').onchange=e=>{const t=e.target.closest('[data-lic]');if(t){S.docs[+t.dataset.lic].until=t.value;schedule();dLicenses();toast('انحفظ التاريخ')}};
+  $('#licAdd').onclick=()=>setTimeout(()=>{const el=document.getElementById('b-docs');el&&form.scrollTo({top:el.offsetTop-form.offsetTop-8,behavior:'smooth'})},300);
+}
+
+/* رابطي والإحصائيات */
+async function dLink(){
+  await refreshMe();
+  const link=(user&&user.link)||cvLink();
+  dSet('رابطي والإحصائيات',`<div class="dpanel lnk"><div class="lnk-qr">${qrSVG(link+'?s=qr',2)}</div><div style="flex:1;min-width:0">
+     <span class="muted">رابط صفحتك العامة</span><b dir="ltr" class="lnk-u">${esc(link.replace('https://',''))}</b>
+     <div class="imact"><button class="btn btn-ghost btn-sm" id="lCopy">${ic('copy',15)} نسخ الرابط</button><a class="btn btn-ghost btn-sm" href="${esc(link)}" target="_blank" rel="noopener">${ic('ext',15)} افتح</a></div></div></div>
+   <h3 class="dh3">رابط باسمك</h3>
+   ${isProU()?`<form class="dpanel unf" id="unF"><span dir="ltr" class="unp">nubthah.com/</span><input id="unI" dir="ltr" placeholder="yourname" value="${esc(user.username||'')}" pattern="[a-zA-Z][a-zA-Z0-9_-]{2,29}" required><button class="btn btn-lime btn-sm">احفظ</button></form><p class="dnote">حروف إنجليزية وأرقام، من ٣ إلى ٣٠ حرف، يبدأ بحرف.</p>`
+     :lockBox('رابط شخصي باسمك','بدل الرابط العشوائي، يصير رابطك مثل nubthah.com/faisal — أسهل تحطه في توقيع الإيميل وحسابك في لينكدإن.')}
+   <h3 class="dh3">الإحصائيات</h3>
+   ${isProU()?'<div id="stBox" class="dpanel"><div class="kwload"><div class="kwspin">'+ic('chart',22)+'</div></div></div>':lockBox('كم شخص شاف سيرتك؟','تعرف كم مرة انفتحت صفحتك، وكم واحد مسح الباركود، يوم بيوم.')}`);
+  $('#lCopy').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(link);toast('نسخنا الرابط')};
+  const f=$('#unF');if(f)f.onsubmit=async e=>{e.preventDefault();const r=await API('/username',{method:'POST',body:JSON.stringify({username:$('#unI').value})});const d=await r.json().catch(()=>({}));
+    if(!r.ok){toast(d.error==='taken'?'الاسم مأخوذ — جرّب غيره':d.error==='bad_username'?'الاسم لازم يكون حروف إنجليزية وأرقام ويبدأ بحرف':'ما انحفظ');return}toast('صار رابطك '+d.link.replace('https://',''));dLink()};
+  if(isProU()){try{const d=await API('/stats').then(r=>r.json());const days=[];for(let i=29;i>=0;i--){const k=new Date(Date.now()-i*864e5).toISOString().slice(0,10);const x=(d.days||[]).find(y=>y.day===k)||{views:0,scans:0};days.push({k,...x})}
+    const mx=Math.max(1,...days.map(x=>x.views));
+    $('#stBox').innerHTML=`<div class="trsum"><div><b>${ar(d.views||0)}</b><span>زيارة</span></div><div><b>${ar(d.scans||0)}</b><span>مسح باركود</span></div></div>
+     <div class="sbars">${days.map(x=>`<i title="${x.k}: ${x.views}" style="height:${Math.max(3,x.views/mx*100)}%"><em style="height:${x.views?x.scans/x.views*100:0}%"></em></i>`).join('')}</div><p class="dnote">آخر ٣٠ يوم — اللون الغامق: مسح الباركود.</p>`}catch(e){}}
+}
+
+/* الاشتراك */
+function dPlan(){
+  const P=PLANS;
+  dSet('الاشتراك',`<div class="plans dplans">${P.map(p=>`<div class="plan ${p.hot?'hot':''}">${p.hot?'<span class="tag">الأكثر طلبًا</span>':''}<div><h3>${p.n}</h3><p class="desc">${p.d}</p></div>
+    <div class="price"><b>${ar(p.m)}</b><span>${p.m===0?'ر.س للأبد':'ر.س / شهريًا'}</span></div><ul>${p.f.map(x=>`<li>${x}</li>`).join('')}</ul>
+    ${p.m===0?(isProU()?'':'<span class="btn btn-ghost" style="pointer-events:none">باقتك الحالية</span>'):(isProU()?'<span class="btn btn-lime" style="pointer-events:none">باقتك الحالية</span>':`<button class="btn btn-lime" data-plan="${p.n}">${p.cta}</button>`)}</div>`).join('')}</div>
+   ${isProU()?'':aiNote()}`);
+}
+document.addEventListener('click',e=>{if(e.target.closest('[data-dmenu]')){const s=document.querySelector('.dshell');s&&s.classList.toggle('open')}});
 
 /* ---------- ATS CHECK ---------- */
 let atsSrc='mine',fileText='';
@@ -3902,13 +4192,16 @@ $('#modeTabs').onclick=e=>{const b=e.target.closest('button');if(b)location.hash
 let lastSiteY=0;
 function route(){
   const pv=$('#profileView');
+  if(PUB){site.hidden=true;builder.hidden=true;$('#dashView').hidden=true;pv.hidden=false;document.body.style.overflow='';
+    if(PUB.missing){pv.innerHTML=`<div class="pv-wrap"><header class="pv-top"><img src="${$('#logoL').src}" alt="نُبذة"><span>ملف مهني على نُبذة</span></header><section class="pv-card pv-empty"><h1>الصفحة غير موجودة</h1><p class="pv-ti">الرابط غلط أو صاحبه ما نشر سيرته للحين.</p><a class="btn btn-lime" href="/">سوّ نُبذتك المهنية ←</a></section></div>`;return}
+    renderProfile();return}
   if(PAGES[location.hash.slice(1)]){openPage(location.hash.slice(1));history.replaceState(null,'',location.pathname+location.search);return}
   const dv=$('#dashView'),hh=location.hash;
   if(AUTH.loaded&&authOn()&&!user&&/^#(build|home|profile)/.test(hh)){
     history.replaceState(null,'',location.pathname+location.search);dv.hidden=true;pv.hidden=true;
     if(site.hidden){builder.hidden=true;site.hidden=false;document.body.style.overflow=''}
     authModal(()=>{location.hash=hh});return}
-  if(hh==='#home'){if(!AUTH.loaded||!authOn()||!user){location.hash='#build';return}
+  if(hh==='#home'||hh.startsWith('#home/')){if(!AUTH.loaded||!authOn()||!user){if(!AUTH.loaded)return;location.hash='#build';return}
     site.hidden=true;builder.hidden=true;pv.hidden=true;dv.hidden=false;document.body.style.overflow='';renderDash();scrollTo(0,0);return}
   dv.hidden=true;
   $('.btop .back').setAttribute('href',user&&authOn()?'#home':'#top');

@@ -157,8 +157,18 @@ function ensureSchema(env){
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS users(id TEXT PRIMARY KEY, email TEXT UNIQUE, name TEXT, picture TEXT, via TEXT, plan TEXT DEFAULT 'free', ai_used INTEGER DEFAULT 0, created INTEGER)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS cvs(uid TEXT PRIMARY KEY, data TEXT, docs TEXT, updated INTEGER)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS codes(email TEXT PRIMARY KEY, hash TEXT, name TEXT, exp INTEGER, tries INTEGER DEFAULT 0, sent INTEGER)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS kv(k TEXT PRIMARY KEY, v TEXT)`)
-  ]).then(() => true).catch(e => { schemaReady = null; throw e; });
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS kv(k TEXT PRIMARY KEY, v TEXT)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS views(uid TEXT, day TEXT, views INTEGER DEFAULT 0, scans INTEGER DEFAULT 0, PRIMARY KEY(uid, day))`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS tracker(uid TEXT PRIMARY KEY, data TEXT, updated INTEGER)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS rem_sent(uid TEXT, doc TEXT, stage INTEGER, sent INTEGER, PRIMARY KEY(uid, doc, stage))`)
+  ]).then(async () => {
+    // أعمدة جديدة (تُتجاهل لو موجودة)
+    for (const q of ['ALTER TABLE users ADD COLUMN username TEXT', 'ALTER TABLE users ADD COLUMN pub TEXT', 'ALTER TABLE cvs ADD COLUMN meta TEXT'])
+      await env.DB.prepare(q).run().catch(() => {});
+    await env.DB.prepare('CREATE UNIQUE INDEX IF NOT EXISTS users_username ON users(username)').run().catch(() => {});
+    await env.DB.prepare('CREATE UNIQUE INDEX IF NOT EXISTS users_pub ON users(pub)').run().catch(() => {});
+    return true;
+  }).catch(e => { schemaReady = null; throw e; });
   return schemaReady;
 }
 // مفتاح توقيع الجلسات: من الأسرار إن وُجد، وإلا يتولّد مرة وحدة ويُحفظ في القاعدة
@@ -188,7 +198,7 @@ async function sessionUser(req, env){
   let p; try { p = JSON.parse(atob(body.replace(/-/g,'+').replace(/_/g,'/'))); } catch (e) { return null; }
   if (!p.uid || p.exp < Date.now()) return null;
   await ensureSchema(env);
-  return await env.DB.prepare('SELECT id,email,name,picture,via,plan,ai_used FROM users WHERE id=?').bind(p.uid).first();
+  return await env.DB.prepare('SELECT id,email,name,picture,via,plan,ai_used,username,pub FROM users WHERE id=?').bind(p.uid).first();
 }
 async function startSession(env, user){
   const body = b64u(new TextEncoder().encode(JSON.stringify({ uid: user.id, exp: Date.now() + 60 * 864e5 })));
@@ -199,13 +209,22 @@ async function upsertUser(env, u){
   const ex = await env.DB.prepare('SELECT * FROM users WHERE email=?').bind(u.email).first();
   if (ex) {
     await env.DB.prepare('UPDATE users SET name=COALESCE(NULLIF(name,\'\'),?), picture=COALESCE(NULLIF(?,\'\'),picture) WHERE id=?').bind(u.name || '', u.picture || '', ex.id).run();
-    return await env.DB.prepare('SELECT id,email,name,picture,via,plan,ai_used FROM users WHERE id=?').bind(ex.id).first();
+    return await env.DB.prepare('SELECT id,email,name,picture,via,plan,ai_used,username,pub FROM users WHERE id=?').bind(ex.id).first();
   }
   const id = 'u_' + b64u(crypto.getRandomValues(new Uint8Array(12)));
   await env.DB.prepare('INSERT INTO users(id,email,name,picture,via,created) VALUES(?,?,?,?,?,?)').bind(id, u.email, u.name || '', u.picture || '', u.via, Date.now()).run();
   return { id, email: u.email, name: u.name || '', picture: u.picture || '', via: u.via, plan: 'free', ai_used: 0 };
 }
-const pub = u => u && ({ id: u.id, email: u.email, name: u.name, picture: u.picture, via: u.via, plan: u.plan || 'free', ai_used: u.ai_used || 0 });
+const pub = u => u && ({ id: u.id, email: u.email, name: u.name, picture: u.picture, via: u.via, plan: u.plan || 'free', ai_used: u.ai_used || 0, username: u.username || '', pub: u.pub || '', link: 'https://nubthah.com/' + (u.plan === 'pro' && u.username ? u.username : 'cv/' + (u.pub || '')) });
+async function ensurePub(env, u){
+  if (!u || u.pub) return u;
+  for (let i = 0; i < 5; i++) {
+    const p = Array.from(crypto.getRandomValues(new Uint8Array(7))).map(b => 'abcdefghjkmnpqrstuvwxyz23456789'[b % 31]).join('');
+    const r = await env.DB.prepare('UPDATE users SET pub=? WHERE id=? AND pub IS NULL').bind(p, u.id).run().catch(() => null);
+    if (r) { u.pub = p; return u; }
+  }
+  return u;
+}
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[a-z]{2,}$/i;
 
 function codeMail(code, name){
@@ -264,9 +283,158 @@ async function cvPut(req, env){
   let b; try { b = JSON.parse(t); } catch (e) { return json({ error: 'bad_json' }, 400); }
   if (!b || typeof b.data !== 'object') return json({ error: 'bad_data' }, 400);
   const now = Date.now();
-  await env.DB.prepare('INSERT INTO cvs(uid,data,docs,updated) VALUES(?,?,?,?) ON CONFLICT(uid) DO UPDATE SET data=excluded.data, docs=COALESCE(excluded.docs,cvs.docs), updated=excluded.updated')
-    .bind(u.id, JSON.stringify(b.data), b.docs ? JSON.stringify(b.docs) : null, now).run();
+  const meta = JSON.stringify({ name: b.data.p?.name || '', title: b.data.p?.title || '', docs: (Array.isArray(b.docs) ? b.docs : []).map(d => ({ id: String(d.id || ''), name: String(d.name || '').slice(0, 120), until: String(d.until || '').slice(0, 10) })) });
+  await env.DB.prepare('INSERT INTO cvs(uid,data,docs,meta,updated) VALUES(?,?,?,?,?) ON CONFLICT(uid) DO UPDATE SET data=excluded.data, docs=COALESCE(excluded.docs,cvs.docs), meta=excluded.meta, updated=excluded.updated')
+    .bind(u.id, JSON.stringify(b.data), b.docs ? JSON.stringify(b.docs) : null, meta, now).run();
   return json({ ok: true, updated: now });
+}
+
+/* ---------- الرابط الشخصي + الصفحة العامة + الإحصائيات ---------- */
+const RESERVED = new Set('api cv c home build admin www mail about privacy terms pricing login signup logout dashboard settings help support info nubthah profile u app static assets index favicon robots sitemap'.split(' '));
+const isPro = u => u && u.plan === 'pro';
+async function setUsername(req, env){
+  const u = await sessionUser(req, env); if (!u) return json({ error: 'unauthorized' }, 401);
+  if (!isPro(u)) return json({ error: 'upgrade_required' }, 402);
+  const { username = '' } = await req.json().catch(() => ({}));
+  const n = String(username).trim().toLowerCase();
+  if (!/^[a-z][a-z0-9_-]{2,29}$/.test(n)) return json({ error: 'bad_username' }, 400);
+  if (RESERVED.has(n)) return json({ error: 'taken' }, 409);
+  const r = await env.DB.prepare('UPDATE users SET username=? WHERE id=?').bind(n, u.id).run().catch(() => null);
+  if (!r) return json({ error: 'taken' }, 409);
+  return json({ ok: true, link: 'https://nubthah.com/' + n });
+}
+function countView(env, uid, scan, ctx){
+  const day = new Date().toISOString().slice(0, 10);
+  ctx.waitUntil(env.DB.prepare('INSERT INTO views(uid,day,views,scans) VALUES(?,?,1,?) ON CONFLICT(uid,day) DO UPDATE SET views=views+1, scans=scans+excluded.scans').bind(uid, day, scan ? 1 : 0).run().catch(() => {}));
+}
+async function stats(req, env){
+  const u = await sessionUser(req, env); if (!u) return json({ error: 'unauthorized' }, 401);
+  const since = new Date(Date.now() - 29 * 864e5).toISOString().slice(0, 10);
+  const r = await env.DB.prepare('SELECT day,views,scans FROM views WHERE uid=? AND day>=? ORDER BY day').bind(u.id, since).all();
+  const rows = r.results || [], tot = rows.reduce((a, x) => ({ views: a.views + x.views, scans: a.scans + x.scans }), { views: 0, scans: 0 });
+  return json({ days: rows, ...tot, pro: isPro(u) });
+}
+async function publicPage(req, env, ctx, key, byUsername){
+  await ensureSchema(env);
+  const u = await env.DB.prepare(`SELECT id,plan,username,pub FROM users WHERE ${byUsername ? 'username' : 'pub'}=?`).bind(key.toLowerCase()).first();
+  let payload = null;
+  if (u && (!byUsername || isPro(u))) {
+    const cv = await env.DB.prepare('SELECT data,docs FROM cvs WHERE uid=?').bind(u.id).first();
+    if (cv && cv.data) {
+      const d = JSON.parse(cv.data);
+      payload = { data: { p: d.p, summary: d.summary, links: d.links, extra: d.extra, secs: d.secs, tpl: d.tpl, color: d.color, dir: d.dir, card: d.card, font: d.font, fmt: d.fmt }, docs: JSON.parse(cv.docs || '[]'), link: 'https://nubthah.com/' + (isPro(u) && u.username ? u.username : 'cv/' + u.pub) };
+      countView(env, u.id, new URL(req.url).searchParams.get('s') === 'qr', ctx);
+    }
+  }
+  const page = await env.ASSETS.fetch(new Request(new URL('/', req.url)));
+  let html = await page.text();
+  const inj = '<script>window.NB_PUBLIC=' + JSON.stringify(payload || { missing: true }).replace(/</g, '\\u003c') + ';</script>';
+  html = html.replace('<script>window.NUBTHAH_API', inj + '<script>window.NUBTHAH_API');
+  return new Response(html, { status: payload ? 200 : 404, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } });
+}
+
+/* ---------- متتبع التقديمات ---------- */
+async function trackerGet(req, env){
+  const u = await sessionUser(req, env); if (!u) return json({ error: 'unauthorized' }, 401);
+  const r = await env.DB.prepare('SELECT data FROM tracker WHERE uid=?').bind(u.id).first();
+  return json({ items: r ? JSON.parse(r.data || '[]') : [], pro: isPro(u) });
+}
+async function trackerPut(req, env){
+  const u = await sessionUser(req, env); if (!u) return json({ error: 'unauthorized' }, 401);
+  if (!isPro(u)) return json({ error: 'upgrade_required' }, 402);
+  const t = await req.text(); if (t.length > 900000) return json({ error: 'too_large' }, 413);
+  let b; try { b = JSON.parse(t); } catch (e) { return json({ error: 'bad_json' }, 400); }
+  if (!Array.isArray(b.items)) return json({ error: 'bad_data' }, 400);
+  await env.DB.prepare('INSERT INTO tracker(uid,data,updated) VALUES(?,?,?) ON CONFLICT(uid) DO UPDATE SET data=excluded.data, updated=excluded.updated').bind(u.id, JSON.stringify(b.items.slice(0, 300)), Date.now()).run();
+  return json({ ok: true });
+}
+
+/* ---------- أدوات الذكاء الاصطناعي: نسخة لكل وظيفة، المقابلة، الترجمة ---------- */
+function cvBrief(cv){
+  try { const c = typeof cv === 'string' ? JSON.parse(cv) : cv; return JSON.stringify({ p: c.p, summary: c.summary, secs: (c.secs || []).map(s => ({ type: s.type, title: s.title, items: s.items, tags: s.tags })) }).slice(0, 14000); }
+  catch (e) { return ''; }
+}
+const Q3 = '"""';
+const AI_PROMPTS = {
+  tailor: b => `You are an expert CV writer and ATS specialist for the Saudi / GCC job market.
+Here is a job posting:
+${Q3}${String(b.job || '').slice(0, 6000)}${Q3}
+Here is the candidate's CV as JSON:
+${cvBrief(b.cv)}
+Tailor the CV to this job WITHOUT inventing anything: only reword, reorder and emphasize facts that already exist in the CV.
+Write in ${b.lang === 'ltr' ? 'professional English' : 'professional Modern Standard Arabic'}.
+Return ONLY JSON:
+{"job_title":"<the job title from the posting>","company":"<company name if mentioned, else empty>",
+"match":<0-100 estimate of how well the CV matches before tailoring>,
+"summary":"<a new 2-4 sentence summary aimed at this job>",
+"skills_order":["<the candidate's existing skills reordered, most relevant first>"],
+"missing_keywords":["<important keywords from the posting that are NOT in the CV; the candidate should add them only if true>"],
+"xp":[{"i":<index of the item inside the xp section>,"d":"<reworded achievements for that item, one per line, emphasizing what this job needs>"}],
+"tips":["<3-5 short Arabic tips specific to applying for this job>"]}`,
+  interview: b => `You are a senior recruiter in Saudi Arabia preparing a candidate for a job interview.
+Job title or posting:
+${Q3}${String(b.job || '').slice(0, 5000)}${Q3}
+Candidate CV (JSON, may be empty):
+${cvBrief(b.cv || '{}')}
+Write 10 likely interview questions for this job in Saudi Arabia: a mix of behavioral, technical/field-specific, and situational questions, plus common Saudi HR questions (e.g. expected salary, why this company).
+For each question give, in Saudi-friendly Modern Standard Arabic: why they ask it, and how to answer well using the candidate's real experience when available (never invent facts; suggest what to mention).
+Return ONLY JSON: {"role":"<job title in Arabic>","questions":[{"q":"","type":"سلوكي|تخصصي|موقفي|عام","why":"","tip":""}],"advice":["<3 short general tips for this interview>"]}`,
+  translate: b => `Translate this CV JSON ${b.to === 'en' ? 'from Arabic to professional English' : 'from English to professional Modern Standard Arabic'}.
+Keep exactly the same JSON structure and keys; translate only human-readable values (titles, descriptions, skills, section titles). Transliterate people's names properly; keep emails, phone numbers, URLs, brand names, certificate acronyms and numbers unchanged.
+${b.to === 'en' ? 'Use English month names and Western digits for dates.' : 'Use Arabic month names where dates are written.'}
+CV JSON:
+${cvBrief(b.cv)}
+Return ONLY the translated JSON object with keys p, summary, secs.`
+};
+async function aiTool(req, env, ip, kind){
+  if (!env.ANTHROPIC_API_KEY) return json({ error: 'ai_not_configured' }, 503);
+  const b = await req.json().catch(() => ({}));
+  if ((kind === 'tailor' || kind === 'interview') && String(b.job || '').trim().length < 5) return json({ error: 'job_required' }, 400);
+  if ((kind === 'tailor' || kind === 'translate') && !b.cv) return json({ error: 'cv_required' }, 400);
+  const g = await aiGate(req, env); if (g.res) return g.res;
+  if (limited(ip, kind, 20)) return json({ error: 'rate_limited' }, 429);
+  try { const out = await askClaude(env, AI_PROMPTS[kind](b), kind === 'translate' ? 8000 : 5000); await aiCount(env, g); return json(out); }
+  catch (e) { return json({ error: 'ai_failed', reason: String(e.message || e).slice(0, 80) }, 502); }
+}
+
+/* ---------- تذكير انتهاء الرخص (يومي) ---------- */
+const STAGES = [90, 30, 7, 0];
+const escH = t => String(t || '').replace(/[<>&"]/g, '');
+function remMail(name, doc, days, until){
+  const when = days > 0 ? `بعد ${days} يوم (${until})` : `اليوم (${until})`;
+  return `<div dir="rtl" style="font-family:Tahoma,Arial,sans-serif;background:#f6f3fb;padding:28px"><div style="max-width:480px;margin:auto;background:#fff;border-radius:16px;padding:28px;border:1px solid #e6def3">
+  <div style="font-size:22px;font-weight:700;color:#5639C9;margin-bottom:6px">نُبذة</div>
+  <p style="color:#2A2038;font-size:15px">أهلًا ${escH(name)}،</p>
+  <p style="color:#2A2038;font-size:15px"><b>${escH(doc)}</b> ينتهي ${when}.</p>
+  <p style="color:#2A2038;font-size:15px">جدّده بدري عشان ما تتأثر وظيفتك أو تقديماتك، وبعد التجديد حدّث التاريخ في نُبذة.</p>
+  <a href="https://nubthah.com/#home/licenses" style="display:inline-block;margin-top:10px;background:#5639C9;color:#fff;padding:10px 18px;border-radius:99px;text-decoration:none;font-weight:700">افتح رخصي في نُبذة</a>
+  </div></div>`;
+}
+function stageFor(days){ // 90 → بين 31 و90، 30 → بين 8 و30، 7 → بين 1 و7، 0 → اليوم أو أمس
+  if (days <= 90 && days > 30) return 90;
+  if (days <= 30 && days > 7) return 30;
+  if (days <= 7 && days > 0) return 7;
+  if (days <= 0 && days >= -1) return 0;
+  return null;
+}
+async function remindLicenses(env){
+  if (!env.DB || !env.RESEND_API_KEY) return;
+  await ensureSchema(env);
+  const r = await env.DB.prepare(`SELECT u.id,u.email,u.name,c.meta FROM users u JOIN cvs c ON c.uid=u.id WHERE u.plan='pro' AND c.meta LIKE '%"until":"2%'`).all();
+  const today = Date.parse(new Date().toISOString().slice(0, 10));
+  for (const row of r.results || []) {
+    let meta; try { meta = JSON.parse(row.meta); } catch (e) { continue; }
+    for (const d of meta.docs || []) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(d.until)) continue;
+      const days = Math.round((Date.parse(d.until) - today) / 864e5), stage = stageFor(days);
+      if (stage === null) continue;
+      const key = d.id + ':' + d.until;
+      if (await env.DB.prepare('SELECT 1 FROM rem_sent WHERE uid=? AND doc=? AND stage=?').bind(row.id, key, stage).first()) continue;
+      const ok = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { authorization: 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
+        body: JSON.stringify({ from: env.MAIL_FROM || 'نُبذة <no-reply@nubthah.com>', to: [row.email], subject: days > 0 ? `${d.name} ينتهي بعد ${days} يوم` : `${d.name} ينتهي اليوم`, html: remMail(row.name || meta.name, d.name, Math.max(days, 0), d.until) }) }).then(x => x.ok).catch(() => false);
+      if (ok) await env.DB.prepare('INSERT OR IGNORE INTO rem_sent(uid,doc,stage,sent) VALUES(?,?,?,?)').bind(row.id, key, stage, Date.now()).run();
+    }
+  }
 }
 
 const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -294,7 +462,14 @@ export default {
       const ip = req.headers.get('cf-connecting-ip') || 'x', m = req.method;
       try {
         if (p === '/api/auth/config' && m === 'GET') return json({ google: !!(env.GOOGLE_CLIENT_ID && env.DB), email: !!(env.RESEND_API_KEY && env.DB), googleClientId: env.GOOGLE_CLIENT_ID || '', db: !!env.DB, ai: !!env.ANTHROPIC_API_KEY });
-        if (p === '/api/me' && m === 'GET') { const u = await sessionUser(req, env); return u ? json({ user: pub(u) }) : json({ user: null }); }
+        if (p === '/api/me' && m === 'GET') { const u = await ensurePub(env, await sessionUser(req, env)); return u ? json({ user: pub(u) }) : json({ user: null }); }
+        if (p === '/api/username' && m === 'POST') return await setUsername(req, env);
+        if (p === '/api/stats' && m === 'GET') return await stats(req, env);
+        if (p === '/api/tracker' && m === 'GET') return await trackerGet(req, env);
+        if (p === '/api/tracker' && m === 'PUT') return await trackerPut(req, env);
+        if (p === '/api/tailor' && m === 'POST') return await aiTool(req, env, ip, 'tailor');
+        if (p === '/api/interview' && m === 'POST') return await aiTool(req, env, ip, 'interview');
+        if (p === '/api/translate' && m === 'POST') return await aiTool(req, env, ip, 'translate');
         if (p === '/api/cv' && m === 'GET') return await cvGet(req, env);
         if (p === '/api/cv' && m === 'PUT') return await cvPut(req, env);
         if (m !== 'POST') return json({ error: 'method_not_allowed' }, 405);
@@ -308,6 +483,14 @@ export default {
       } catch (e) { return json({ error: 'server_error' }, 500); }
       return json({ error: 'not_found' }, 404);
     }
+    // الصفحة العامة: nubthah.com/cv/xxxx أو nubthah.com/username
+    if (req.method === 'GET' && env.DB) {
+      let mm = p.match(/^\/(?:cv|c)\/([a-z0-9]{5,12})\/?$/i);
+      if (mm) return publicPage(req, env, ctx, mm[1], false);
+      mm = p.match(/^\/([a-z][a-z0-9_-]{2,29})\/?$/i);
+      if (mm && !RESERVED.has(mm[1].toLowerCase())) return publicPage(req, env, ctx, mm[1], true);
+    }
     return env.ASSETS.fetch(req);
-  }
+  },
+  async scheduled(event, env, ctx){ ctx.waitUntil(remindLicenses(env)); }
 };
