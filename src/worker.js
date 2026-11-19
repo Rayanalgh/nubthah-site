@@ -82,10 +82,10 @@ async function askClaude(env, prompt, maxTokens){
   const r = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: env.AI_MODEL || MODEL, max_tokens: maxTokens, messages: [{ role: 'user', content: prompt }, { role: 'assistant', content: '{' }] })
+    body: JSON.stringify({ model: env.AI_MODEL || MODEL, max_tokens: maxTokens, messages: [{ role: 'user', content: prompt }] })
   });
   if (!r.ok) { let m = ''; try { m = (await r.json()).error?.type || ''; } catch (e) {} throw new Error('ai_' + r.status + (m ? ':' + m : '')); }
-  const d = await r.json(), m = ('{' + (d.content || []).map(c => c.text || '').join('')).match(/\{[\s\S]*\}/);
+  const d = await r.json(), m = (d.content || []).map(c => c.text || '').join('').match(/\{[\s\S]*\}/);
   if (!m) throw new Error('bad_ai_output');
   return JSON.parse(m[0]);
 }
