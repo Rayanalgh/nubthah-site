@@ -17,6 +17,8 @@ run_worker_first = true
 [vars]
 # Client ID حق Google (مو سر) — نفس القيمة اللي في public/index.html
 GOOGLE_CLIENT_ID = ""
+# حسابات الفريق (Pro دائمًا)
+PRO_EMAILS = "rayanlaghamdi@gmail.com"
 
 # قاعدة بيانات الحسابات والسير (تنشأ تلقائيًا أول نشر)
 [[d1_databases]]

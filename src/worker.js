@@ -198,7 +198,12 @@ async function sessionUser(req, env){
   let p; try { p = JSON.parse(atob(body.replace(/-/g,'+').replace(/_/g,'/'))); } catch (e) { return null; }
   if (!p.uid || p.exp < Date.now()) return null;
   await ensureSchema(env);
-  return await env.DB.prepare('SELECT id,email,name,picture,via,plan,ai_used,username,pub FROM users WHERE id=?').bind(p.uid).first();
+  const u = await env.DB.prepare('SELECT id,email,name,picture,via,plan,ai_used,username,pub FROM users WHERE id=?').bind(p.uid).first();
+  // حسابات الفريق: Pro دائمًا (PRO_EMAILS في wrangler.toml)
+  if (u && u.plan !== 'pro' && String(env.PRO_EMAILS || '').toLowerCase().split(/[\s,]+/).includes(u.email)) {
+    u.plan = 'pro'; await env.DB.prepare("UPDATE users SET plan='pro' WHERE id=?").bind(u.id).run().catch(() => {});
+  }
+  return u;
 }
 async function startSession(env, user){
   const body = b64u(new TextEncoder().encode(JSON.stringify({ uid: user.id, exp: Date.now() + 60 * 864e5 })));
