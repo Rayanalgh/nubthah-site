@@ -887,7 +887,8 @@ body.noscroll{overflow:hidden}
 .accslot{display:contents}
 .accbtn{display:inline-flex;align-items:center;gap:8px;padding:7px 12px 7px 14px;border-radius:999px;border:1px solid var(--line2);font-size:13.5px;font-weight:600;background:rgba(255,255,255,.03);white-space:nowrap}
 .accbtn:hover{background:var(--raised)}
-.accbtn svg{width:16px;height:16px}
+.accbtn svg{width:16px;height:16px}.accbtn span{line-height:1;padding-top:3px}
+.price b.free{font-size:30px}
 .accbtn.in{padding:4px 12px 4px 4px}
 .accbtn.in img,.accbtn.in i{width:28px;height:28px;border-radius:50%;object-fit:cover;font-style:normal;display:grid;place-items:center;background:var(--grad);color:#fff;font-size:13px}
 .nav .bar,.btop{position:relative}
@@ -1152,7 +1153,7 @@ body.noscroll{overflow:hidden}
       <div id="srcFile" hidden><label class="drop" for="atsFile"><b>اسحب ملف السيرة هنا أو اضغط للاختيار</b><span class="muted">PDF أو TXT</span><span id="fileName"></span></label><input type="file" id="atsFile" accept=".pdf,.txt,application/pdf,text/plain" hidden></div>
       <textarea id="srcPaste" rows="8" placeholder="الصق نص سيرتك هنا..." hidden></textarea>
       <button class="kwcard" data-kw><i>✦</i><div><b>كلمات مفتاحية لتخصصك</b><span>اكتب تخصصك وأضف أهم الكلمات لسيرتك بضغطة</span></div></button>
-      <label class="lbl" for="jd">الوصف الوظيفي <small>— اختياري، يعطيك تطابق الكلمات المفتاحية</small></label>
+      <label class="lbl" for="jd">الوصف الوظيفي <small>— ميزة Pro: يطابق سيرتك مع الإعلان</small></label>
       <textarea id="jd" rows="8" placeholder="الصق إعلان الوظيفة هنا..."></textarea>
       <button class="btn btn-lime" id="runAts" style="width:100%">افحص الآن</button>
       <p class="muted" style="font-size:12px">الفحص يعطيك إرشادات عامة ولا يضمن تجاوز نظام فحص معيّن.</p>
@@ -3427,9 +3428,9 @@ const DNAV=[
   ['!kw','key','الكلمات المفتاحية'],
   ['!cr','cap','الدورات والشهادات'],
   ['arrange','edit','رتّب سيرتي بالذكاء','ai'],
-  ['tailor','spark', 'نسخة لكل وظيفة','ai'],
-  ['interview','chat','تجهيز المقابلة','ai'],
-  ['translate','globe','ترجمة السيرة','ai'],
+  ['tailor','spark', 'نسخة لكل وظيفة','pro'],
+  ['interview','chat','تجهيز المقابلة','pro'],
+  ['translate','globe','ترجمة السيرة','pro'],
   ['#',     null,    'مساري المهني'],
   ['tracker','list', 'تتبع التقديمات','pro'],
   ['licenses','id',  'الرخص والتذكيرات'],
@@ -3535,6 +3536,7 @@ function dHome(){
 /* نسخة لكل وظيفة */
 let lastTailor=null;
 function dTailor(){
+  if(!isProU()){dSet('نسخة لكل وظيفة',lockBox('نسخة من سيرتك لكل وظيفة','الصق إعلان الوظيفة، والذكاء الاصطناعي يعدّل ملخصك ومهاراتك وصياغة خبراتك عشان تطابق الإعلان.'));return}
   dSet('نسخة لكل وظيفة',`<p class="dlead">الصق إعلان الوظيفة، والذكاء الاصطناعي يعدّل ملخصك وترتيب مهاراتك وصياغة خبراتك عشان تطابق الوظيفة — بدون ما يضيف شي ما سويته.</p>
    <div class="dpanel"><label class="lbl">إعلان الوظيفة</label><textarea id="tJob" rows="8" placeholder="الصق نص الإعلان هنا: المسمى، المهام، المتطلبات…"></textarea>
    <button class="btn btn-lime" id="tGo">${ic('spark',16)} جهّز نسخة لهذي الوظيفة</button>${aiNote()}</div><div id="tOut"></div>`);
@@ -3578,6 +3580,7 @@ async function aiCall(path,body){
 
 /* تجهيز المقابلة */
 function dInterview(){
+  if(!isProU()){dSet('تجهيز المقابلة',lockBox('جهّز نفسك للمقابلة','أسئلة المقابلة المتوقعة لوظيفتك، مع طريقة الإجابة المناسبة من واقع سيرتك.'));return}
   dSet('تجهيز المقابلة',`<p class="dlead">اكتب المسمى الوظيفي أو الصق إعلان الوظيفة، ونطلع لك أسئلة المقابلة المتوقعة، وليش يسألونها، وكيف تجاوب عليها من خبرتك.</p>
    <div class="dpanel"><label class="lbl">الوظيفة</label><textarea id="iJob" rows="4" placeholder="مثال: محاسب أول في شركة تجزئة — أو الصق الإعلان كامل">${esc(S.p.title||'')}</textarea>
    <button class="btn btn-lime" id="iGo">${ic('chat',16)} جهّز أسئلة المقابلة</button>${aiNote()}</div><div id="iOut"></div>`);
@@ -3594,6 +3597,7 @@ function dInterview(){
 
 /* ترجمة السيرة */
 function dTranslate(){
+  if(!isProU()){dSet('ترجمة السيرة',lockBox('ترجم سيرتك بضغطة','نترجم سيرتك كاملة للإنجليزي أو العربي بصياغة احترافية، ونحتفظ بالنسختين.'));return}
   const to=S.dir==='rtl'?'en':'ar',other=JSON.parse(localStorage.getItem('nubthah_lang_'+(to==='en'?'ltr':'rtl'))||'null');
   dSet('ترجمة السيرة',`<p class="dlead">نترجم سيرتك كاملة ${to==='en'?'للإنجليزي':'للعربي'} بصياغة احترافية، ونحتفظ بالنسخة الحالية عشان ترجع لها بضغطة.</p>
    <div class="dpanel"><div class="dres-h"><b>لغة سيرتك الحين: ${S.dir==='rtl'?'العربي':'الإنجليزي'}</b></div>
@@ -3675,7 +3679,7 @@ async function dLink(){
 function dPlan(){
   const P=PLANS;
   dSet('الاشتراك',`<div class="plans dplans">${P.map(p=>`<div class="plan ${p.hot?'hot':''}">${p.hot?'<span class="tag">الأكثر طلبًا</span>':''}<div><h3>${p.n}</h3><p class="desc">${p.d}</p></div>
-    <div class="price"><b>${ar(p.m)}</b><span>${p.m===0?'ر.س للأبد':'ر.س / شهريًا'}</span></div><ul>${p.f.map(x=>`<li>${x}</li>`).join('')}</ul>
+    <div class="price">${p.m===0?'<b class="free">مجانًا</b><span>بدون بطاقة دفع</span>':`<b>${ar(p.m)}</b><span>ر.س / شهريًا</span>`}</div><ul>${p.f.map(x=>`<li>${x}</li>`).join('')}${(p.no||[]).map(x=>`<li class="no">${x}</li>`).join('')}</ul>
     ${p.m===0?(isProU()?'':'<span class="btn btn-ghost" style="pointer-events:none">باقتك الحالية</span>'):(isProU()?'<span class="btn btn-lime" style="pointer-events:none">باقتك الحالية</span>':`<button class="btn btn-lime" data-plan="${p.n}">${p.cta}</button>`)}</div>`).join('')}</div>
    ${isProU()?'':aiNote()}`);
 }
@@ -4166,6 +4170,7 @@ document.addEventListener('click',e=>{
 
 function countUp(el,to){let v=0;const st=performance.now();const f=t=>{v=Math.min(1,(t-st)/900);el.textContent=ar(Math.round(to*(1-Math.pow(1-v,3))));if(v<1)requestAnimationFrame(f)};requestAnimationFrame(f)}
 function runAts(){
+  if($('#jd').value.trim()&&!isProU()){openUpsell('مطابقة سيرتك مع إعلان الوظيفة');return}
   const text=atsSrc==='mine'?cvText():atsSrc==='file'?fileText:$('#srcPaste').value;
   if(!text||text.trim().length<40){toast(atsSrc==='file'?'ارفع ملف سيرتك أول':'السيرة فاضية — اكتبها أو الصقها أول');return}
   const r=analyze(text,$('#jd').value,atsSrc==='mine');
@@ -4287,8 +4292,8 @@ $('#mtabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;$$('#mta
 
 /* ---------- PRICING ---------- */
 const PLANS=[
- {n:'مجاني',d:'كل اللي تحتاجه عشان تبدأ',m:0,f:['سيرة كاملة بقالبي ATS وحديث','تحميل PDF','بطاقة أعمال وصفحة عامة وباركود','فحص ATS الأساسي','كلمات مفتاحية ودورات من قائمة نُبذة','٣ تجارب مجانية للذكاء الاصطناعي'],no:['قوالب PRO','الذكاء الاصطناعي بلا حدود'],cta:'ابدأ مجانًا'},
- {n:'Pro',d:'للباحث عن عمل بجدية',m:29,hot:1,f:['كل ميزات المجاني','كل القوالب المميزة بدون علامة مائية','الذكاء الاصطناعي بلا حدود: رتّب سيرتي، والكلمات المفتاحية لأي تخصص، والدورات','فحص ATS مقابل الوظيفة','رابط باسمك وإحصائيات الزيارات','تذكير قبل انتهاء الرخص','تتبع التقديمات وتجهيز المقابلة','الميزات الجديدة أول بأول'],cta:'اشترك في Pro'}
+ {n:'مجاني',d:'جرّب نُبذة وصمّم سيرتك الأولى',m:0,f:['سيرة ذاتية بقالبين أساسيين','تحميل PDF','بطاقة أعمال بباركود','فحص ATS عام','٣ تجارب للذكاء الاصطناعي'],no:['القوالب المميزة','الذكاء الاصطناعي بلا حدود','مطابقة سيرتك مع إعلان الوظيفة','تجهيز المقابلة وترجمة السيرة','رابط باسمك وإحصائيات الزيارات','تذكير الرخص وتتبع التقديمات'],cta:'ابدأ مجانًا'},
+ {n:'Pro',d:'للباحث عن عمل بجدية',m:29,hot:1,f:['كل القوالب المميزة بدون علامة مائية','الذكاء الاصطناعي بلا حدود: رتّب سيرتي، الكلمات المفتاحية، الدورات','نسخة مطابقة لكل وظيفة + فحص ATS مقابل الإعلان','تجهيز المقابلة بأسئلة متوقعة وإجابات','ترجمة السيرة عربي ↔ إنجليزي','رابط باسمك وإحصائيات الزيارات والباركود','تذكير قبل انتهاء الرخص والشهادات','تتبع كل تقديماتك في مكان واحد','الميزات الجديدة توصلك أول'],cta:'اشترك في Pro'}
 ];
 function drawPlans(){
   $('#plans').innerHTML=PLANS.map(p=>{
@@ -4296,7 +4301,7 @@ function drawPlans(){
     const unit=price===0?'ر.س للأبد':'ر.س / شهريًا';
     return `<div class="plan ${p.hot?'hot':''}">${p.hot?'<span class="tag">الأكثر طلبًا</span>':''}
      <div><h3>${p.n}</h3><p class="desc">${p.d}</p></div>
-     <div class="price"><b>${ar(price)}</b><span>${unit}</span></div>
+     <div class="price">${price===0?'<b class="free">مجانًا</b><span>بدون بطاقة دفع</span>':`<b>${ar(price)}</b><span>${unit}</span>`}</div>
      <ul>${p.f.map(x=>`<li>${x}</li>`).join('')}${(p.no||[]).map(x=>`<li class="no">${x}</li>`).join('')}</ul>
      <button class="btn ${p.hot?'btn-lime':'btn-ghost'}" data-plan="${p.n}">${p.cta}</button></div>`}).join('');
 }

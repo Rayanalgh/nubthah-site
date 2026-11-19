@@ -397,6 +397,7 @@ async function aiTool(req, env, ip, kind){
   if ((kind === 'tailor' || kind === 'interview') && String(b.job || '').trim().length < 5) return json({ error: 'job_required' }, 400);
   if ((kind === 'tailor' || kind === 'translate') && !b.cv) return json({ error: 'cv_required' }, 400);
   const g = await aiGate(req, env); if (g.res) return g.res;
+  if (g.u && g.u.plan !== 'pro') return json({ error: 'pro_required' }, 402);
   if (limited(ip, kind, 20)) return json({ error: 'rate_limited' }, 429);
   try { const out = await askClaude(env, AI_PROMPTS[kind](b), kind === 'translate' ? 8000 : 5000); await aiCount(env, g); return json(out); }
   catch (e) { return json({ error: 'ai_failed', reason: String(e.message || e).slice(0, 80) }, 502); }
