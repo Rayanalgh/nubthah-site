@@ -82,10 +82,10 @@ async function askClaude(env, prompt, maxTokens){
   const r = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: env.AI_MODEL || MODEL, max_tokens: maxTokens, messages: [{ role: 'user', content: prompt }] })
+    body: JSON.stringify({ model: env.AI_MODEL || MODEL, max_tokens: maxTokens, messages: [{ role: 'user', content: prompt }, { role: 'assistant', content: '{' }] })
   });
   if (!r.ok) { let m = ''; try { m = (await r.json()).error?.type || ''; } catch (e) {} throw new Error('ai_' + r.status + (m ? ':' + m : '')); }
-  const d = await r.json(), m = (d.content || []).map(c => c.text || '').join('').match(/\{[\s\S]*\}/);
+  const d = await r.json(), m = ('{' + (d.content || []).map(c => c.text || '').join('')).match(/\{[\s\S]*\}/);
   if (!m) throw new Error('bad_ai_output');
   return JSON.parse(m[0]);
 }
@@ -112,7 +112,7 @@ async function keywords(req, env, ip, ctx){
   const hit = await cache.match(ck); if (hit) return hit;
   if (limited(ip, 'kw', 30)) return json({ error: 'rate_limited' }, 429);
   try {
-    const out = await askClaude(env, kwPrompt(f), 1800); if (!out.error) await aiCount(env, g);
+    const out = await askClaude(env, kwPrompt(f), 4000); if (!out.error) await aiCount(env, g);
     const res = json(out, 200, { 'cache-control': 'public, max-age=2592000' });
     if (!out.error) ctx.waitUntil(cache.put(ck, res.clone()));
     return res;
@@ -129,7 +129,7 @@ async function courses(req, env, ip, ctx){
   const hit = await cache.match(ck); if (hit) return hit;
   if (limited(ip, 'cr', 30)) return json({ error: 'rate_limited' }, 429);
   try {
-    const out = await askClaude(env, crPrompt(f), 2200); if (!out.error) await aiCount(env, g);
+    const out = await askClaude(env, crPrompt(f), 4500); if (!out.error) await aiCount(env, g);
     const res = json(out, 200, { 'cache-control': 'public, max-age=2592000' });
     if (!out.error) ctx.waitUntil(cache.put(ck, res.clone()));
     return res;
@@ -143,7 +143,7 @@ async function arrange(req, env, ip){
   if (t.length < 15) return json({ error: 'text_too_short' }, 400);
   const g = await aiGate(req, env); if (g.res) return g.res;
   if (limited(ip, 'arr', 20)) return json({ error: 'rate_limited' }, 429);
-  try { const out = await askClaude(env, arrPrompt(t, lang === 'ltr' ? 'ltr' : 'rtl'), 3000); await aiCount(env, g); return json(out); }
+  try { const out = await askClaude(env, arrPrompt(t, lang === 'ltr' ? 'ltr' : 'rtl'), 6000); await aiCount(env, g); return json(out); }
   catch (e) { return json({ error: 'ai_failed', reason: String(e.message || e).slice(0, 80) }, 502); }
 }
 
