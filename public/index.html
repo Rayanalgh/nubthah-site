@@ -12,10 +12,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 <style>
+svg.i{display:inline-block;vertical-align:-3px;flex-shrink:0}
 :root{
   --bg:#0D0C15; --bg2:#110F1B; --card:#171321; --raised:#221A31; --hover:#30223F;
   --line:rgba(193,163,255,.12); --line2:rgba(193,163,255,.24);
-  --ink:#F1EBF8; --muted:#A99BBC; --lime:#C1A3FF; --violet:#8242E5; --indigo:#5639C9; --coral:#ff7a8a;
+  --ink:#F1EBF8; --muted:#A99BBC; --lime:#C1A3FF; --violet:#8242E5; --indigo:#5639C9; --coral:#E3A3F5;
   --grad:linear-gradient(115deg,#8242E5,#5639C9); --head:linear-gradient(100deg,#D0B0FF,#A1A8FF);
   --r:22px; --ease:cubic-bezier(.2,.8,.2,1);
   --fd:'DM Sans','IBM Plex Sans Arabic',system-ui,sans-serif; --fb:'DM Sans','IBM Plex Sans Arabic',system-ui,sans-serif;
@@ -77,7 +78,7 @@ h1{font-family:var(--fd);font-weight:700;font-size:clamp(46px,6.6vw,92px);line-h
 .stage .chip{position:absolute;padding:10px 14px;border-radius:14px;background:rgba(23,19,33,.88);border:1px solid var(--line2);backdrop-filter:blur(10px);font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:0 20px 40px -10px rgba(0,0,0,.6);animation:float 6s ease-in-out infinite}
 .chip.c1{top:60px;inset-inline-start:10px}
 .chip.c2{bottom:240px;inset-inline-end:0;animation-delay:-3s}
-.chip .dot{width:9px;height:9px;border-radius:50%;background:#7CF2B0;box-shadow:0 0 12px #7CF2B0}
+.chip .dot{width:9px;height:9px;border-radius:50%;background:#C1A3FF;box-shadow:0 0 12px #C1A3FF}
 .ring{width:38px;height:38px;border-radius:50%;background:conic-gradient(var(--lime) 0 92%,rgba(255,255,255,.1) 0);display:grid;place-items:center;font-size:11px;font-weight:700}
 .ring em{width:30px;height:30px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-style:normal}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
@@ -115,6 +116,15 @@ h2 .g{background:var(--head);-webkit-background-clip:text;background-clip:text;c
 .tcard .meta>span{font-size:13px;color:var(--lime);font-weight:600}
 
 /* bento */
+.feats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.feat{display:flex;flex-direction:column;gap:8px;padding:22px;border-radius:20px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(193,163,255,.05),rgba(193,163,255,0) 60%),var(--card);transition:border-color .3s,transform .4s var(--ease)}
+a.feat:hover{border-color:rgba(193,163,255,.5);transform:translateY(-4px)}
+.feat .fi{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--grad);color:#fff;box-shadow:0 10px 24px -10px rgba(130,66,229,.8);margin-bottom:6px}
+.feat h3{font-size:17px;line-height:1.4}
+.feat p{color:var(--muted);font-size:14px;line-height:1.7;flex:1}
+.feat .fgo{font-size:13px;font-weight:700;color:var(--lime);margin-top:4px}
+@media (max-width:1050px){.feats{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.feats{grid-template-columns:1fr}.feat{padding:18px}}
 .bento{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .tile{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:28px;transition:border-color .3s,transform .4s var(--ease)}
 .tile:hover{border-color:var(--line2);transform:translateY(-4px)}
@@ -133,7 +143,7 @@ h2 .g{background:var(--head);-webkit-background-clip:text;background-clip:text;c
 .sw.on{background:var(--violet)}
 .sw.on::after{inset-inline-start:24px}
 .save{background:rgba(193,163,255,.14);color:var(--lime);padding:3px 10px;border-radius:99px;font-size:12px}
-.plans{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:stretch}
+.plans{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;align-items:stretch;max-width:820px;margin-inline:auto}
 .plan{border:1px solid var(--line);border-radius:24px;padding:28px 22px;background:var(--card);display:flex;flex-direction:column;gap:18px;position:relative;transition:transform .4s var(--ease)}
 .plan:hover{transform:translateY(-5px)}
 .plan.hot{background:linear-gradient(180deg,#24184a,#171321);border-color:rgba(193,163,255,.55);box-shadow:0 30px 80px -30px rgba(130,66,229,.6)}
@@ -171,11 +181,14 @@ h2 .g{background:var(--head);-webkit-background-clip:text;background-clip:text;c
 .final{text-align:center;padding:140px 0;position:relative;overflow:hidden;isolation:isolate}
 .final h2{font-size:clamp(42px,7vw,96px)}
 .final .aurora{inset:0}
+
+.legal{line-height:1.9}.legal h3{margin-bottom:12px}.legal h4{font-size:15px;margin:18px 0 4px;color:var(--ink)}.legal p{color:#d6cce3;font-size:14.5px}.legal .upd{color:var(--muted);font-size:12.5px}.legal a{color:var(--lime)}
 footer{border-top:1px solid var(--line);padding:46px 0 28px;color:var(--muted);font-size:14px}
 footer .wrap{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:30px}
 footer h5{color:var(--ink);font-size:14px;margin-bottom:12px}
 footer ul{list-style:none;display:grid;gap:8px}
 footer a:hover{color:var(--lime)}
+.copy .ksa{display:inline-flex;align-items:center;gap:8px}.copy .ksa::before{content:"";width:18px;height:12px;border-radius:2px;background:#0A7A3E}
 .copy{grid-column:1/-1;border-top:1px solid var(--line);padding-top:20px;margin-top:16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 
 /* modal + toast */
@@ -237,7 +250,7 @@ footer a:hover{color:var(--lime)}
 .ttl:focus{border-bottom-color:var(--lime)}
 .ib{width:28px;height:28px;flex-shrink:0;border-radius:8px;color:var(--muted);display:grid;place-items:center;font-size:15px;transition:.2s}
 .ib:hover{background:rgba(255,255,255,.07);color:var(--ink)}
-.ib.x:hover{background:rgba(255,107,74,.15);color:var(--coral)}
+.ib.x:hover{background:rgba(227,163,245,.15);color:var(--coral)}
 .fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .fields .w{grid-column:1/-1}
 .form input,.form textarea,.form select,.f input,.f select{width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line);background:#0c0c11;outline:none;transition:border-color .2s,box-shadow .2s;font-size:14px;resize:vertical;min-width:0}
@@ -263,7 +276,7 @@ footer a:hover{color:var(--lime)}
 .ph{width:64px;height:64px;flex-shrink:0;border-radius:18px;background:#1b1b22 center/cover no-repeat;display:grid;place-items:center;color:var(--muted);font-size:22px;border:1px dashed var(--line2)}
 .ph:hover{border-color:var(--lime);color:var(--lime)}
 .muted{color:var(--muted);font-size:12.5px}
-.lnk{color:var(--coral);font-size:12.5px}
+.lnk{color:var(--lime);font-size:12.5px}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
 .tags:empty{display:none}
 .tags span{padding:5px 8px 5px 12px;border-radius:999px;background:rgba(193,163,255,.1);color:#e4d6ff;font-size:13px;display:flex;align-items:center;gap:6px}
@@ -278,7 +291,7 @@ footer a:hover{color:var(--lime)}
 .tpls button{padding:8px 13px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid var(--line);color:#c7c6ce;display:flex;gap:6px;align-items:center;transition:.2s}
 .tpls button:hover{border-color:var(--line2)}
 .tpls button.on{background:var(--ink);color:#000;border-color:var(--ink)}
-.pro{font-size:10px;padding:1px 6px;border-radius:5px;background:linear-gradient(135deg,#ffd76a,#ff9a3d);color:#000;font-weight:700}
+.pro{font-size:10px;padding:1px 6px;border-radius:5px;background:var(--grad);color:#fff;font-weight:700}
 .swatches{display:flex;gap:6px}
 .swatches button{width:22px;height:22px;border-radius:50%;border:2px solid transparent;outline:1px solid var(--line2);transition:.2s}
 .swatches button.on{border-color:var(--bg);outline:2px solid var(--ink);transform:scale(1.12)}
@@ -428,8 +441,8 @@ footer a:hover{color:var(--lime)}
 .kwbox h4:not(:first-child){margin-top:16px}
 .kws{display:flex;flex-wrap:wrap;gap:6px}.kws em{color:var(--muted);font-style:normal;font-size:13px}
 .kws span{padding:5px 12px;border-radius:99px;font-size:13px}
-.kws.ok span{background:rgba(124,242,176,.12);color:#9ff5c5}
-.kws.miss span{background:rgba(255,122,138,.12);color:#ffb0b9}
+.kws.ok span{background:rgba(193,163,255,.16);color:#DCCBFF}
+.kws.miss span{background:rgba(227,163,245,.12);color:#EBC6F8}
 .tipsbox ol{padding-inline-start:20px;display:grid;gap:8px;color:#d6cce3;font-size:14.5px}
 .tipsbox b{color:#fff}
 .ats-cta{display:flex;gap:10px;flex-wrap:wrap}
@@ -475,15 +488,15 @@ footer a:hover{color:var(--lime)}
 }
 
 .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:13px;font-weight:600}
-.l-ok{color:#7CF2B0}.l-warn{color:#ffc457}.l-no{color:#ff8a98}
+.l-ok{color:#C1A3FF}.l-warn{color:#A1A8FF}.l-no{color:#E3A3F5}
 .chk{padding:6px 20px 8px;border-radius:18px;border:1px solid var(--line);background:var(--card)}
 .chk h4{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 0 8px;font-size:15px}
 .chk h4 small{color:var(--muted);font-weight:500;white-space:nowrap}
 .ci{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--line);align-items:flex-start}
 .ci .ic{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-size:12px;font-weight:800}
-.ci.ok .ic{background:rgba(124,242,176,.14);color:#7CF2B0}
-.ci.no .ic{background:rgba(255,122,138,.15);color:#ff8a98}
-.ci.warn .ic{background:rgba(255,196,87,.15);color:#ffc457}
+.ci.ok .ic{background:rgba(193,163,255,.18);color:#C1A3FF}
+.ci.no .ic{background:rgba(227,163,245,.15);color:#E3A3F5}
+.ci.warn .ic{background:rgba(161,168,255,.16);color:#A1A8FF}
 .ci b{font-size:14.5px;font-weight:600;display:block;line-height:1.5}
 .ci.ok b{color:#cfc6dc;font-weight:500}
 .ci p{font-size:13px;color:var(--muted);margin-top:3px}
@@ -538,19 +551,19 @@ footer a:hover{color:var(--lime)}
 .pv-demobar a{flex:none;background:linear-gradient(90deg,#8242E5,#5639C9);color:#fff;font-weight:700;font-size:13.5px;padding:9px 16px;border-radius:99px;white-space:nowrap}
 .pv-card{position:relative}
 .pv-ex{position:absolute;top:12px;left:12px;z-index:3;background:#2A2038;color:#fff;font-size:12px;font-weight:700;padding:4px 12px;border-radius:99px}
-.pv-warn{max-width:520px;margin:10px auto 0;padding:10px 14px;border-radius:12px;background:rgba(255,190,60,.12);border:1px solid rgba(255,190,60,.35);color:#ffd88a;font-size:13.5px;text-align:center}
-.pv-warn a{color:#fff;font-weight:700}
+.pv-warn{max-width:520px;margin:10px auto 0;padding:10px 14px;border-radius:12px;background:#F4EFFA;border:1px solid #CDB8F2;color:#2A2038;font-size:13.5px;text-align:center}
+.pv-warn a{color:#5639C9;font-weight:700}
 .crc{padding:14px;border-radius:14px;border:1px solid var(--line2);background:var(--raised)}
 .crc.have{opacity:.6;border-style:dashed}
 .crc-h b{font-size:15px}.crc-h small{display:block;color:var(--muted);font-size:12px;margin-top:2px;direction:ltr;text-align:start}
 .crc-m{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;font-size:12px;color:var(--muted)}
 .crc-m span{padding:2px 9px;border-radius:99px;background:var(--bg)}
-.crc-m .lv{color:#cbb6f5}.crc-m .fr{background:rgba(52,199,89,.15);color:#7ee2a0}
+.crc-m .lv{color:#cbb6f5}.crc-m .fr{background:rgba(193,163,255,.18);color:#E2D4FF}
 .crc p{font-size:13px;color:#d6cce3;margin-top:8px;line-height:1.7}
 .crc-a{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .crc-a .btn-sm{padding:7px 12px;font-size:12.5px}
 .crc-a .btn-ghost.on{border-color:var(--lime);color:var(--lime)}
-.crc-a .ok{font-size:12.5px;color:#7ee2a0;font-weight:600}
+.crc-a .ok{font-size:12.5px;color:var(--lime);font-weight:600}
 .plan{margin-top:14px;padding:12px 14px;border-radius:14px;border:1px solid var(--lime);background:linear-gradient(135deg,rgba(130,66,229,.16),rgba(86,57,201,.05))}
 .plan summary{cursor:pointer;font-weight:700;font-size:14px;list-style:none}.plan summary::-webkit-details-marker{display:none}
 .plan-l{display:grid;gap:8px;margin-top:10px}
@@ -564,7 +577,7 @@ footer a:hover{color:var(--lime)}
 .arrange{width:100%;margin-top:10px}
 .arrange:disabled{opacity:.85;cursor:wait}
 .spin{width:15px;height:15px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .8s linear infinite}
-.arrnote{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(124,242,176,.08);border:1px solid rgba(124,242,176,.2);color:#c4f5da;font-size:13px;display:flex;gap:10px;align-items:center;justify-content:space-between}
+.arrnote{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(193,163,255,.08);border:1px solid rgba(193,163,255,.24);color:#E2D4FF;font-size:13px;display:flex;gap:10px;align-items:center;justify-content:space-between}
 .arrnote button{color:var(--lime);font-weight:700;white-space:nowrap}
 .kwblk{border-color:var(--line2)}
 .kwblk .kwq input{background:#0c0b13}
@@ -606,7 +619,8 @@ body.noscroll{overflow:hidden}
 .pv-ti{color:#7145BD;font-weight:600;margin-top:2px}
 .pv-city,.pv-now{font-size:13.5px;color:#756680;margin-top:4px}
 .pv-acts{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:16px}
-.pv-btn{display:grid;justify-items:center;gap:2px;min-width:68px;padding:10px 8px;border-radius:16px;background:#F4EFFA;font-size:18px;color:#2A2038;border:1px solid #E4DCED}
+.pv-btn svg{color:#6b3fd4}
+.pv-btn{display:grid;justify-items:center;gap:4px;min-width:68px;padding:10px 8px;border-radius:16px;background:#F4EFFA;font-size:18px;color:#2A2038;border:1px solid #E4DCED}
 .pv-btn span{font-size:11.5px;font-weight:600;color:#5a4d6a}
 .pv-btn:hover{background:#EEE5FB}
 .pv-contact{font-size:12.5px;color:#756680;margin-top:12px}
@@ -624,7 +638,7 @@ body.noscroll{overflow:hidden}
 .pv-docs{display:grid;gap:8px}
 .pv-doc{display:flex;align-items:center;gap:12px;width:100%;text-align:start;padding:12px;border-radius:16px;border:1px solid #E4DCED;background:#FCFAFF;color:#2A2038}
 .pv-doc:hover{border-color:#7145BD;background:#F4EFFA}
-.pv-dic{width:44px;height:44px;border-radius:13px;background:linear-gradient(115deg,#8242E5,#5639C9);display:grid;place-items:center;font-size:20px;flex-shrink:0}
+.pv-dic{width:44px;height:44px;border-radius:13px;background:linear-gradient(115deg,#8242E5,#5639C9);display:grid;place-items:center;font-size:20px;flex-shrink:0;color:#fff}
 .pv-dt{flex:1;display:grid;gap:1px}.pv-dt b{font-size:14.5px}.pv-dt small{font-size:12px;color:#756680}
 .pv-open{font-size:13px;font-weight:700;color:#7145BD}
 .pv-note{font-size:11.5px;color:#9a8fa8;margin-top:10px}
@@ -755,7 +769,7 @@ body.noscroll{overflow:hidden}
 .am-h em{font-style:normal;font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:5px;margin-top:4px}.am-h em svg{width:13px;height:13px}
 .accmenu a,.accmenu button{padding:9px 10px;border-radius:10px;font-size:13.5px;text-align:start;color:#ddd3ea}
 .accmenu a:hover,.accmenu button:hover{background:var(--raised);color:#fff}
-.accmenu [data-logout]{color:#ff9aa6}
+.accmenu [data-logout]{color:#E3A3F5}
 @media (max-width:1050px){.nav .accbtn span{display:none}.nav .accbtn{padding:7px;margin-inline-start:auto}.nav .bar>.btn{margin-inline-start:0}}
 @media (max-width:900px){.btop .accbtn span{display:none}.btop .accbtn{padding:6px}.btop .accbtn.in{padding:3px}}
 /* BUILDER PAGE */
@@ -778,7 +792,6 @@ body.noscroll{overflow:hidden}
 @media (max-width:1050px){
   .hero .wrap{grid-template-columns:1fr}
   .stage{height:470px;max-width:520px;margin-inline:auto;width:100%}
-  .plans{grid-template-columns:1fr 1fr}
   .addons{grid-template-columns:1fr}
   .faq{grid-template-columns:1fr;gap:20px}
   .nav ul{display:none}
@@ -910,15 +923,7 @@ body.noscroll{overflow:hidden}
 <section id="features" style="padding-top:0">
   <div class="wrap">
     <div class="head rv"><div><span class="eyebrow">المميزات</span><h2>كل اللي تحتاجه <span class="g">عشان تنقبل</span></h2></div></div>
-    <div class="bento">
-      <a href="#build-ats" class="tile hl lnk rv"><div class="ic">◎</div><h3>فحص ATS بمعايير عالمية</h3><p>قائمة واضحة: وش متحقق في سيرتك ووش ناقص، مع طريقة إصلاح كل نقطة. ←</p></a>
-      <div class="tile rv"><div class="ic">ع/E</div><h3>عربي وإنجليزي</h3><p>نفس بياناتك بالاتجاهين، بخطوط واتجاه مضبوط.</p></div>
-      <div class="tile rv"><div class="ic">▣</div><h3>بطاقة أعمال + QR</h3><p>بطاقة رقمية من نفس بياناتك، برابط شخصي تشاركه.</p></div>
-      <div class="tile rv"><div class="ic">＋</div><h3>أقسام بلا حدود</h3><p>مشاريع، شهادات، دورات، تطوع، روابط، أو قسم بتسميتك.</p></div>
-      <a href="#build-kw" class="tile lnk rv"><div class="ic">✦</div><h3>كلمات مفتاحية لكل تخصص</h3><p>اكتب تخصصك ونطلع لك المهارات والأدوات والشهادات المطلوبة، وتنضاف لسيرتك بضغطة. ←</p></a>
-      <a href="#build-courses" class="tile lnk rv"><div class="ic">◆</div><h3>دورات وشهادات لتخصصك</h3><p>اكتب تخصصك ونطلع لك الرخص والشهادات والدورات اللي ترفع قيمة سيرتك، وتحفظها في خطتك. ←</p></a>
-      <div class="tile rv"><div class="ic">✦</div><h3>كتابة بالذكاء الاصطناعي</h3><p>حوّل وصف مهامك إلى إنجازات مقنعة بأرقام واضحة.</p></div>
-    </div>
+    <div class="feats"><a href="#build-ats" class="feat rv"><div class="fi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></div><h3>فحص ATS بمعايير عالمية</h3><p>قائمة واضحة بالمتحقق والناقص في سيرتك، مع طريقة إصلاح كل نقطة.</p><span class="fgo">افحص سيرتك ←</span></a><a href="#build" class="feat rv"><div class="fi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></div><h3>رتّب سيرتك بالذكاء الاصطناعي</h3><p>اكتب عن نفسك بكلامك، ونوزّعه على أقسام السيرة بصياغة احترافية.</p><span class="fgo">جرّبها ←</span></a><a href="#build-kw" class="feat rv"><div class="fi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/></svg></div><h3>كلمات مفتاحية لكل تخصص</h3><p>المهارات والأدوات اللي تدوّر عليها أنظمة التوظيف في مجالك، تنضاف بضغطة.</p><span class="fgo">اطلع كلماتك ←</span></a><a href="#build-courses" class="feat rv"><div class="fi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg></div><h3>دورات وشهادات لتخصصك</h3><p>الرخص والشهادات والدورات اللي ترفع قيمة سيرتك، وتحفظها في خطتك.</p><span class="fgo">شوف الدورات ←</span></a><a href="#build-card" class="feat rv"><div class="fi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15h4M7 11h10"/></svg></div><h3>بطاقة أعمال رقمية</h3><p>بطاقة من نفس بياناتك، برابط شخصي وباركود تشاركه بلحظة.</p><span class="fgo">صمّم بطاقتك ←</span></a><a href="#share" class="feat rv"><div class="fi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v7h-4M14 21v-3"/></svg></div><h3>صفحة عامة وباركود</h3><p>صفحة مهنية تفتح بالباركود، فيها سيرتك وشهاداتك ورخصك.</p><span class="fgo">كيف تشتغل ←</span></a><div class="feat rv"><div class="fi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div><h3>عربي وإنجليزي</h3><p>نفس بياناتك بالاتجاهين، بخطوط واتجاه مضبوط.</p></div><div class="feat rv"><div class="fi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg></div><h3>أقسام بلا حدود</h3><p>مشاريع، شهادات، دورات، تطوع، أو قسم بتسميتك.</p></div></div>
   </div>
 </section>
 
@@ -926,14 +931,8 @@ body.noscroll{overflow:hidden}
   <div class="wrap">
     <div class="head rv">
       <div><span class="eyebrow">الأسعار</span><h2>ابدأ مجانًا، <span class="g">وترقّى لما تحتاج</span></h2></div>
-      <div class="bill">شهري <button class="sw" id="billSw" aria-label="تبديل الفوترة"></button> سنوي <span class="save">وفّر ٤٠٪</span></div>
     </div>
     <div class="plans" id="plans"></div>
-    <div class="addons">
-      <div class="addon rv"><div class="ic">✎</div><div><h4>مراجعة بشرية للسيرة</h4><p>خبير توظيف يراجعها خلال ٤٨ ساعة</p></div><div class="pr"><b>٧٩ ر.س</b><button data-buy="مراجعة بشرية للسيرة|79">اطلب ←</button></div></div>
-      <div class="addon rv"><div class="ic">◈</div><div><h4>بطاقة NFC مطبوعة</h4><p>بطاقة فاخرة تفتح ملفك بلمسة</p></div><div class="pr"><b>١٤٩ ر.س</b><button data-buy="بطاقة NFC مطبوعة|149">اطلب ←</button></div></div>
-      <div class="addon rv"><div class="ic">✉</div><div><h4>خطاب تقديم مخصص</h4><p>Cover Letter مطابق للوظيفة</p></div><div class="pr"><b>٢٩ ر.س</b><button data-buy="خطاب تقديم مخصص|29">اطلب ←</button></div></div>
-    </div>
     <div class="pay rv">ادفع بأمان عبر <span>مدى</span><span>Apple Pay</span><span>STC Pay</span><span>Visa</span><span>Mastercard</span><span>تمارا</span></div>
   </div>
 </section>
@@ -945,8 +944,8 @@ body.noscroll{overflow:hidden}
       <details class="qa" open><summary>هل نُبذة مجانية فعلًا؟</summary><p>نعم. الباقة المجانية تعطيك سيرة كاملة بقالب ATS وتصدير PDF وبطاقة أساسية، بدون بطاقة ائتمان. الباقات المدفوعة تفتح القوالب المميزة، وتشيل العلامة المائية، وتضيف الذكاء الاصطناعي والرابط الشخصي.</p></details>
       <details class="qa"><summary>هل السيرة تعدّي أنظمة ATS؟</summary><p>قوالبنا مبنية ببنية نصية واضحة تقرأها أنظمة التوظيف بسهولة، والمؤشر يعطيك إرشادات عامة للتحسين. ما فيه أداة تضمن تجاوز نظام فحص معيّن، لكننا نرفع فرصك.</p></details>
       <details class="qa"><summary>أقدر ألغي الاشتراك متى ما أبي؟</summary><p>أكيد، تلغي بضغطة من حسابك، وتبقى ميزاتك فعّالة لين نهاية الفترة المدفوعة.</p></details>
-      <details class="qa"><summary>وش الفرق بين الشهري و"مدى الحياة"؟</summary><p>الشهري مناسب لو تدوّر وظيفة الحين. مدى الحياة دفعة وحدة وتفتح لك كل ميزات Pro للأبد، مع كل القوالب الجديدة.</p></details>
-      <details class="qa"><summary>هل بياناتي آمنة؟</summary><p>بياناتك محفوظة على جهازك افتراضيًا. لما تسجّل حساب، تتزامن بشكل مشفّر ولا نشاركها مع أي جهة.</p></details>
+      <details class="qa"><summary>وش الفرق بين المجاني والبرو؟</summary><p>المجاني يعطيك سيرة كاملة وبطاقة أعمال وصفحة عامة بباركود. البرو بـ ٢٩ ريال شهريًا يفتح لك كل القوالب بدون علامة مائية، والذكاء الاصطناعي بلا حدود، وفحص السيرة مقابل الوظيفة.</p></details>
+      <details class="qa"><summary>هل بياناتي آمنة؟</summary><p>بياناتك محفوظة على جهازك، وما نشاركها مع أي جهة. ما يشوف صفحتك العامة إلا اللي تعطيه الرابط أو الباركود.</p></details>
     </div>
   </div>
 </section>
@@ -963,10 +962,10 @@ body.noscroll{overflow:hidden}
 <footer>
   <div class="wrap">
     <div><a class="logo" href="#top"><img src="data:image/png;base64,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" alt="نُبذة"></a><p style="margin-top:14px;max-width:300px">منصة سعودية لتصميم السير الذاتية وبطاقات الأعمال بالعربي والإنجليزي.</p></div>
-    <div><h5>المنتج</h5><ul><li><a href="#build">منشئ السيرة</a></li><li><a href="#build-card">بطاقات الأعمال</a></li><li><a href="#templates">القوالب</a></li><li><a href="#pricing">الأسعار</a></li></ul></div>
-    <div><h5>الموارد</h5><ul><li><a href="#how">طريقة العمل</a></li><li><a href="#faq">الأسئلة الشائعة</a></li></ul></div>
-    <div><h5>الشركة</h5><ul><li><a href="#top">من نحن</a></li><li><a href="#top">الخصوصية</a></li><li><a href="#top">الشروط</a></li></ul></div>
-    <div class="copy"><span>© ٢٠٢٦ نُبذة. جميع الحقوق محفوظة.</span><span>صُنع في السعودية 🇸🇦</span></div>
+    <div><h5>المنتج</h5><ul><li><a href="#build">منشئ السيرة</a></li><li><a href="#build-card">بطاقة الأعمال</a></li><li><a href="#build-ats">فحص ATS</a></li><li><a href="#templates">القوالب</a></li><li><a href="#pricing">الأسعار</a></li></ul></div>
+    <div><h5>نُبذة</h5><ul><li><a href="#about">من نحن</a></li><li><a href="#how">طريقة العمل</a></li><li><a href="#faq">الأسئلة الشائعة</a></li><li><a href="mailto:info@nubthah.com">تواصل معنا</a></li></ul></div>
+    <div><h5>قانوني</h5><ul><li><a href="#privacy">سياسة الخصوصية</a></li><li><a href="#terms">الشروط والأحكام</a></li></ul></div>
+    <div class="copy"><span>© ٢٠٢٦ نُبذة. جميع الحقوق محفوظة.</span><span><a href="mailto:info@nubthah.com" dir="ltr">info@nubthah.com</a></span><span class="ksa">صُنع في السعودية</span></div>
   </div>
 </footer>
 </div>
@@ -1003,7 +1002,7 @@ body.noscroll{overflow:hidden}
       <div class="toolbar">
         <div class="tpls" id="tpls"></div>
         <div class="swatches" id="sw"></div>
-        <div class="sp"><button class="fmtbtn" id="fmtBtn">🎨 التنسيق</button><div class="lang" id="dirT"><button class="on" data-d="rtl">ع</button><button data-d="ltr">EN</button></div></div>
+        <div class="sp"><button class="fmtbtn" id="fmtBtn"><svg class="i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/></svg> التنسيق</button><div class="lang" id="dirT"><button class="on" data-d="rtl">ع</button><button data-d="ltr">EN</button></div></div>
       </div>
       <div class="fmtpanel" id="fmtPanel" hidden></div>
       <div class="viewport" id="vp">
@@ -2312,7 +2311,10 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.targ
 $$('.rv').forEach((el,i)=>{el.style.transitionDelay=(i%4)*70+'ms';io.observe(el)});
 
 /* ---------- DOCS (شهادات ورخص مرفقة) + PROFILE PAGE (اللي يفتح بالباركود) ---------- */
-const DOC_T={license:['رخصة مهنية','🪪'],cert:['شهادة','🎓'],exp:['شهادة خبرة','💼'],other:['وثيقة','📄']};
+/* أيقونات خطية موحّدة (بدل الإيموجي) */
+const IC_P={"eye": "<path d=\"M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "pin": "<path d=\"M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z\"/><circle cx=\"12\" cy=\"9.5\" r=\"2.5\"/>", "brief": "<rect x=\"3\" y=\"7\" width=\"18\" height=\"13\" rx=\"2\"/><path d=\"M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18\"/>", "phone": "<path d=\"M5 3h3l2 5-2.5 1.5a11 11 0 0 0 7 7L16 14l5 2v3a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2z\"/>", "link": "<path d=\"M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1\"/><path d=\"M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1\"/>", "user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21a8 8 0 0 1 16 0\"/><path d=\"M19 4v4M17 6h4\"/>", "file": "<path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5M9 13h6M9 17h6\"/>", "id": "<rect x=\"3\" y=\"5\" width=\"18\" height=\"14\" rx=\"2\"/><circle cx=\"9\" cy=\"11\" r=\"2\"/><path d=\"M6 16a3 3 0 0 1 6 0M14 10h4M14 14h4\"/>", "cap": "<path d=\"M2 9l10-5 10 5-10 5z\"/><path d=\"M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5\"/>", "clip": "<path d=\"M21 11.5l-8.5 8.5a5.5 5.5 0 0 1-7.8-7.8l9-9a3.7 3.7 0 0 1 5.2 5.2l-9 9a1.8 1.8 0 0 1-2.6-2.6l8.3-8.3\"/>", "palette": "<path d=\"M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z\"/><circle cx=\"7.5\" cy=\"11\" r=\"1\"/><circle cx=\"10\" cy=\"7\" r=\"1\"/><circle cx=\"15\" cy=\"7.5\" r=\"1\"/>", "lock": "<rect x=\"4\" y=\"11\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/>", "mail": "<rect x=\"3\" y=\"5\" width=\"18\" height=\"14\" rx=\"2\"/><path d=\"M3 7l9 6 9-6\"/>", "out": "<path d=\"M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10\"/>", "edit": "<path d=\"M4 20h4L19 9l-4-4L4 16z\"/><path d=\"M13 7l4 4\"/>", "card": "<rect x=\"3\" y=\"5\" width=\"18\" height=\"14\" rx=\"2\"/><path d=\"M7 15h4M7 11h10\"/>", "target": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"5\"/><circle cx=\"12\" cy=\"12\" r=\"1\"/>"};
+const ic=(k,sz=18)=>`<svg class="i" width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC_P[k]||''}</svg>`;
+const DOC_T={license:['رخصة مهنية','id'],cert:['شهادة','cap'],exp:['شهادة خبرة','brief'],other:['وثيقة','file']};
 const demoCertURL={};
 function demoCert(who='Faisal Al-Otaibi'){
   if(demoCertURL[who])return demoCertURL[who];
@@ -2329,7 +2331,7 @@ function demoCert(who='Faisal Al-Otaibi'){
 }
 function docsBlock(){
   const D=S.docs||[];
-  return `<div class="blk" id="b-docs"><div class="blk-h"><b>📎 الشهادات والرخص المرفقة</b></div>
+  return `<div class="blk" id="b-docs"><div class="blk-h"><b>${ic('clip',16)} الشهادات والرخص المرفقة</b></div>
    <p class="muted" style="margin:-4px 0 12px;font-size:13px">ارفع صور أو ملفات PDF لشهاداتك ورخصك المهنية (مثل رخصة SOCPA أو رخصة المحاماة). تظهر مرتّبة في صفحتك لمن يمسح الباركود.</p>
    ${D.map((d,i)=>`<div class="doc"><button class="dthumb" data-act="viewDoc" data-v="${i}" aria-label="عرض">${d.file?(d.file.mime.startsWith('image/')?`<img src="${d.file.data}" alt="">`:'<span>PDF</span>'):'<span>＋</span>'}</button>
      <div class="fields" style="flex:1"><input class="w" data-d="${i}" data-df="name" placeholder="اسم الوثيقة — مثال: رخصة SOCPA" value="${esc(d.name)}" aria-label="اسم الوثيقة">
@@ -2338,7 +2340,7 @@ function docsBlock(){
      <input class="w" data-d="${i}" data-df="expiry" placeholder="رقم أو تاريخ انتهاء (اختياري)" value="${esc(d.expiry)}" aria-label="تفاصيل"></div>
      <button class="ib x" data-act="rmDoc" data-v="${i}" aria-label="حذف">×</button></div>`).join('')}
    <button class="add" data-act="addDoc">＋ ارفع شهادة أو رخصة (صورة أو PDF)</button>
-   <a href="#profile" class="pvlink">👁 شوف صفحتك اللي تطلع لمن يمسح الباركود ←</a>
+   <a href="#profile" class="pvlink">${ic('eye',16)} شوف صفحتك اللي تطلع لمن يمسح الباركود ←</a>
   </div>`;
 }
 async function takeDoc(f){
@@ -2399,7 +2401,7 @@ function renderProfile(){
   const xp=(S.secs.find(s=>s.type==='xp')||{items:[]}).items.filter(filled)[0];
   const links=S.links.filter(l=>l.u);
   $('#profileView').innerHTML=`
-   <div class="pv-owner"><span>👁 هذا اللي يشوفه أي أحد يمسح باركودك</span><a href="#build">← رجوع للتعديل</a></div>
+   <div class="pv-owner"><span>${ic('eye',16)} هذا اللي يشوفه أي أحد يمسح باركودك</span><a href="#build">← رجوع للتعديل</a></div>
    ${isSample(S)&&!renderProfile.demo?`<div class="pv-warn">هذي بيانات <b>المثال</b> وليست بياناتك. <a href="#build" data-act="blank">ابدأ ببياناتك ←</a></div>`:''}
    <div class="pv-wrap">
     <header class="pv-top"><img src="${$('#logoL').src}" alt="نُبذة"><span>ملف مهني على نُبذة</span></header>
@@ -2407,13 +2409,13 @@ function renderProfile(){
       <div class="pv-cover"></div>
       <div class="pv-av" style="${P.photo?`background-image:url(${P.photo})`:''}">${P.photo?'':ini}</div>
       <h1>${esc(P.name||'اسمك')}</h1><p class="pv-ti">${esc(P.title||'')}${P.company?' · '+esc(P.company):''}</p>
-      ${P.city?`<p class="pv-city">📍 ${esc(P.city)}</p>`:''}
-      ${xp?`<p class="pv-now">💼 ${esc(xp.a)}${xp.b?' — '+esc(xp.b):''}</p>`:''}
+      ${P.city?`<p class="pv-city">${ic('pin',15)} ${esc(P.city)}</p>`:''}
+      ${xp?`<p class="pv-now">${ic('brief',15)} ${esc(xp.a)}${xp.b?' — '+esc(xp.b):''}</p>`:''}
       <div class="pv-acts">
-        ${P.phone?`<a class="pv-btn" href="tel:${esc(P.phone.replace(/\s/g,''))}">📞<span>اتصال</span></a>`:''}
-        ${P.email?`<a class="pv-btn" href="mailto:${esc(P.email)}">✉️<span>بريد</span></a>`:''}
-        ${links.slice(0,2).map(l=>`<a class="pv-btn" href="https://${esc(l.u.replace(/^https?:\/\//,''))}" target="_blank" rel="noopener">🔗<span>${esc(l.t)}</span></a>`).join('')}
-        <button class="pv-btn" id="pvSave">👤<span>حفظ الجهة</span></button>
+        ${P.phone?`<a class="pv-btn" href="tel:${esc(P.phone.replace(/\s/g,''))}">${ic('phone',20)}<span>اتصال</span></a>`:''}
+        ${P.email?`<a class="pv-btn" href="mailto:${esc(P.email)}">${ic('mail',20)}<span>بريد</span></a>`:''}
+        ${links.slice(0,2).map(l=>`<a class="pv-btn" href="https://${esc(l.u.replace(/^https?:\/\//,''))}" target="_blank" rel="noopener">${ic('link',20)}<span>${esc(l.t)}</span></a>`).join('')}
+        <button class="pv-btn" id="pvSave">${ic('user',20)}<span>حفظ الجهة</span></button>
       </div>
       ${P.phone||P.email?`<p class="pv-contact" dir="ltr">${[P.phone,P.email].filter(Boolean).map(esc).join('  ·  ')}</p>`:''}
     </section>
@@ -2423,7 +2425,7 @@ function renderProfile(){
       ${sk.length?`<div class="pv-tags">${sk.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
     </section>
     ${D.length?`<section class="pv-sec"><h2>الشهادات والرخص <small>${ar(D.length)}</small></h2>
-      <div class="pv-docs">${D.map((d,i)=>`<button class="pv-doc" data-pvdoc="${i}"><span class="pv-dic">${DOC_T[d.type]?.[1]||'📄'}</span>
+      <div class="pv-docs">${D.map((d,i)=>`<button class="pv-doc" data-pvdoc="${i}"><span class="pv-dic">${ic(DOC_T[d.type]?.[1]||'file',22)}</span>
         <span class="pv-dt"><b>${esc(d.name||'وثيقة')}</b><small>${esc([DOC_T[d.type]?.[0],d.issuer].filter(Boolean).join(' · '))}</small>${d.expiry?`<small>${esc(d.expiry)}</small>`:''}</span>
         <span class="pv-open">${d.file?'عرض':'—'}</span></button>`).join('')}</div>
       <p class="pv-note">الوثائق مرفوعة من صاحب الملف.</p></section>`:''}
@@ -2461,7 +2463,7 @@ const LINKS=['LinkedIn','GitHub','Behance','Dribbble','X','Instagram','YouTube',
 const EXTRAS=['الجنسية','تاريخ الميلاد','رخصة القيادة','الحالة الاجتماعية','العنوان','الإقامة'];
 const TPL=[{id:'ats',n:'ATS'},{id:'modern',n:'حديث'},{id:'aca',n:'أكاديمي',pro:1},{id:'eu',n:'أوروبي',pro:1}];
 const CARDS=[{id:'noir',n:'نوار'},{id:'lime',n:'ملوّن'},{id:'glass',n:'زجاجي',pro:1}];
-const COLORS=['#6b3fd4','#0f766e','#c2410c','#1d4ed8','#be123c','#111111','#a16207'];
+const COLORS=['#6b3fd4','#4338ca','#1d4ed8','#0f766e','#86198f','#334155','#111111'];
 const SUM_T=['الملخص المهني','Profile'];
 const sec=(type,o={})=>({id:uid(),type,title:null,items:[],tags:[],...o});
 const empty=type=>type==='langs'?{a:'',b:'متقدم'}:{a:'',b:'',c:'',d:''};
@@ -2732,7 +2734,7 @@ function cvAttr(){const F=fmt();return `style="${cvVars()}"${F.head?` data-head=
 function decoCV(el){const F=fmt();el.style.cssText=cvVars();el.toggleAttribute('data-font',!!F.font);el.toggleAttribute('data-bul',!!F.bul);el.toggleAttribute('data-nophoto',!F.photo);if(F.head)el.dataset.head=F.head;else delete el.dataset.head}
 function fmtHTML(){
   const F=fmt();const seg=(key,opts)=>`<div class="segs">${opts.map(([v,n])=>`<button data-fmt="${key}" data-val="${v}" class="${String(F[key])===String(v)?'on':''}">${n}</button>`).join('')}</div>`;
-  return `<div class="fp-h"><b>🎨 تنسيق السيرة</b><button class="ib" id="fmtClose" aria-label="إغلاق">✕</button></div>
+  return `<div class="fp-h"><b>${ic('palette',16)} تنسيق السيرة</b><button class="ib" id="fmtClose" aria-label="إغلاق">✕</button></div>
    <div class="fp-sec"><span>الخط</span><div class="fonts">${FONTS.map(([id,n,fam])=>`<button data-fmt="font" data-val="${id==='plex'?'':id}" class="${(F.font||'plex')===id?'on':''}" style="font-family:${fam.replace(/"/g,"'")}">${n}<small>نُبذة عنك</small></button>`).join('')}</div></div>
    <div class="fp-sec"><span>حجم الخط</span>${seg('k',[[.92,'صغير'],[1,'متوسط'],[1.08,'كبير']])}</div>
    <div class="fp-sec"><span>المسافات</span>${seg('g',[[.7,'مضغوطة'],[1,'عادية'],[1.35,'واسعة']])}</div>
@@ -2907,7 +2909,7 @@ function score(){
    [xp&&xp.items.some(i=>i.a),17,'أضف خبرة عملية واحدة على الأقل'],[xp&&xp.items.some(i=>/[0-9٠-٩]/.test(i.d)),10,'أضف أرقامًا لإنجازاتك (نسبة، عدد، مبلغ)'],
    [ed&&ed.items.some(i=>i.a),7,'أضف مؤهلك الدراسي'],[sk&&sk.tags.length>=5,8,'أضف ٥ مهارات على الأقل']];
   let s=0,tip='';chk.forEach(([ok,w,t])=>{if(ok)s+=w;else if(!tip)tip=t});
-  $('#scoreN').textContent=ar(s)+'٪';$('#scoreBar').style.width=s+'%';$('#scoreTip').textContent=tip||'سيرتك جاهزة للتقديم 🎉';
+  $('#scoreN').textContent=ar(s)+'٪';$('#scoreBar').style.width=s+'%';$('#scoreTip').textContent=tip||'سيرتك جاهزة للتقديم';
 }
 
 /* ---------- CV RENDER ---------- */
@@ -2976,7 +2978,7 @@ function cardHTML(){
   $('#flip').className='flip c-'+S.card+($('#flip').classList.contains('back')?' back':'');
   $('#cf').innerHTML=`<div class="brow" style="align-items:start"><div class="mono" style="${P.photo?`background-image:url(${P.photo});border:0`:''}">${P.photo?'':ini}</div><span style="font-size:12px;opacity:.6;letter-spacing:2px">NUBTHAH</span></div>
     <div><div class="nm">${esc(P.name||'اسمك هنا')}</div><div class="ti">${esc(P.title||'مسماك الوظيفي')}${P.company?' · '+esc(P.company):''}</div>${P.tagline?`<div class="tg">${esc(P.tagline)}</div>`:''}</div>`;
-  const rows=[['✉',P.email],['☏',P.phone],['⌖',P.city],...S.links.filter(l=>l.u).slice(0,2).map(l=>[ICO[l.t]||'↗',l.u.replace(/^https?:\/\/(www\.)?/,'')])].filter(r=>r[1]);
+  const rows=[[ic('mail',13),P.email],[ic('phone',13),P.phone],[ic('pin',13),P.city],...S.links.filter(l=>l.u).slice(0,2).map(l=>[ICO[l.t]||'↗',l.u.replace(/^https?:\/\/(www\.)?/,'')])].filter(r=>r[1]);
   $('#cb').innerHTML=`<div class="brow" style="height:100%"><ul>${rows.map(([i,v])=>`<li><em>${i}</em><span dir="ltr">${esc(v)}</span></li>`).join('')}</ul>
     <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div class="qr">${qrSVG(cardLink(),2)}</div><small style="font-size:11px;opacity:.7" dir="ltr">${cardLink().replace('https://','')}</small></div></div>`;
 }
@@ -3060,7 +3062,7 @@ function shareModal(kind){
      <button class="btn btn-ghost btn-sm" id="copyLink">نسخ الرابط</button>
      <button class="btn btn-ghost btn-sm" data-wallet="google">Google Wallet</button>
    </div>
-   <a href="#profile" class="pvlink" data-close style="justify-content:center;margin-top:12px">👁 شوف الصفحة اللي تطلع لمن يمسح الباركود ←</a>
+   <a href="#profile" class="pvlink" data-close style="justify-content:center;margin-top:12px">${ic('eye',16)} شوف الصفحة اللي تطلع لمن يمسح الباركود ←</a>
    <p class="note">الباركود يفتح دائمًا أحدث نسخة من ${kind==='card'?'بطاقتك':'سيرتك'}، حتى لو عدّلتها بعدين.</p></div>`);
   $('#saveQr').onclick=()=>{
     const url=qrCanvas(link,S.p.name,link.replace('https://',''));
@@ -3113,7 +3115,7 @@ function finishLogin(u){
   if(u.email&&!S.p.email){S.p.email=u.email;f=1}
   if(f)schedule();
   if(f&&builder&&!builder.hidden)drawForm();
-  toast('أهلًا '+((u.name||'').split(' ')[0]||'')+' 👋 تم تسجيل دخولك');
+  toast('أهلًا '+((u.name||'').split(' ')[0]||'')+'، تم تسجيل دخولك');
   const n=authNext;authNext=null;n&&n();
 }
 function googleBtnHTML(){return `<div id="gWrap" class="gwrap"><button type="button" class="gbtn" id="gBtn">${G_SVG}<span>المتابعة باستخدام Google</span></button></div>`}
@@ -3149,7 +3151,7 @@ function accHTML(){
   const ini=esc((user.name||user.email||'؟').trim()[0]);
   return `<button class="accbtn in" data-accmenu>${user.picture?`<img src="${esc(user.picture)}" alt="" referrerpolicy="no-referrer">`:`<i>${ini}</i>`}<span>${esc((user.name||'').split(' ')[0]||'حسابي')}</span></button>
    <div class="accmenu" hidden><div class="am-h"><b>${esc(user.name||'')}</b><small dir="ltr">${esc(user.email||'')}</small>${user.via==='google'?`<em>${G_SVG} عن طريق Google</em>`:''}</div>
-   <a href="#build">✎ سيرتي</a><a href="#build-card">▣ بطاقتي</a><a href="#build-ats">◎ فحص ATS</a><a href="#profile">👁 صفحتي العامة</a><button data-logout>↩ تسجيل الخروج</button></div>`;
+   <a href="#build">${ic('edit',16)} سيرتي</a><a href="#build-card">${ic('card',16)} بطاقتي</a><a href="#build-ats">${ic('target',16)} فحص ATS</a><a href="#profile">${ic('eye',16)} صفحتي العامة</a><button data-logout>${ic('out',16)} تسجيل الخروج</button></div>`;
 }
 function drawAccount(){document.querySelectorAll('.accslot').forEach(s=>s.innerHTML=accHTML())}
 document.addEventListener('click',e=>{
@@ -3299,7 +3301,7 @@ function analyze(text,jd,mine){
   return {score,C,found,miss,words,mine};
 }
 function resultHTML(r){
-  const lbl=r.score>=85?['ممتازة 🎉','سيرتك قوية ومقروءة للأنظمة.']:r.score>=70?['جيدة — تحتاج لمسات','كم تعديل بسيط ويرتفع تقييمك.']:r.score>=50?['متوسطة','فيها نقاط مهمة تحتاج تحسين قبل التقديم.']:['تحتاج شغل','ابدأ بالنقاط الحمراء تحت وارجع افحص.'];
+  const lbl=r.score>=85?['ممتازة','سيرتك قوية ومقروءة للأنظمة.']:r.score>=70?['جيدة — تحتاج لمسات','كم تعديل بسيط ويرتفع تقييمك.']:r.score>=50?['متوسطة','فيها نقاط مهمة تحتاج تحسين قبل التقديم.']:['تحتاج شغل','ابدأ بالنقاط الحمراء تحت وارجع افحص.'];
   const okN=r.C.filter(c=>c.ok===1).length;
   const ord=c=>c.ok===0?0:c.ok<1?1:2;
   const list=g=>r.C.filter(c=>c.g===g).sort((a,b)=>ord(a)-ord(b)).map(c=>{const cls=c.ok===1?'ok':c.ok===0?'no':'warn';
@@ -3312,7 +3314,7 @@ function resultHTML(r){
    <div class="chk"><h4><span>الأساسيات اللي تدوّر عليها أنظمة ATS</span><small>${cnt('m')}</small></h4>${list('m')}</div>
    <div class="chk"><h4><span>نقاط تقوّي سيرتك</span><small>${cnt('p')}</small></h4>${list('p')}</div>
    ${r.found.length||r.miss.length?`<div class="kwbox"><h4>كلمات الوظيفة الموجودة في سيرتك <small>${ar(r.found.length)}</small></h4><div class="kws ok">${r.found.map(w=>`<span>${esc(w)}</span>`).join('')||'<em>—</em>'}</div>
-     <h4>كلمات الوظيفة الناقصة <small>${ar(r.miss.length)}</small></h4><div class="kws miss">${r.miss.map(w=>`<span>${esc(w)}</span>`).join('')||'<em>ما فيه كلمات ناقصة 👌</em>'}</div>
+     <h4>كلمات الوظيفة الناقصة <small>${ar(r.miss.length)}</small></h4><div class="kws miss">${r.miss.map(w=>`<span>${esc(w)}</span>`).join('')||'<em>ما فيه كلمات ناقصة</em>'}</div>
      ${r.mine&&r.miss.length?`<button class="btn btn-ghost btn-sm" id="addMiss" style="margin-top:14px">＋ أضف الناقصة لمهاراتي</button><p class="muted" style="font-size:12px;margin-top:6px">أضف بس اللي فعلًا من خبرتك.</p>`:''}</div>`:''}
    <div class="ats-cta"><a href="#build" class="btn btn-lime">عدّل سيرتي ←</a><button class="btn btn-ghost" data-kw>✦ كلمات مفتاحية لتخصصك</button><button class="btn btn-ghost" data-act="ai">✦ رتّب سيرتي بالذكاء الاصطناعي</button></div></div>`;
 }
@@ -3622,7 +3624,7 @@ function renderCR(){
     const p=e.target.closest('[data-crplan]');if(p){togglePlan(f.items[+p.dataset.crplan]);renderCR();return}
     if(e.target.closest('#crRegen')){crCache.delete(norm($('#crIn').value).trim());crSearch($('#crIn').value)}};
 }
-function togglePlan(it){let a=planGet();if(a.some(p=>p.en===it.en)){a=a.filter(p=>p.en!==it.en);toast('شلناها من خطتك')}else{a.push({t:it.t,ar:it.ar,en:it.en,by:it.by});toast('انحفظت في خطتك ★')}planSet(a);renderPlan()}
+function togglePlan(it){let a=planGet();if(a.some(p=>p.en===it.en)){a=a.filter(p=>p.en!==it.en);toast('شلناها من خطتك')}else{a.push({t:it.t,ar:it.ar,en:it.en,by:it.by});toast('انحفظت في خطتك')}planSet(a);renderPlan()}
 function renderPlan(){
   const box=$('#crPlan');if(!box)return;const a=planGet();
   box.innerHTML=a.length?`<details class="plan" open><summary>★ خطتي للتطوير (${ar(a.length)})</summary><div class="plan-l">${a.map((it,i)=>`<div class="plan-i"><span><b>${esc(it.ar)}</b>${it.by?` <small>— ${esc(it.by)}</small>`:''}</span><span><button data-pdone="${i}">خلّصتها ← أضف لسيرتي</button><button data-prm="${i}" aria-label="حذف">×</button></span></div>`).join('')}</div></details>`:'';
@@ -3707,6 +3709,27 @@ $('#dlBtn').onclick=()=>{
   $$('#tgal .rv').forEach(el=>io.observe(el));
 })();
 
+
+/* ---------- صفحات: من نحن، الخصوصية، الشروط ---------- */
+const PAGES={
+about:['من نحن',`<p>نُبذة منصة سعودية تساعدك تصمّم سيرتك الذاتية وبطاقة أعمالك بالعربي والإنجليزي في دقائق، بقوالب متوافقة مع أنظمة التوظيف (ATS).</p>
+<p>هدفنا إن كل باحث عن عمل في السعودية يقدر يقدّم نفسه بأفضل صورة: سيرة واضحة، وكلمات مفتاحية مناسبة لتخصصه، وصفحة مهنية يشاركها بباركود.</p>
+<p>لأي استفسار أو اقتراح: <a href="mailto:info@nubthah.com">info@nubthah.com</a></p>`],
+privacy:['سياسة الخصوصية',`<p class="upd">آخر تحديث: نوفمبر ٢٠٢٦</p>
+<h4>البيانات اللي نجمعها</h4><p>البيانات اللي تكتبها في سيرتك وبطاقتك (مثل الاسم والمسمى والخبرات ووسائل التواصل)، والوثائق اللي ترفعها، وبيانات حسابك عند التسجيل (الاسم والبريد الإلكتروني).</p>
+<h4>كيف نستخدمها</h4><p>نستخدم بياناتك عشان نقدّم لك الخدمة فقط: عرض سيرتك وبطاقتك، وصفحتك العامة، وتحميل الملفات. ما نبيع بياناتك ولا نشاركها مع أي جهة لأغراض تسويقية.</p>
+<h4>الصفحة العامة</h4><p>صفحتك العامة يشوفها أي شخص عنده رابطها أو يمسح باركودها. أنت تتحكم في البيانات اللي تظهر فيها، وتقدر تعدّلها أو تحذفها أي وقت.</p>
+<h4>ميزات الذكاء الاصطناعي</h4><p>لما تستخدم ميزة تعتمد على الذكاء الاصطناعي (مثل ترتيب السيرة أو الكلمات المفتاحية)، يُرسل النص اللازم لمزوّد الذكاء الاصطناعي لمعالجته وإرجاع النتيجة، ولا يُستخدم لأي غرض آخر.</p>
+<h4>الدفع</h4><p>عمليات الدفع تتم عبر بوابة دفع مرخّصة، وما نحفظ بيانات بطاقتك عندنا.</p>
+<h4>حقوقك</h4><p>تقدر تطلب نسخة من بياناتك أو حذفها في أي وقت بمراسلتنا على <a href="mailto:info@nubthah.com">info@nubthah.com</a>، وفق نظام حماية البيانات الشخصية في المملكة العربية السعودية.</p>`],
+terms:['الشروط والأحكام',`<p class="upd">آخر تحديث: نوفمبر ٢٠٢٦</p>
+<h4>استخدام الخدمة</h4><p>باستخدامك نُبذة توافق على هذه الشروط. الخدمة مخصصة لإنشاء السير الذاتية وبطاقات الأعمال للاستخدام المهني المشروع.</p>
+<h4>صحة البيانات</h4><p>أنت مسؤول عن صحة المعلومات اللي تضيفها في سيرتك وصفحتك العامة، بما فيها الشهادات والرخص. يُمنع إضافة بيانات أو وثائق غير صحيحة أو تخص شخصًا آخر.</p>
+<h4>الاشتراك والدفع</h4><p>الباقة المجانية متاحة بدون رسوم. اشتراك Pro شهري ويتجدد تلقائيًا، وتقدر تلغيه أي وقت وتبقى ميزاته فعّالة لين نهاية الفترة المدفوعة.</p>
+<h4>المحتوى المقترح</h4><p>الاقتراحات اللي تقدمها نُبذة (مثل الكلمات المفتاحية والدورات ونتيجة فحص ATS) إرشادية، ولا تضمن قبولك في وظيفة أو تجاوز نظام فحص معيّن. تأكد من متطلبات الشهادات ورسومها من الجهات المانحة.</p>
+<h4>الملكية</h4><p>محتوى سيرتك ملكك. تصميم المنصة وقوالبها وعلامتها التجارية ملك لنُبذة.</p>
+<h4>التواصل</h4><p>لأي استفسار: <a href="mailto:info@nubthah.com">info@nubthah.com</a></p>`]};
+function openPage(k){const pg=PAGES[k];if(!pg)return;open(`<div class="legal"><h3>${pg[0]}</h3>${pg[1]}</div>`,'wide')}
 /* ---------- ROUTER: landing ↔ builder page ---------- */
 const site=$('#site'),builder=$('#builder');
 function setMode(m){$$('#modeTabs button').forEach(x=>x.classList.toggle('on',x.dataset.mode===m));
@@ -3718,6 +3741,7 @@ $('#modeTabs').onclick=e=>{const b=e.target.closest('button');if(b)location.hash
 let lastSiteY=0;
 function route(){
   const pv=$('#profileView');
+  if(PAGES[location.hash.slice(1)]){openPage(location.hash.slice(1));history.replaceState(null,'',location.pathname+location.search);return}
   if(location.hash==='#profile'){site.hidden=true;builder.hidden=true;pv.hidden=false;document.body.style.overflow='';renderProfile();scrollTo(0,0);return}
   pv.hidden=true;
   const h=location.hash, b=h==='#build'||h==='#build-card'||h==='#build-ats'||h==='#build-kw'||h==='#build-courses';
@@ -3731,25 +3755,20 @@ $('#mtabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;$$('#mta
   $('#app').classList.toggle('pv',b.dataset.v==='pv');if(b.dataset.v==='pv')requestAnimationFrame(fit)};
 
 /* ---------- PRICING ---------- */
-let yearly=false;
 const PLANS=[
- {n:'مجاني',d:'لتجربة سريعة وسيرة واحدة',m:0,y:0,f:['سيرة كاملة بقالب ATS وحديث','تصدير PDF','فحص ATS أساسي','باركود لمشاركة سيرتك'],no:['قوالب PRO','الذكاء الاصطناعي'],cta:'ابدأ مجانًا'},
- {n:'Pro',d:'للباحث عن عمل بجدية',m:29,y:17,hot:1,f:['كل القوالب المميزة','بدون علامة مائية','سير غير محدودة (عربي + EN)','كتابة بالذكاء الاصطناعي','فحص ATS مقابل الوظيفة','إضافة السيرة لـ Apple Wallet'],cta:'اشترك في Pro'},
- {n:'مدى الحياة',d:'دفعة واحدة. للأبد.',once:149,f:['كل ميزات Pro للأبد','كل القوالب الجديدة القادمة','بطاقة أعمال بتصاميم حصرية','أولوية في الدعم'],cta:'احصل عليه للأبد'},
- {n:'الشركات',d:'بطاقات موحّدة لفريقك',m:15,y:9,per:'لكل موظف',f:['هوية موحّدة لكل الفريق','لوحة تحكم وإدارة','بطاقات NFC بالجملة','فوترة ضريبية'],cta:'تواصل معنا'}
+ {n:'مجاني',d:'كل اللي تحتاجه عشان تبدأ',m:0,f:['سيرة كاملة بقالبي ATS وحديث','تحميل PDF','بطاقة أعمال وصفحة عامة وباركود','فحص ATS الأساسي','كلمات مفتاحية ودورات من قائمة نُبذة','٣ تجارب مجانية للذكاء الاصطناعي'],no:['قوالب PRO','الذكاء الاصطناعي بلا حدود'],cta:'ابدأ مجانًا'},
+ {n:'Pro',d:'للباحث عن عمل بجدية',m:29,hot:1,f:['كل ميزات المجاني','كل القوالب المميزة بدون علامة مائية','الذكاء الاصطناعي بلا حدود: رتّب سيرتي، والكلمات المفتاحية لأي تخصص، والدورات','فحص ATS مقابل الوظيفة','إضافة السيرة لـ Apple Wallet','الميزات الجديدة أول بأول'],cta:'اشترك في Pro'}
 ];
 function drawPlans(){
   $('#plans').innerHTML=PLANS.map(p=>{
-    const price=p.once!=null?p.once:(yearly?p.y:p.m);
-    const unit=p.once!=null?'ر.س مرة واحدة':price===0?'ر.س للأبد':`ر.س / ${p.per?p.per+' شهريًا':'شهريًا'}`;
+    const price=p.m;
+    const unit=price===0?'ر.س للأبد':'ر.س / شهريًا';
     return `<div class="plan ${p.hot?'hot':''}">${p.hot?'<span class="tag">الأكثر طلبًا</span>':''}
      <div><h3>${p.n}</h3><p class="desc">${p.d}</p></div>
      <div class="price"><b>${ar(price)}</b><span>${unit}</span></div>
-     ${yearly&&p.y&&!p.once?`<small style="color:var(--muted);margin-top:-12px">تُدفع سنويًا ${ar(p.y*12)} ر.س</small>`:''}
      <ul>${p.f.map(x=>`<li>${x}</li>`).join('')}${(p.no||[]).map(x=>`<li class="no">${x}</li>`).join('')}</ul>
      <button class="btn ${p.hot?'btn-lime':'btn-ghost'}" data-plan="${p.n}">${p.cta}</button></div>`}).join('');
 }
-$('#billSw').onclick=e=>{yearly=!yearly;e.currentTarget.classList.toggle('on',yearly);drawPlans()};
 drawPlans();
 
 /* ---------- MODALS ---------- */
@@ -3766,7 +3785,7 @@ function checkout(title,amount,sub){
    <div class="methods"><button class="on">مدى</button><button>Apple Pay</button><button>STC Pay</button></div>
    <div class="f" style="margin-bottom:12px"><label>كود الخصم</label><div style="display:flex;gap:8px"><input id="cpn" placeholder="مثال: NUB20" dir="ltr"><button class="btn btn-ghost btn-sm" id="cpnB">تطبيق</button></div></div>
    <button class="btn btn-lime" style="width:100%;justify-content:center" id="payB">ادفع ${ar(tot)} ر.س</button>
-   <p class="note">🔒 هذه معاينة للتصميم — يُربط الزر ببوابة دفع (مثل Moyasar أو Tap) عند الإطلاق.</p>`);
+   <p class="note">${ic('lock',14)} هذه معاينة للتصميم — يُربط الزر ببوابة دفع (مثل Moyasar أو Tap) عند الإطلاق.</p>`);
   mbox.querySelector('.methods').onclick=e=>{const b=e.target.closest('button');if(b)mbox.querySelectorAll('.methods button').forEach(x=>x.classList.toggle('on',x===b))};
   $('#cpnB').onclick=()=>toast($('#cpn').value.trim().toUpperCase()==='NUB20'?'تم تطبيق خصم ٢٠٪':'الكود غير صالح');
   $('#payB').onclick=()=>{
@@ -3780,20 +3799,16 @@ function openUpsell(feature){
   open(`<span class="pro" style="font-size:12px;padding:3px 10px">PRO</span><h3 style="margin-top:12px">${feature}</h3>
    <p style="color:var(--muted)">هذه الميزة ضمن نُبذة Pro. ترقّى وافتح كل شي:</p>
    <div class="perks"><div>كل القوالب المميزة بدون علامة مائية</div><div>كتابة وتحسين بالذكاء الاصطناعي</div><div>فحص ATS مقابل أي وظيفة</div><div>رابط شخصي ورمز QR لبطاقتك</div></div>
-   <button class="btn btn-lime" style="width:100%;justify-content:center" id="upB">ترقّى بـ ${ar(yearly?17:29)} ر.س / شهريًا</button>
+   <button class="btn btn-lime" style="width:100%;justify-content:center" id="upB">ترقّى بـ ${ar(29)} ر.س / شهريًا</button>
    <p class="note">إلغاء بأي وقت · ضمان استرجاع ٧ أيام</p>`);
-  $('#upB').onclick=()=>checkout('نُبذة Pro',yearly?204:29,yearly?'سنوي':'شهري');
+  $('#upB').onclick=()=>checkout('نُبذة Pro',29,'شهري');
 }
 document.addEventListener('click',e=>{
   const p=e.target.closest('[data-plan]');
   if(p){const n=p.dataset.plan;
     if(n==='مجاني'){location.hash='#build';return}
-    if(n==='الشركات'){open(`<h3>باقة الشركات</h3><p style="color:var(--muted);margin-bottom:16px">اترك بياناتك ونتواصل معك بعرض مخصص لفريقك.</p>
-      <form id="bizF" style="display:grid;gap:10px"><div class="f"><label>اسم الشركة</label><input required></div><div class="f"><label>عدد الموظفين</label><select><option>١ – ١٠</option><option>١١ – ٥٠</option><option>٥١ – ٢٠٠</option><option>+٢٠٠</option></select></div>
-      <div class="f"><label>البريد</label><input type="email" required dir="ltr"></div><button class="btn btn-lime" style="justify-content:center">أرسل الطلب</button></form>`);
-      $('#bizF').onsubmit=ev=>{ev.preventDefault();close();toast('تم استلام طلبك (معاينة) ✓')};return}
     const pl=PLANS.find(x=>x.n===n);
-    checkout('نُبذة '+n,pl.once!=null?pl.once:(yearly?pl.y*12:pl.m),pl.once!=null?'دفعة واحدة':(yearly?'سنوي':'شهري'));
+    checkout('نُبذة '+n,pl.m,'شهري');
   }
   const b=e.target.closest('[data-buy]');
   if(b){const [t,a]=b.dataset.buy.split('|');checkout(t,+a,'')}
