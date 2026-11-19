@@ -3560,6 +3560,7 @@ async function dTracker(){
   if(!isProU()){dSet('تتبع التقديمات',lockBox('تتبع كل وظيفة قدّمت عليها','سجّل الشركة والوظيفة وتاريخ التقديم، وحرّك كل طلب بين «قدّمت» و«مقابلة» و«عرض»، ونذكّرك تتابع إذا طال الرد.'));return}
   dSet('تتبع التقديمات','<div class="kwload"><div class="kwspin">'+ic('list',22)+'</div></div>');
   if(trItems===null)await trackerLoad();
+  if(dPage()!=='tracker'||$('#dashView').hidden)return;
   const today=Date.parse(new Date().toISOString().slice(0,10)),cnt=k=>trItems.filter(x=>x.status===k).length;
   dSet('تتبع التقديمات',`<div class="trsum">${TR_ST.map(([k,t])=>`<div><b>${ar(cnt(k))}</b><span>${t}</span></div>`).join('')}</div>
    <form class="dpanel trf" id="trF"><input id="trC" placeholder="الشركة" required><input id="trR" placeholder="الوظيفة" required><input id="trD" type="date" value="${new Date().toISOString().slice(0,10)}"><input id="trU" placeholder="رابط الإعلان (اختياري)" dir="ltr"><button class="btn btn-lime">${ic('plus',16)} أضف</button></form>
@@ -3587,7 +3588,9 @@ function dLicenses(){
 
 /* رابطي والإحصائيات */
 async function dLink(){
+  dSet('رابطي والإحصائيات','<div class="kwload"><div class="kwspin">'+ic('chart',22)+'</div></div>');
   await refreshMe();
+  if(dPage()!=='link'||$('#dashView').hidden)return;
   const link=(user&&user.link)||cvLink();
   dSet('رابطي والإحصائيات',`<div class="dpanel lnk"><div class="lnk-qr">${qrSVG(link+'?s=qr',2)}</div><div style="flex:1;min-width:0">
      <span class="muted">رابط صفحتك العامة</span><b dir="ltr" class="lnk-u">${esc(link.replace('https://',''))}</b>
@@ -3600,7 +3603,7 @@ async function dLink(){
   $('#lCopy').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(link);toast('نسخنا الرابط')};
   const f=$('#unF');if(f)f.onsubmit=async e=>{e.preventDefault();const r=await API('/username',{method:'POST',body:JSON.stringify({username:$('#unI').value})});const d=await r.json().catch(()=>({}));
     if(!r.ok){toast(d.error==='taken'?'الاسم مأخوذ — جرّب غيره':d.error==='bad_username'?'الاسم لازم يكون حروف إنجليزية وأرقام ويبدأ بحرف':'ما انحفظ');return}toast('صار رابطك '+d.link.replace('https://',''));dLink()};
-  if(isProU()){try{const d=await API('/stats').then(r=>r.json());const days=[];for(let i=29;i>=0;i--){const k=new Date(Date.now()-i*864e5).toISOString().slice(0,10);const x=(d.days||[]).find(y=>y.day===k)||{views:0,scans:0};days.push({k,...x})}
+  if(isProU()){try{const d=await API('/stats').then(r=>r.json());if(dPage()!=='link'||!$('#stBox'))return;const days=[];for(let i=29;i>=0;i--){const k=new Date(Date.now()-i*864e5).toISOString().slice(0,10);const x=(d.days||[]).find(y=>y.day===k)||{views:0,scans:0};days.push({k,...x})}
     const mx=Math.max(1,...days.map(x=>x.views));
     $('#stBox').innerHTML=`<div class="trsum"><div><b>${ar(d.views||0)}</b><span>زيارة</span></div><div><b>${ar(d.scans||0)}</b><span>مسح باركود</span></div></div>
      <div class="sbars">${days.map(x=>`<i title="${x.k}: ${x.views}" style="height:${Math.max(3,x.views/mx*100)}%"><em style="height:${x.views?x.scans/x.views*100:0}%"></em></i>`).join('')}</div><p class="dnote">آخر ٣٠ يوم — اللون الغامق: مسح الباركود.</p>`}catch(e){}}
