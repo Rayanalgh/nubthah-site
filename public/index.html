@@ -283,6 +283,24 @@ a.feat:hover{border-color:rgba(193,163,255,.5);transform:translateY(-4px)}
 .pv-valid{color:#5639C9!important;font-weight:700}
 .snapb{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-size:12.5px}
 .dscrim{display:none}
+button.dnav{width:100%;background:none;border:0;font:inherit;cursor:pointer;text-align:start}
+button.dcard{font:inherit;color:inherit;text-align:start;cursor:pointer}
+.dshell.prev{grid-template-columns:260px minmax(0,1fr) 440px}.dshell:not(.prev) .dprev{display:none}
+.dprev{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;background:#0b0a12;border-inline-start:1px solid var(--line)}
+.dprev-h{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.dprev-h b{flex:1;font-size:14.5px;display:flex;align-items:center;gap:8px}.dprev-h b svg{color:var(--lime)}
+.dprev-x{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--raised);color:#fff;border:0;cursor:pointer}
+.dprev-s{flex:1;overflow-y:auto;scrollbar-width:thin;padding:16px}
+.dprev-box{position:relative;margin-inline:auto;border-radius:6px;overflow:hidden;box-shadow:0 20px 50px -20px rgba(0,0,0,.8)}
+.dprev-box .cv{position:absolute;top:0;right:0;box-shadow:none}
+.dprev-box .cv.ltr{right:auto;left:0;transform-origin:top left}
+.dprev-f{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--line)}.dprev-f .btn{flex:1;justify-content:center}
+.dtog{display:inline-flex;align-items:center;gap:7px}
+@media (max-width:1100px){
+  .dshell.prev{grid-template-columns:260px minmax(0,1fr)}
+  .dprev{position:fixed;inset-block:0;left:0;width:min(440px,92vw);z-index:58;box-shadow:20px 0 60px rgba(0,0,0,.6)}
+}
+@media (max-width:860px){.dshell.prev{grid-template-columns:1fr}.dtog span{display:none}}
 @media (max-width:1100px){.dstats{grid-template-columns:repeat(2,1fr)}.trcols{grid-template-columns:repeat(2,1fr)}.trf{grid-template-columns:1fr 1fr}}
 @media (max-width:860px){
   .dshell{grid-template-columns:1fr}
@@ -2776,13 +2794,15 @@ async function readDocx(file){
 async function importCV(file){
   if(!file)return;
   if(file.size>15e6){toast('الملف كبير — الحد ١٥ ميقا');return}
-  if(location.hash!=='#build')location.hash='#build';
+  const inDash=!$('#dashView').hidden;
+  if(!inDash&&location.hash!=='#build')location.hash='#build';
   open(`<div class="kwload"><div class="kwspin">${ic('file',22)}</div><b>نقرأ سيرتك القديمة…</b><span class="muted">${esc(file.name)}</span></div>`);
   let text='';
   try{text=/\.pdf$/i.test(file.name)||file.type==='application/pdf'?await readPdf(file):/\.docx$/i.test(file.name)?await readDocx(file):await file.text()}catch(e){text=''}
   if(text.replace(/\s+/g,' ').trim().length<60){open(`<h3>ما قدرنا نقرأ الملف</h3><p class="muted">غالبًا الملف صورة ممسوحة (Scan) أو بصيغة ما نقرأها. جرّب ملف PDF أو Word نصّي، أو انسخ نص سيرتك والصقه في خانة «الملخص المهني» واضغط «رتّبها في سيرتي».</p>`);return}
   mbox.querySelector('b').textContent='نرتّب سيرتك بالشكل الجديد…';
   await arrange(text.slice(0,18000));
+  if(inDash)dPrevShow();
 }
 function importReport(parts,aiTips,ai){
   const sc=(()=>{try{return score()}catch(e){return{s:0,tips:[]}}})();
@@ -3154,6 +3174,7 @@ function render(){
     const demo=isBlankCV();cv.classList.toggle('demo',demo);
     cv.innerHTML=(demo?'<div class="demo-tag">مثال توضيحي — اكتب بياناتك وتتغيّر هنا مباشرة</div>'+withSample(cvHTML):cvHTML())+(isProSel()&&!S.pro?'<div class="wm"><span>نُبذة PRO</span></div>':'');fit();
   }else{const demo=isBlankCV();$('#cardBox').style.setProperty('--ac',S.color);$('#cardBox').classList.toggle('demo',demo);demo?withSample(cardHTML):cardHTML()}
+  if($('#dPrevBox'))dPrevPaint();
 }
 let raf=0,st=0;
 function schedule(){
@@ -3403,8 +3424,9 @@ const DNAV=[
   ['@#profile','qr', 'صفحتي العامة'],
   ['@#build-ats','target','فحص ATS'],
   ['#',     null,    'طوّر سيرتك'],
-  ['@#build-kw','key','الكلمات المفتاحية'],
-  ['@#build-courses','cap','الدورات والشهادات'],
+  ['!kw','key','الكلمات المفتاحية'],
+  ['!cr','cap','الدورات والشهادات'],
+  ['arrange','edit','رتّب سيرتي بالذكاء','ai'],
   ['tailor','spark', 'نسخة لكل وظيفة','ai'],
   ['interview','chat','تجهيز المقابلة','ai'],
   ['translate','globe','ترجمة السيرة','ai'],
@@ -3414,7 +3436,7 @@ const DNAV=[
   ['link',  'chart', 'رابطي والإحصائيات'],
   ['#',     null,    'الحساب'],
   ['plan',  'crown', 'الاشتراك']];
-Object.assign(IC_P,{chat:'<path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/>',globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+Object.assign(IC_P,{eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',chat:'<path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/>',globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
   list:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
   menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
   copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',ext:'<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
@@ -3424,22 +3446,62 @@ async function refreshMe(){try{const m=await API('/me').then(r=>r.json());if(m.u
 function proChip(kind){if(isProU())return '';return kind==='pro'?'<em class="dpro">PRO</em>':kind==='ai'?'<em class="dpro ai">AI</em>':''}
 function renderDash(){
   const pg=dPage(),dv=$('#dashView');
-  const nav=DNAV.map(([k,i,t,kind])=>k==='#'?`<div class="dsec">${t}</div>`:
+  const nav=DNAV.map(([k,i,t,kind])=>k==='#'?`<div class="dsec">${t}</div>`:k[0]==='!'?`<button class="dnav" data-${k.slice(1)}>${ic(i,18)}<span>${t}</span>${proChip(kind)}</button>`:
     `<a href="${k.startsWith('@')?k.slice(1):'#home'+(k?'/'+k:'')}" class="dnav${!k.startsWith('@')&&k===pg?' on':''}">${ic(i,18)}<span>${t}</span>${proChip(kind)}</a>`).join('');
   const left=aiLeft();
-  dv.innerHTML=`<div class="dshell${dv.classList.contains('open')?' open':''}">
+  const pon=dPrevOn();
+  dv.innerHTML=`<div class="dshell${pon?' prev':''}">
    <aside class="dside"><a href="#top" class="dlogo"><img src="${$('.btop .back img').src}" alt="نُبذة"></a>
     <nav>${nav}</nav>
     <div class="dsfoot">${isProU()?`<div class="dpcard pro">${ic('crown',16)} <b>أنت على Pro</b></div>`:
       `<div class="dpcard"><b>الباقة المجانية</b><span>${left===Infinity?'':`باقي لك ${ar(left)} من ${ar(FREE_AI)} تجارب للذكاء الاصطناعي`}</span><a href="#home/plan" class="btn btn-lime btn-sm">رقّ لـ Pro</a></div>`}</div>
    </aside>
    <div class="dscrim" data-dmenu></div>
-   <section class="dmain"><header class="dbar"><button class="dmenu" data-dmenu aria-label="القائمة">${ic('menu',22)}</button><h2 id="dTitle"></h2><span class="accslot"></span></header>
-    <div class="dbody" id="dBody"></div></section></div>`;
+   <section class="dmain"><header class="dbar"><button class="dmenu" data-dmenu aria-label="القائمة">${ic('menu',22)}</button><h2 id="dTitle"></h2><button class="btn btn-ghost btn-sm dtog" data-dprev>${ic('eye',16)}<span id="dTogT">${pon?'اخفِ السيرة':'اعرض سيرتي'}</span></button><span class="accslot"></span></header>
+    <div class="dbody" id="dBody"></div></section>
+   <aside class="dprev" aria-label="معاينة سيرتك"><div class="dprev-h"><b>${ic('eye',16)} سيرتك الآن</b><button class="dprev-x" data-dprev aria-label="إخفاء">✕</button></div>
+    <div class="dprev-s"><div class="dprev-box" id="dPrevBox"></div></div>
+    <div class="dprev-f"><a href="#build" class="btn btn-lime btn-sm">${ic('edit',15)} عدّل سيرتي</a><button class="btn btn-ghost btn-sm" data-dpdf>تحميل PDF</button></div></aside></div>`;
   drawAccount();
-  const pages={'':dHome,tailor:dTailor,interview:dInterview,translate:dTranslate,tracker:dTracker,licenses:dLicenses,link:dLink,plan:dPlan};
+  const pages={'':dHome,arrange:dArrange,tailor:dTailor,interview:dInterview,translate:dTranslate,tracker:dTracker,licenses:dLicenses,link:dLink,plan:dPlan};
   (pages[pg]||dHome)();
-  dv.querySelector('.dshell').classList.remove('open');
+  dPrevPaint();
+}
+/* معاينة السيرة داخل اللوحة */
+function dPrevOn(){try{const v=localStorage.getItem('nubthah_dprev');return v===null?innerWidth>=1300:v==='1'}catch(e){return innerWidth>=1300}}
+function dPrevSet(on){try{localStorage.setItem('nubthah_dprev',on?'1':'0')}catch(e){}
+  const sh=$('.dshell');if(!sh)return;
+  sh.classList.toggle('prev',on);const t=$('#dTogT');if(t)t.textContent=on?'اخفِ السيرة':'اعرض سيرتي';if(on)dPrevPaint()}
+function paintCV(){
+  const cv=$('#cv');decoCV(cv);cv.dir=S.dir;cv.classList.toggle('ltr',S.dir==='ltr');
+  const demo=isBlankCV();cv.classList.toggle('demo',demo);
+  cv.innerHTML=(demo?'<div class="demo-tag">مثال توضيحي — اكتب بياناتك وتتغيّر هنا مباشرة</div>'+withSample(cvHTML):cvHTML())+(isProSel()&&!S.pro?'<div class="wm"><span>نُبذة PRO</span></div>':'');
+}
+function dPrevPaint(){
+  const box=$('#dPrevBox');if(!box||$('#dashView').hidden||!$('.dshell.prev'))return;
+  paintCV();const c=$('#cv').cloneNode(true);c.removeAttribute('id');
+  box.innerHTML='';box.appendChild(c);
+  const w=box.parentElement.clientWidth-32,sc=Math.min(1,w/794);
+  c.style.transform=`scale(${sc})`;box.style.width=(794*sc)+'px';box.style.height=(c.offsetHeight*sc)+'px';
+}
+addEventListener('resize',()=>{if($('#dPrevBox'))dPrevPaint()});
+document.addEventListener('click',e=>{
+  if(e.target.closest('.dside button.dnav')){const sh=$('.dshell');sh&&sh.classList.remove('open')}
+  if(e.target.closest('[data-dprev]')){e.preventDefault();dPrevSet(!dPrevOn());return}
+  if(e.target.closest('[data-dpdf]')){e.preventDefault();const m=S.mode;S.mode='cv';paintCV();try{$('#dlBtn').onclick()}finally{S.mode=m}}
+});
+function dPrevShow(){if(!dPrevOn()&&!$('#dashView').hidden)dPrevSet(true)}
+
+/* رتّب سيرتي */
+function dArrange(){
+  dSet('رتّب سيرتي بالذكاء',`<p class="dlead">اكتب عن نفسك بكلامك العادي — وش تشتغل، خبراتك، دراستك، مهاراتك، لغاتك، شهاداتك — والذكاء الاصطناعي يرتّبها لك في سيرتك. تشوف النتيجة مباشرة على اليسار.</p>
+   <div class="dpanel"><label class="lbl">عن نفسك</label><textarea id="aTxt" rows="9" placeholder="مثال: أنا محاسب، خبرتي ٤ سنوات في شركة … تخرجت من جامعة … أجيد Excel و SAP …">${esc(S.summary||'')}</textarea>
+   <button class="btn btn-lime" id="aGo">${ic('spark',16)} رتّب سيرتي</button>${aiNote()}</div>
+   <label class="dimp">${ic('file',22)}<div><b>أو ارفع سيرتك القديمة</b><span>PDF أو Word — ننقلها للتصميم الجديد ونقول لك وش ناقص</span></div><input type="file" class="cvimp" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" hidden></label>`);
+  $('#aGo').onclick=async()=>{const t=$('#aTxt').value.trim();if(t.length<15){toast('اكتب عن نفسك أكثر — خبراتك، مهاراتك، لغاتك، شهاداتك…');$('#aTxt').focus();return}
+    const b=$('#aGo');b.disabled=true;b.innerHTML='<span class="spin"></span> نقرأ كلامك ونرتّب سيرتك…';
+    try{await arrange(t)}finally{if(dPage()==='arrange'&&$('#aGo')){b.disabled=false;b.innerHTML=ic('spark',16)+' رتّب سيرتي'}}
+    dPrevShow();dPrevPaint()};
 }
 const dSet=(title,html)=>{$('#dTitle').textContent=title;$('#dBody').innerHTML=html};
 function lockBox(title,desc){return `<div class="dlock">${ic('crown',26)}<b>${title}</b><p>${desc}</p><a href="#home/plan" class="btn btn-lime">رقّ لـ Pro بـ ٢٩ ريال شهريًا</a></div>`}
@@ -3452,7 +3514,7 @@ function dHome(){
   const sc=(()=>{try{return score()}catch(e){return{s:0,tip:''}}})(),first=((user&&user.name)||S.p.name||'').split(' ')[0];
   const docs=(S.docs||[]).filter(d=>d.until).sort((a,b)=>(a.until>b.until?1:-1)),near=docs.find(d=>{const n=docDays(d);return n!==null&&n<=90});
   const Q=[['edit','سيرتي الذاتية','صمّم وعدّل ونزّل PDF','#build'],['card','بطاقة الأعمال','بطاقة رقمية بباركود','#build-card'],['target','فحص ATS','وش متحقق ووش ناقص','#build-ats'],
-    ['spark','نسخة لكل وظيفة','طابق سيرتك مع الإعلان','#home/tailor'],['chat','تجهيز المقابلة','أسئلة متوقعة وطريقة الإجابة','#home/interview'],['cap','الدورات والشهادات','وش ترفع فيه قيمتك','#build-courses']];
+    ['spark','نسخة لكل وظيفة','طابق سيرتك مع الإعلان','#home/tailor'],['chat','تجهيز المقابلة','أسئلة متوقعة وطريقة الإجابة','#home/interview'],['cap','الدورات والشهادات','وش ترفع فيه قيمتك','!cr'],['key','الكلمات المفتاحية','أهم الكلمات لتخصصك','!kw'],['edit','رتّب سيرتي','اكتب عن نفسك ونرتّبها','#home/arrange']];
   dSet('الرئيسية',`<div class="dhello"><div><h1>أهلًا${first?' '+esc(first):''}</h1><p class="muted">وش تبي تسوي اليوم؟</p></div>
      <span class="dplan${isProU()?' pro':''}">${ic(isProU()?'crown':'spark',15)} ${isProU()?'Pro':'الباقة المجانية'}</span></div>
    <div class="dstats">
@@ -3463,7 +3525,7 @@ function dHome(){
    </div>
    <label class="dimp">${ic('file',22)}<div><b>ارفع سيرتك القديمة</b><span>PDF أو Word — ننقلها للتصميم الجديد ونقول لك وش ناقص</span></div><input type="file" class="cvimp" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" hidden></label>
    <h3 class="dh3">ابدأ من هنا</h3>
-   <div class="dgrid">${Q.map(([i,t,d,h])=>`<a href="${h}" class="dcard"><div class="fi">${ic(i,22)}</div><b>${t}</b><span>${d}</span></a>`).join('')}</div>`);
+   <div class="dgrid">${Q.map(([i,t,d,h])=>h[0]==='!'?`<button class="dcard" data-${h.slice(1)}><div class="fi">${ic(i,22)}</div><b>${t}</b><span>${d}</span></button>`:`<a href="${h}" class="dcard"><div class="fi">${ic(i,22)}</div><b>${t}</b><span>${d}</span></a>`).join('')}</div>`);
   if(isProU()){
     API('/stats').then(r=>r.json()).then(d=>{const e=$('#stViews b');if(e)e.textContent=ar(d.views||0)}).catch(()=>{});
     API('/tracker').then(r=>r.json()).then(d=>{const e=$('#stApps b');if(e)e.textContent=ar((d.items||[]).length)}).catch(()=>{});
@@ -3500,7 +3562,7 @@ function renderTailor(){
       const idx=sk.tags.map((t,i)=>i).sort((a,b)=>{const ia=ord.indexOf(norm(sk.tags[a]).trim()),ib=ord.indexOf(norm(sk.tags[b]).trim());return (ia<0?999:ia)-(ib<0?999:ib)});
       ['tags','lv','gr'].forEach(k=>{const v=sk[k].slice();sk[k]=idx.map(i=>v[i])})}
     if(xp)(o.xp||[]).forEach(x=>{if(xp.items[x.i]&&x.d)xp.items[x.i].d=x.d});
-    drawForm();schedule();toast('طبّقنا النسخة على سيرتك — وتقدر ترجع من «رجّع النسخة السابقة»');location.hash='#build';
+    drawForm();schedule();toast('طبّقنا النسخة على سيرتك — تشوفها على اليسار، وتقدر ترجع من «رجّع النسخة السابقة»');dPrevShow();
   };
   $('#tTrack').onclick=()=>{if(!isProU()){openUpsell('متتبع التقديمات');return}
     trackerAdd({company:o.company||'',role:o.job_title||'',status:'applied',date:new Date().toISOString().slice(0,10),notes:'نسخة مطابقة للإعلان'});location.hash='#home/tracker'};
@@ -3544,10 +3606,10 @@ function dTranslate(){
     try{localStorage.setItem('nubthah_lang_'+S.dir,JSON.stringify({p:S.p,summary:S.summary,secs:S.secs}))}catch(e){}
     const keep=S.secs;S.p={...S.p,...o.p};S.summary=o.summary||'';
     S.secs=o.secs.map((x,i)=>({...(keep[i]||sec(x.type||'custom')),...x,id:(keep[i]&&keep[i].id)||uid()}));
-    S.dir=to==='en'?'ltr':'rtl';drawForm();schedule();toast('ترجمنا سيرتك — راجعها');location.hash='#build';
+    S.dir=to==='en'?'ltr':'rtl';drawForm();schedule();toast('ترجمنا سيرتك — تشوفها على اليسار');dPrevShow();
   };
   const bk=$('#trBack');if(bk)bk.onclick=()=>{try{localStorage.setItem('nubthah_lang_'+S.dir,JSON.stringify({p:S.p,summary:S.summary,secs:S.secs}))}catch(e){}
-    Object.assign(S,other);S.dir=to==='en'?'ltr':'rtl';drawForm();schedule();toast('رجّعنا النسخة المحفوظة');location.hash='#build'};
+    Object.assign(S,other);S.dir=to==='en'?'ltr':'rtl';drawForm();schedule();toast('رجّعنا النسخة المحفوظة');dPrevShow()};
 }
 
 /* تتبع التقديمات */
