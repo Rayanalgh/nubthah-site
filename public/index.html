@@ -527,7 +527,13 @@ footer a:hover{color:var(--lime)}
 .skel i:nth-child(3n){width:120px}.skel i:nth-child(3n+1){width:90px}.skel i:nth-child(3n+2){width:150px}
 @keyframes sh{to{background-position:-200% 0}}
 .crg{display:grid;gap:10px}
-.pv-empty{text-align:center;padding:40px 22px}.pv-empty h1{margin-top:0}.pv-empty .btn{margin-top:18px;display:inline-flex}
+#cv.demo>*:not(.demo-tag){opacity:.42;filter:grayscale(.35)}
+.demo-tag{position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:6;background:linear-gradient(90deg,#8242E5,#5639C9);color:#fff;font-size:22px;font-weight:700;padding:10px 22px;border-radius:99px;white-space:nowrap;box-shadow:0 8px 24px rgba(86,57,201,.35);font-family:inherit}
+#printRoot .demo-tag{display:none}
+#cardBox.demo .flip{opacity:.5;filter:grayscale(.3)}
+.pv-demo .pv-wrap{opacity:.5;filter:grayscale(.3);pointer-events:none}
+.pv-demobar{max-width:520px;margin:12px auto 0;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,rgba(130,66,229,.25),rgba(86,57,201,.1));border:1px solid #8242E5;display:grid;gap:6px;text-align:center;justify-items:center;color:#fff}
+.pv-demobar span{font-size:13px;opacity:.75}.pv-demobar .btn{margin-top:6px}
 .pv-warn{max-width:520px;margin:10px auto 0;padding:10px 14px;border-radius:12px;background:rgba(255,190,60,.12);border:1px solid rgba(255,190,60,.35);color:#ffd88a;font-size:13.5px;text-align:center}
 .pv-warn a{color:#fff;font-weight:700}
 .crc{padding:14px;border-radius:14px;border:1px solid var(--line2);background:var(--raised)}
@@ -2379,10 +2385,10 @@ function vcard(){
   return ['BEGIN:VCARD','VERSION:3.0','FN:'+P.name,'TITLE:'+P.title,P.company?'ORG:'+P.company:'',P.phone?'TEL;TYPE=CELL:'+P.phone.replace(/\s/g,''):'',P.email?'EMAIL:'+P.email:'',P.city?'ADR:;;'+P.city+';;;;':'',li?'URL:https://'+li.u.replace(/^https?:\/\//,''):'','NOTE:nubthah.com/cv/'+ensureId(),'END:VCARD'].filter(Boolean).join('\r\n');
 }
 function renderProfile(){
-  if(!S.p.name.trim()){$('#profileView').innerHTML=`<div class="pv-owner"><span>صفحتك العامة</span><a href="#build">← رجوع للتصميم</a></div>
-   <div class="pv-wrap"><header class="pv-top"><img src="${$('#logoL').src}" alt="نُبذة"><span>ملف مهني على نُبذة</span></header>
-   <section class="pv-card pv-empty"><h1>صفحتك لسه فاضية</h1><p class="pv-ti">اكتب اسمك وبياناتك في صفحة التصميم، وتطلع هنا تلقائيًا ويقدر أي أحد يشوفها من الباركود.</p>
-   <a class="btn btn-lime" href="#build">ابدأ سيرتك ←</a></section></div>`;return}
+  if(isBlankCV()&&!renderProfile.demo){renderProfile.demo=1;try{withSample(renderProfile)}finally{renderProfile.demo=0}
+    const pv=$('#profileView');pv.classList.add('pv-demo');
+    pv.querySelector('.pv-owner').insertAdjacentHTML('afterend',`<div class="pv-demobar"><b>هذا مثال لشكل صفحتك العامة</b><span>تتعبّى تلقائيًا من سيرتك — اكتب بياناتك مرة وحدة وتطلع هنا وفي الباركود.</span><a class="btn btn-lime btn-sm" href="#build">ابدأ سيرتك ←</a></div>`);return}
+  $('#profileView').classList.remove('pv-demo');
   const P=S.p,D=(S.docs||[]),link='nubthah.com/cv/'+ensureId(),ini=esc(P.name.trim()[0]||'ن');
   const sk=(S.secs.find(s=>s.type==='skills')||{tags:[]}).tags.slice(0,8);
   const xp=(S.secs.find(s=>s.type==='xp')||{items:[]}).items.filter(filled)[0];
@@ -2475,6 +2481,12 @@ function blankData(){return{p:{name:'',title:'',email:'',phone:'',city:'',photo:
 /* المثال (سارة القحطاني) للعرض فقط — ما يصير بيانات أحد */
 const isSample=d=>!!(d&&d.p&&d.p.name==='سارة القحطاني'&&(!d.p.email||d.p.email==='sara@email.com'));
 const S={tpl:'modern',card:'noir',color:'#6b3fd4',dir:'rtl',mode:'cv',pro:false,...blankData()};
+/* السيرة فاضية؟ (اللغة العربية الافتراضية ما تُحسب) */
+function isBlankCV(){return !S.p.name.trim()&&!S.p.title.trim()&&!S.summary.trim()&&!S.p.photo&&
+  S.secs.every(s=>TYPES[s.type].tags?!s.tags.length:s.type==='langs'||!s.items.some(filled))}
+/* نعرض المثال كصورة توضيحية بدون ما يلمس بيانات المستخدم */
+function withSample(fn){const k=['p','summary','links','extra','secs','docs'],keep={};k.forEach(x=>keep[x]=S[x]);
+  Object.assign(S,sampleData());try{return fn()}finally{Object.assign(S,keep)}}
 try{const sv=JSON.parse(localStorage.getItem('nubthah_v2')||'null');
   if(sv&&sv.p&&Array.isArray(sv.secs)){
     if(isSample(sv)){['tpl','card','color','dir','font'].forEach(k=>{if(sv[k]!=null)S[k]=sv[k]});S.docs=[]}
@@ -2937,8 +2949,9 @@ function render(){
   drawTpls();score();
   if(S.mode==='cv'){
     const cv=$('#cv');decoCV(cv);cv.dir=S.dir;cv.classList.toggle('ltr',S.dir==='ltr');
-    cv.innerHTML=cvHTML()+(isProSel()&&!S.pro?'<div class="wm"><span>نُبذة PRO</span></div>':'');fit();
-  }else{$('#cardBox').style.setProperty('--ac',S.color);cardHTML()}
+    const demo=isBlankCV();cv.classList.toggle('demo',demo);
+    cv.innerHTML=(demo?'<div class="demo-tag">مثال توضيحي — اكتب بياناتك وتتغيّر هنا مباشرة</div>'+withSample(cvHTML):cvHTML())+(isProSel()&&!S.pro?'<div class="wm"><span>نُبذة PRO</span></div>':'');fit();
+  }else{const demo=isBlankCV();$('#cardBox').style.setProperty('--ac',S.color);$('#cardBox').classList.toggle('demo',demo);demo?withSample(cardHTML):cardHTML()}
 }
 let raf=0,st=0;
 function schedule(){
@@ -3634,6 +3647,7 @@ function refreshMine(){$('#mineName').textContent=S.p.name?`${S.p.name} — ${S.
 /* download → share */
 $('#dlBtn').onclick=()=>{
   if(isProSel()&&!S.pro){openUpsell('تحميل بقالب PRO بدون علامة مائية');return}
+  if(isBlankCV()){toast('اللي تشوفه مثال بس — اكتب بياناتك أول');focusLater('[data-p="name"]');return}
   if(S.mode==='card'){shareModal('card');return}
   let pr=$('#printRoot');if(!pr){pr=document.createElement('div');pr.id='printRoot';document.body.appendChild(pr)}
   pr.innerHTML='';pr.appendChild($('#cv').cloneNode(true));
