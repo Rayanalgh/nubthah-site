@@ -197,6 +197,12 @@ a.feat:hover{border-color:rgba(193,163,255,.5);transform:translateY(-4px)}
 .dprog{display:grid;gap:12px;padding:18px 20px;border-radius:18px;border:1px solid var(--line2);background:var(--card)}
 .dprog b{display:block;font-size:16px}.dprog span{font-size:13px;color:var(--muted)}
 .dbar{height:8px;border-radius:99px;background:var(--raised);overflow:hidden}.dbar i{display:block;height:100%;background:var(--grad);border-radius:99px}
+.impbtn{display:flex;gap:10px;align-items:center;margin-top:12px;padding:12px 14px;border-radius:14px;border:1px dashed var(--line2);cursor:pointer;font-size:13px;color:var(--muted)}
+.impbtn:hover{border-color:var(--lime)}.impbtn b{color:var(--ink)}.impbtn svg{color:var(--lime)}
+.dimp{display:flex;gap:14px;align-items:center;padding:18px 20px;border-radius:18px;border:1px dashed rgba(193,163,255,.45);background:rgba(193,163,255,.05);cursor:pointer}
+.dimp:hover{border-color:var(--lime)}.dimp svg{color:var(--lime)}.dimp b{display:block;font-size:16px}.dimp span{font-size:13px;color:var(--muted)}
+.impr h3{display:flex;gap:8px;align-items:center}.impr h4{margin:16px 0 8px;font-size:15px}.imsc{margin-top:14px;display:grid;gap:8px}
+.imtips{display:grid;gap:8px;padding-inline-start:20px;font-size:14px;color:#d6cce3}.imact{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
 .dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .dcard{display:grid;gap:6px;padding:20px;border-radius:18px;border:1px solid var(--line);background:var(--card);transition:border-color .25s,transform .3s var(--ease)}
 .dcard:hover{border-color:rgba(193,163,255,.5);transform:translateY(-3px)}
@@ -2337,7 +2343,7 @@ $$('.rv').forEach((el,i)=>{el.style.transitionDelay=(i%4)*70+'ms';io.observe(el)
 /* ---------- DOCS (شهادات ورخص مرفقة) + PROFILE PAGE (اللي يفتح بالباركود) ---------- */
 /* أيقونات خطية موحّدة (بدل الإيموجي) */
 const IC_P={"eye": "<path d=\"M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "pin": "<path d=\"M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z\"/><circle cx=\"12\" cy=\"9.5\" r=\"2.5\"/>", "brief": "<rect x=\"3\" y=\"7\" width=\"18\" height=\"13\" rx=\"2\"/><path d=\"M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18\"/>", "phone": "<path d=\"M5 3h3l2 5-2.5 1.5a11 11 0 0 0 7 7L16 14l5 2v3a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2z\"/>", "link": "<path d=\"M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1\"/><path d=\"M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1\"/>", "user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21a8 8 0 0 1 16 0\"/><path d=\"M19 4v4M17 6h4\"/>", "file": "<path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5M9 13h6M9 17h6\"/>", "id": "<rect x=\"3\" y=\"5\" width=\"18\" height=\"14\" rx=\"2\"/><circle cx=\"9\" cy=\"11\" r=\"2\"/><path d=\"M6 16a3 3 0 0 1 6 0M14 10h4M14 14h4\"/>", "cap": "<path d=\"M2 9l10-5 10 5-10 5z\"/><path d=\"M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5\"/>", "clip": "<path d=\"M21 11.5l-8.5 8.5a5.5 5.5 0 0 1-7.8-7.8l9-9a3.7 3.7 0 0 1 5.2 5.2l-9 9a1.8 1.8 0 0 1-2.6-2.6l8.3-8.3\"/>", "palette": "<path d=\"M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z\"/><circle cx=\"7.5\" cy=\"11\" r=\"1\"/><circle cx=\"10\" cy=\"7\" r=\"1\"/><circle cx=\"15\" cy=\"7.5\" r=\"1\"/>", "lock": "<rect x=\"4\" y=\"11\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/>", "mail": "<rect x=\"3\" y=\"5\" width=\"18\" height=\"14\" rx=\"2\"/><path d=\"M3 7l9 6 9-6\"/>", "out": "<path d=\"M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10\"/>", "edit": "<path d=\"M4 20h4L19 9l-4-4L4 16z\"/><path d=\"M13 7l4 4\"/>", "card": "<rect x=\"3\" y=\"5\" width=\"18\" height=\"14\" rx=\"2\"/><path d=\"M7 15h4M7 11h10\"/>", "target": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"5\"/><circle cx=\"12\" cy=\"12\" r=\"1\"/>"};
-Object.assign(IC_P,{key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/>',
+Object.assign(IC_P,{check:'<path d="M20 6L9 17l-5-5"/>',key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/>',
  qr:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v7h-4M14 21v-3"/>',
  spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
  home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
@@ -2578,7 +2584,7 @@ function arrPrompt(text,lang){
   return `You are an expert CV writer and ATS specialist for the Saudi Arabia / GCC and global job market.
 A job seeker wrote this free text about themselves. It may be messy, in Saudi dialect, mixed Arabic/English, or just a list:
 """
-${text.slice(0,6000)}
+${text.slice(0,12000)}
 """
 Organize it into a CV. Write all CV content in ${lang==='ltr'?'professional English':'professional Modern Standard Arabic'}; keep brand, tool and certificate names as they are.
 Rules:
@@ -2600,7 +2606,8 @@ Return ONLY a JSON object, no markdown:
 "vol":[{"a":"role","b":"organization","c":"period","d":""}],
 "awards":[{"a":"award","b":"issuer","c":"year"}],
 "interests":["..."],
-"extra":[{"k":"الجنسية|تاريخ الميلاد|رخصة القيادة|الحالة الاجتماعية|العنوان","v":""}]}
+"extra":[{"k":"الجنسية|تاريخ الميلاد|رخصة القيادة|الحالة الاجتماعية|العنوان","v":""}],
+"tips":["3-6 short, specific suggestions in Saudi-friendly Arabic about what is missing or weak in this CV"]}
 Omit keys whose arrays would be empty.`;
 }
 async function askAI(path,body,prompt){
@@ -2648,23 +2655,59 @@ function applyParsed(o){
   ['xp','edu','skills','langs','certs','courses','projects','vol','awards','interests'].forEach(t=>put(t,o[t]));
   return c;
 }
-async function arrange(){
-  const ta=form.querySelector('[data-sum]'),text=(ta?ta.value:S.summary).trim();
+async function arrange(srcText){
+  const fromFile=typeof srcText==='string',ta=form.querySelector('[data-sum]'),text=(fromFile?srcText:(ta?ta.value:S.summary)).trim();
   if(text.length<15){toast('اكتب عن نفسك أكثر — خبراتك، مهاراتك، لغاتك، شهاداتك…');ta&&ta.focus();return}
   const btn=form.querySelector('[data-act="arrange"]');if(btn){btn.disabled=true;btn.innerHTML='<span class="spin"></span> نقرأ كلامك ونرتّب سيرتك…'}
   let o=null,ai=true;
   try{o=await askAI('/arrange',{text,lang:S.dir},arrPrompt(text,S.dir))}catch(e){o=null}
   if(!o||o.error||typeof o!=='object'){o=localArrange(text);ai=false}
   arrSnap=JSON.stringify({p:S.p,summary:S.summary,links:S.links,extra:S.extra,secs:S.secs});
-  if(isSample(S)&&o.p&&o.p.name&&!SAMPLE_NAMES.includes(o.p.name)){const b=blankData();Object.assign(S,b);S.links=[];S.secs=S.secs.filter(s=>s.type!=='langs')}
+  if((fromFile||isSample(S))&&o.p&&o.p.name&&!SAMPLE_NAMES.includes(o.p.name)){const b=blankData();Object.assign(S,b);S.links=[];S.secs=S.secs.filter(s=>s.type!=='langs')}
+  const aiTips=Array.isArray(o.tips)?o.tips.filter(x=>typeof x==='string').slice(0,6):[];delete o.tips;
   const c=applyParsed(o);
   const N={xp:'خبرة',edu:'مؤهل',skills:'مهارة',langs:'لغة',certs:'شهادة',courses:'دورة',projects:'مشروع',vol:'تطوع',awards:'جائزة',interests:'اهتمام',links:'رابط'};
   const parts=['الملخص',...(c.p?['بياناتك']:[]),...Object.keys(N).filter(k=>c[k]).map(k=>ar(c[k])+' '+N[k])];
   arrMsg=`<div class="arrnote"><span>✓ ${ai?'رتّبناها':'رتّبناها مبدئيًا'}: ${parts.join('، ')}</span><button data-act="undoArr">تراجع</button></div>`;
   drawForm();schedule();
   requestAnimationFrame(()=>form.querySelectorAll('.blk:not(.add-sec):not(.kwblk)').forEach(b=>b.classList.add('flash')));
+  if(fromFile){importReport(parts,aiTips,ai);return}
   toast(ai?'✦ رتّبنا سيرتك — راجعها وعدّل اللي تبي':'رتّبنا الأساسيات — للترتيب الذكي الكامل نحتاج الذكاء الاصطناعي');
 }
+/* ---------- استيراد السيرة القديمة (PDF / Word / نص) ---------- */
+async function readDocx(file){
+  const b=new Uint8Array(await file.arrayBuffer()),v=new DataView(b.buffer);
+  let e=b.length-22;while(e>=0&&v.getUint32(e,true)!==0x06054b50)e--;if(e<0)throw 0;
+  let p=v.getUint32(e+16,true);const n=v.getUint16(e+10,true);
+  for(let i=0;i<n;i++){const m=v.getUint16(p+10,true),cs=v.getUint32(p+20,true),fl=v.getUint16(p+28,true),xl=v.getUint16(p+30,true),cl=v.getUint16(p+32,true),off=v.getUint32(p+42,true);
+    const name=new TextDecoder().decode(b.subarray(p+46,p+46+fl));
+    if(name==='word/document.xml'){const lf=v.getUint16(off+26,true),lx=v.getUint16(off+28,true),st=off+30+lf+lx,raw=b.subarray(st,st+cs);
+      let xml;if(m===0)xml=new TextDecoder().decode(raw);else{const ds=new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw')));xml=await ds.text()}
+      return xml.replace(/<w:tab\/>/g,' ').replace(/<\/w:p>/g,'\n').replace(/<w:br\/>/g,'\n').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/\n{3,}/g,'\n\n')}
+    p+=46+fl+xl+cl}
+  throw 0;
+}
+async function importCV(file){
+  if(!file)return;
+  if(file.size>15e6){toast('الملف كبير — الحد ١٥ ميقا');return}
+  if(location.hash!=='#build')location.hash='#build';
+  open(`<div class="kwload"><div class="kwspin">${ic('file',22)}</div><b>نقرأ سيرتك القديمة…</b><span class="muted">${esc(file.name)}</span></div>`);
+  let text='';
+  try{text=/\.pdf$/i.test(file.name)||file.type==='application/pdf'?await readPdf(file):/\.docx$/i.test(file.name)?await readDocx(file):await file.text()}catch(e){text=''}
+  if(text.replace(/\s+/g,' ').trim().length<60){open(`<h3>ما قدرنا نقرأ الملف</h3><p class="muted">غالبًا الملف صورة ممسوحة (Scan) أو بصيغة ما نقرأها. جرّب ملف PDF أو Word نصّي، أو انسخ نص سيرتك والصقه في خانة «الملخص المهني» واضغط «رتّبها في سيرتي».</p>`);return}
+  mbox.querySelector('b').textContent='نرتّب سيرتك بالشكل الجديد…';
+  await arrange(text.slice(0,18000));
+}
+function importReport(parts,aiTips,ai){
+  const sc=(()=>{try{return score()}catch(e){return{s:0,tips:[]}}})();
+  const tips=[...aiTips,...(sc.tips||[]).filter(t=>!aiTips.some(a=>a.includes(t.slice(0,8))))].slice(0,8);
+  open(`<div class="impr"><h3>${ic('check',20)} نقلنا سيرتك للتصميم الجديد</h3>
+   <p class="muted">${ai?'قرأنا سيرتك القديمة ووزّعناها على الأقسام':'نقلنا الأساسيات من سيرتك'}: ${parts.join('، ')}.</p>
+   <div class="imsc"><b>قوة سيرتك الحين: ${ar(sc.s)}٪</b><div class="dbar"><i style="width:${sc.s}%"></i></div></div>
+   ${tips.length?`<h4>وش ناقص عشان تقوى سيرتك</h4><ul class="imtips">${tips.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:'<p>سيرتك مكتملة، راجعها وعدّل اللي تبي.</p>'}
+   <div class="imact"><button class="btn btn-lime" data-close>راجع سيرتي</button><button class="btn btn-ghost" data-act="undoArr" data-close>تراجع</button></div></div>`);
+}
+document.addEventListener('change',e=>{if(e.target.matches('.cvimp')){const f=e.target.files[0];e.target.value='';importCV(f)}});
 function undoArrange(){if(!arrSnap)return;Object.assign(S,JSON.parse(arrSnap));arrSnap=null;arrMsg='';drawForm();schedule();toast('رجّعنا سيرتك مثل ما كانت')}
 
 /* ---------- تحكم كامل بالمهارات + التنسيق ---------- */
@@ -2816,6 +2859,7 @@ function drawForm(){
    <p class="muted" style="margin:-4px 0 10px;font-size:13px">اكتب عن نفسك بأي طريقة: خبراتك، وين اشتغلت، دراستك، مهاراتك، لغاتك، شهاداتك… واضغط <b>رتّبها</b>، ونكتب لك ملخص احترافي ونوزّع الباقي على أقسام سيرتك تلقائيًا.</p>
    <textarea rows="6" data-sum placeholder="مثال: أنا محمد العتيبي من الرياض، محاسب، اشتغلت ٥ سنوات في شركة المراعي وقبلها سنتين في بنك الراجحي، خفّضت المصاريف ١٥٪. عندي بكالوريوس محاسبة من جامعة الملك سعود ٢٠١٦ وشهادة SOCPA. أجيد Excel و SAP، وأتكلم عربي وإنجليزي…" aria-label="الملخص المهني">${esc(S.summary)}</textarea>
    <button class="btn btn-lime arrange" data-act="arrange">✦ رتّبها في سيرتي</button>${arrMsg}
+   <label class="impbtn">${ic('file',18)}<span><b>عندك سيرة قديمة؟</b> ارفعها (PDF أو Word) وننقلها للتصميم الجديد ونقول لك وش ناقص</span><input type="file" class="cvimp" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" hidden></label>
   </div>
   <div class="blk kwblk" id="b-kw"><div class="blk-h"><b>✦ الكلمات المفتاحية لتخصصك</b></div>
    <p class="muted" style="margin:-4px 0 10px;font-size:13px">أنظمة التوظيف تفرز السير حسب الكلمات المفتاحية. اكتب تخصصك ونطلع لك المهارات والأدوات والشهادات المطلوبة في مجالك، وتنضاف لسيرتك بضغطة.</p>
@@ -2938,9 +2982,9 @@ function score(){
    [S.links.some(l=>l.t==='LinkedIn'&&l.u),8,'أضف رابط LinkedIn — يرفع ثقة المُوظِّف'],[S.summary.length>80,15,'اكتب ملخصًا من سطرين على الأقل'],
    [xp&&xp.items.some(i=>i.a),17,'أضف خبرة عملية واحدة على الأقل'],[xp&&xp.items.some(i=>/[0-9٠-٩]/.test(i.d)),10,'أضف أرقامًا لإنجازاتك (نسبة، عدد، مبلغ)'],
    [ed&&ed.items.some(i=>i.a),7,'أضف مؤهلك الدراسي'],[sk&&sk.tags.length>=5,8,'أضف ٥ مهارات على الأقل']];
-  let s=0,tip='';chk.forEach(([ok,w,t])=>{if(ok)s+=w;else if(!tip)tip=t});
+  let s=0,tip='';const tips=[];chk.forEach(([ok,w,t])=>{if(ok)s+=w;else{if(!tip)tip=t;tips.push(t)}});
   $('#scoreN').textContent=ar(s)+'٪';$('#scoreBar').style.width=s+'%';$('#scoreTip').textContent=tip||'سيرتك جاهزة للتقديم';
-  return {s,tip};
+  return {s,tip,tips};
 }
 
 /* ---------- CV RENDER ---------- */
@@ -3272,6 +3316,7 @@ function renderDash(){
     <div class="dhello"><div><h1>أهلًا${first?' '+esc(first):''}</h1><p class="muted">وش تبي تسوي اليوم؟</p></div>
      <span class="dplan${pro?' pro':''}">${ic(pro?'crown':'spark',15)} ${pro?'Pro':'الباقة المجانية'}</span></div>
     <a href="#build" class="dprog"><div><b>سيرتك مكتملة ${ar(sc.s)}٪</b><span>${esc(sc.tip||'سيرتك جاهزة للتقديم')}</span></div><div class="dbar"><i style="width:${sc.s}%"></i></div></a>
+    <label class="dimp">${ic('file',22)}<div><b>ارفع سيرتك القديمة</b><span>PDF أو Word — ننقلها للتصميم الجديد ونقول لك وش ناقص</span></div><input type="file" class="cvimp" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" hidden></label>
     <div class="dgrid">${T.map(([i,t,d,h])=>`<a href="${h}" class="dcard"><div class="fi">${ic(i,22)}</div><b>${t}</b><span>${d}</span></a>`).join('')}</div>
     ${pro?'':`<div class="dup"><div><b>رقّ لـ Pro</b><span>كل القوالب، والذكاء الاصطناعي بلا حدود، بـ ٢٩ ريال شهريًا.</span></div><a href="#pricing" class="btn btn-lime btn-sm">اعرف أكثر</a></div>`}
    </main>`;

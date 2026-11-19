@@ -44,7 +44,7 @@ function arrPrompt(text, lang){
   return `You are an expert CV writer and ATS specialist for the Saudi Arabia / GCC and global job market.
 A job seeker wrote this free text about themselves. It may be messy, in Saudi dialect, mixed Arabic/English, or just a list:
 """
-${text.slice(0,6000)}
+${text.slice(0,12000)}
 """
 Organize it into a CV. Write all CV content in ${lang==='ltr'?'professional English':'professional Modern Standard Arabic'}; keep brand, tool and certificate names as they are.
 Rules:
@@ -66,7 +66,8 @@ Return ONLY a JSON object, no markdown:
 "vol":[{"a":"role","b":"organization","c":"period","d":""}],
 "awards":[{"a":"award","b":"issuer","c":"year"}],
 "interests":["..."],
-"extra":[{"k":"الجنسية|تاريخ الميلاد|رخصة القيادة|الحالة الاجتماعية|العنوان","v":""}]}
+"extra":[{"k":"الجنسية|تاريخ الميلاد|رخصة القيادة|الحالة الاجتماعية|العنوان","v":""}],
+"tips":["3-6 short, specific suggestions in Saudi-friendly Arabic about what is missing or weak in this CV, e.g. achievements without numbers, no LinkedIn link, missing skills section, summary too generic"]}
 Omit keys whose arrays would be empty.`;
 }
 
@@ -141,9 +142,10 @@ async function arrange(req, env, ip){
   const { text = '', lang = 'rtl' } = await req.json().catch(() => ({}));
   const t = String(text).trim();
   if (t.length < 15) return json({ error: 'text_too_short' }, 400);
+  if (t.length > 20000) return json({ error: 'text_too_long' }, 413);
   const g = await aiGate(req, env); if (g.res) return g.res;
   if (limited(ip, 'arr', 20)) return json({ error: 'rate_limited' }, 429);
-  try { const out = await askClaude(env, arrPrompt(t, lang === 'ltr' ? 'ltr' : 'rtl'), 6000); await aiCount(env, g); return json(out); }
+  try { const out = await askClaude(env, arrPrompt(t, lang === 'ltr' ? 'ltr' : 'rtl'), 7000); await aiCount(env, g); return json(out); }
   catch (e) { return json({ error: 'ai_failed', reason: String(e.message || e).slice(0, 80) }, 502); }
 }
 
