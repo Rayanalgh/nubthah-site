@@ -519,14 +519,14 @@ async function consumerFor(env, u){
   let id = null;
   try {
     const f = await stream(env, '/api/v2/consumers?search_term=' + encodeURIComponent(u.email));
-    const hit = f.ok && listOf(f.j).find(c => c && (c.external_id === u.id || String(c.email || '').toLowerCase() === u.email));
+    const hit = f.ok && listOf(f.j).find(c => c && (c.external_id === u.email || c.external_id === u.id || String(c.email || '').toLowerCase() === u.email));
     if (hit) id = hit.id;
   } catch (e) {}
   if (!id) {
     const nm = (String(u.name || '').trim() || u.email.split('@')[0]).slice(0, 120);
-    let r = await stream(env, '/api/v2/consumers', { method: 'POST', body: JSON.stringify({ name: nm, email: u.email, external_id: u.id, communication_methods: ['EMAIL'], preferred_language: 'AR' }) });
-    if (!(r.ok && r.d && r.d.id)) r = await stream(env, '/api/v2/consumers', { method: 'POST', body: JSON.stringify({ name: nm, email: u.email, external_id: u.id, communication_methods: ['EMAIL'] }) });
-    if (!(r.ok && r.d && r.d.id)) { console.error('consumer', r.status, (r.t || '').slice(0, 300)); return null; }
+    let r = await stream(env, '/api/v2/consumers', { method: 'POST', body: JSON.stringify({ name: nm, email: u.email, external_id: u.email, communication_methods: ['EMAIL'], preferred_language: 'AR' }) });
+    if (!(r.ok && r.d && r.d.id)) r = await stream(env, '/api/v2/consumers', { method: 'POST', body: JSON.stringify({ name: nm, email: u.email, external_id: u.email, communication_methods: ['EMAIL'] }) });
+    if (!(r.ok && r.d && r.d.id)) { console.error('consumer', r.status, (r.t || '').slice(0, 300)); u._cerr = r.status + ' ' + (r.t || '').slice(0, 300); return null; }
     id = r.d.id;
   }
   await env.DB.prepare('UPDATE users SET spc=? WHERE id=?').bind(id, u.id).run(); u.spc = id; return id;
@@ -574,7 +574,7 @@ async function payStart(req, env){
   if (oc && !(r.ok && r.d && r.d.url)) { console.error('pay link w/ consumer', r.status, (r.t || '').slice(0, 300)); r = await mk(null); }
   if (!r.ok || !r.d || !r.d.url || !r.d.id) { console.error('pay link', r.status, (r.t || '').slice(0, 300)); return json({ error: 'ما قدرنا نفتح الدفع، جرّب بعد شوي' }, 502); }
   await env.DB.prepare("INSERT INTO orders(id,uid,link,status,created) VALUES(?,?,?,'pending',?)").bind(id, u.id, r.d.id, Date.now()).run();
-  return json({ url: r.d.url, order: id });
+  return json({ url: r.d.url, order: id, ...(u.team && !oc ? { diag: u._cerr || 'no consumer' } : {}) });
 }
 async function payCheck(req, env){
   const u = await sessionUser(req, env); if (!u) return json({ error: 'login' }, 401);
