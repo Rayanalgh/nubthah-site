@@ -103,39 +103,33 @@ async function aiGate(req, env){
 }
 async function aiCount(env, g){ if (g && g.u && g.u.plan !== 'pro') await env.DB.prepare('UPDATE users SET ai_used=ai_used+1 WHERE id=?').bind(g.u.id).run(); }
 
-async function keywords(req, env, ip, ctx){
+/* الكلمات المفتاحية والدورات: المجاني يشوف عيّنة (بدون ما تنحسب من تجاربه)، والمشترك يشوف القائمة كاملة */
+const KW_FREE = { h: 4, t: 2, s: 2, c: 1 }, CR_FREE = 3;
+function limitKW(o){ const out = { ...o, more: {} }; for (const k in KW_FREE) { const a = Array.isArray(o[k]) ? o[k] : []; out[k] = a.slice(0, KW_FREE[k]); out.more[k] = Math.max(0, a.length - out[k].length); } return out; }
+function limitCR(o){ const a = Array.isArray(o.items) ? o.items : [], pick = [];
+  for (const t of ['L', 'C', 'S']) { const x = a.find(i => i && i.t === t); if (x) pick.push(x); }
+  for (const x of a) { if (pick.length >= CR_FREE) break; if (!pick.includes(x)) pick.push(x); }
+  const items = pick.slice(0, CR_FREE); return { ...o, items, more: Math.max(0, a.length - items.length) }; }
+async function previewTool(req, env, ip, ctx, kind){
   if (!env.ANTHROPIC_API_KEY) return json({ error: 'ai_not_configured' }, 503);
   const { field = '' } = await req.json().catch(() => ({}));
   const f = String(field).replace(/[«»<>]/g, '').trim().slice(0, 120);
   if (f.length < 2) return json({ error: 'field_required' }, 400);
-  const g = await aiGate(req, env); if (g.res) return g.res;
-  const cache = caches.default, ck = new Request('https://cache.nubthah/kw/' + encodeURIComponent(normKey(f)));
-  const hit = await cache.match(ck); if (hit) return hit;
-  if (limited(ip, 'kw', 30)) return json({ error: 'rate_limited' }, 429);
+  let pro = true;
+  if (accountsOn(env)) { const u = await sessionUser(req, env); if (!u) return json({ error: 'login_required' }, 401); pro = u.plan === 'pro'; }
+  const lim = o => (pro || o.error) ? o : (kind === 'kw' ? limitKW(o) : limitCR(o));
+  const cache = caches.default, ck = new Request('https://cache.nubthah/' + kind + '/' + encodeURIComponent(normKey(f)));
+  const hit = await cache.match(ck);
+  if (hit) { try { return json(lim(await hit.json())); } catch (e) {} }
+  if (limited(ip, kind, 30)) return json({ error: 'rate_limited' }, 429);
   try {
-    const out = await askClaude(env, kwPrompt(f), 4000); if (!out.error) await aiCount(env, g);
-    const res = json(out, 200, { 'cache-control': 'public, max-age=2592000' });
-    if (!out.error) ctx.waitUntil(cache.put(ck, res.clone()));
-    return res;
+    const out = await askClaude(env, kind === 'kw' ? kwPrompt(f) : crPrompt(f), kind === 'kw' ? 4000 : 4500);
+    if (!out.error) ctx.waitUntil(cache.put(ck, json(out, 200, { 'cache-control': 'public, max-age=2592000' })));
+    return json(lim(out));
   } catch (e) { return json({ error: 'ai_failed', reason: String(e.message || e).slice(0, 80) }, 502); }
 }
-
-async function courses(req, env, ip, ctx){
-  if (!env.ANTHROPIC_API_KEY) return json({ error: 'ai_not_configured' }, 503);
-  const { field = '' } = await req.json().catch(() => ({}));
-  const f = String(field).replace(/[«»<>]/g, '').trim().slice(0, 120);
-  if (f.length < 2) return json({ error: 'field_required' }, 400);
-  const g = await aiGate(req, env); if (g.res) return g.res;
-  const cache = caches.default, ck = new Request('https://cache.nubthah/cr/' + encodeURIComponent(normKey(f)));
-  const hit = await cache.match(ck); if (hit) return hit;
-  if (limited(ip, 'cr', 30)) return json({ error: 'rate_limited' }, 429);
-  try {
-    const out = await askClaude(env, crPrompt(f), 4500); if (!out.error) await aiCount(env, g);
-    const res = json(out, 200, { 'cache-control': 'public, max-age=2592000' });
-    if (!out.error) ctx.waitUntil(cache.put(ck, res.clone()));
-    return res;
-  } catch (e) { return json({ error: 'ai_failed', reason: String(e.message || e).slice(0, 80) }, 502); }
-}
+const keywords = (req, env, ip, ctx) => previewTool(req, env, ip, ctx, 'kw');
+const courses = (req, env, ip, ctx) => previewTool(req, env, ip, ctx, 'cr');
 
 async function arrange(req, env, ip){
   if (!env.ANTHROPIC_API_KEY) return json({ error: 'ai_not_configured' }, 503);
