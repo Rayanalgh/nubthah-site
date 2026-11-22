@@ -158,6 +158,8 @@ function ensureSchema(env){
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS cvs(uid TEXT PRIMARY KEY, data TEXT, docs TEXT, updated INTEGER)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS codes(email TEXT PRIMARY KEY, hash TEXT, name TEXT, exp INTEGER, tries INTEGER DEFAULT 0, sent INTEGER)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS kv(k TEXT PRIMARY KEY, v TEXT)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS cv_hist(uid TEXT, data TEXT, docs TEXT, updated INTEGER, saved INTEGER)`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS cv_hist_uid ON cv_hist(uid, saved)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS views(uid TEXT, day TEXT, views INTEGER DEFAULT 0, scans INTEGER DEFAULT 0, PRIMARY KEY(uid, day))`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS tracker(uid TEXT PRIMARY KEY, data TEXT, updated INTEGER)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS rem_sent(uid TEXT, doc TEXT, stage INTEGER, sent INTEGER, PRIMARY KEY(uid, doc, stage))`)
@@ -288,6 +290,18 @@ async function cvPut(req, env){
   let b; try { b = JSON.parse(t); } catch (e) { return json({ error: 'bad_json' }, 400); }
   if (!b || typeof b.data !== 'object') return json({ error: 'bad_data' }, 400);
   const now = Date.now();
+  const old = await env.DB.prepare('SELECT data,docs,updated FROM cvs WHERE uid=?').bind(u.id).first();
+  /* حماية من الكتابة فوق نسخة أحدث (صفحة قديمة مفتوحة في جهاز ثاني) */
+  if (old && typeof b.base === 'number' && old.updated > b.base)
+    return json({ error: 'conflict', data: JSON.parse(old.data || 'null'), docs: JSON.parse(old.docs || '[]'), updated: old.updated }, 409);
+  /* نسخة احتياطية قبل الكتابة — آخر ٣٠ نسخة لكل مستخدم (وحدة كل ١٠ دقائق على الأكثر) */
+  if (old && old.data) {
+    const last = await env.DB.prepare('SELECT saved FROM cv_hist WHERE uid=? ORDER BY saved DESC LIMIT 1').bind(u.id).first();
+    if (!last || now - last.saved > 600000) {
+      await env.DB.prepare('INSERT INTO cv_hist(uid,data,docs,updated,saved) VALUES(?,?,?,?,?)').bind(u.id, old.data, old.docs, old.updated, now).run();
+      await env.DB.prepare('DELETE FROM cv_hist WHERE uid=? AND saved NOT IN (SELECT saved FROM cv_hist WHERE uid=? ORDER BY saved DESC LIMIT 30)').bind(u.id, u.id).run();
+    }
+  }
   const meta = JSON.stringify({ name: b.data.p?.name || '', title: b.data.p?.title || '', docs: (Array.isArray(b.docs) ? b.docs : []).map(d => ({ id: String(d.id || ''), name: String(d.name || '').slice(0, 120), until: String(d.until || '').slice(0, 10) })) });
   await env.DB.prepare('INSERT INTO cvs(uid,data,docs,meta,updated) VALUES(?,?,?,?,?) ON CONFLICT(uid) DO UPDATE SET data=excluded.data, docs=COALESCE(excluded.docs,cvs.docs), meta=excluded.meta, updated=excluded.updated')
     .bind(u.id, JSON.stringify(b.data), b.docs ? JSON.stringify(b.docs) : null, meta, now).run();
@@ -295,7 +309,7 @@ async function cvPut(req, env){
 }
 
 /* ---------- الرابط الشخصي + الصفحة العامة + الإحصائيات ---------- */
-const RESERVED = new Set('api cv c home build admin www mail about privacy terms pricing login signup logout dashboard settings help support info nubthah profile u app static assets index favicon robots sitemap'.split(' '));
+const RESERVED = new Set('api img og cv c home build admin www mail about privacy terms pricing login signup logout dashboard settings help support info nubthah profile u app static assets index favicon robots sitemap'.split(' '));
 const isPro = u => u && u.plan === 'pro';
 async function setUsername(req, env){
   const u = await sessionUser(req, env); if (!u) return json({ error: 'unauthorized' }, 401);
