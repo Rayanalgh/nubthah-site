@@ -549,6 +549,7 @@ footer a:hover{color:var(--lime)}
   #printRoot .prt thead .sp{height:11mm}#printRoot .prt tfoot .sp{height:9mm}
   #printRoot .demo-tag{display:none}
   #printRoot .wm{display:none}
+  #printRoot .t-mod{min-height:286mm}#printRoot .t-mod main,#printRoot .t-mod aside{padding-bottom:10px}
 }
 @media (max-width:1050px){
   .app{grid-template-columns:1fr;height:auto}
@@ -684,6 +685,9 @@ footer a:hover{color:var(--lime)}
 .aibadge{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--grad);color:#fff}
 .aibadge.db{background:var(--raised);color:var(--muted)}
 .regen{font-size:12.5px;color:var(--lime);font-weight:600;margin-inline-start:auto}
+.aitm{display:inline-block;margin-inline-start:6px;font-size:.82em;opacity:.85;font-variant-numeric:tabular-nums;white-space:nowrap}
+.aibar{width:min(260px,80%);height:6px;border-radius:9px;background:rgba(127,127,127,.18);overflow:hidden;margin:4px auto 2px}.aibar i{display:block;height:100%;width:2%;background:#22c55e;border-radius:9px;transition:width .9s linear}
+.kwload .aitm{margin:0;font-size:13px}
 .kwload{display:grid;gap:6px;justify-items:center;text-align:center;padding:26px 10px 10px}
 .kwspin{width:46px;height:46px;border-radius:14px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:20px;animation:spin 1.6s linear infinite;margin-bottom:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -2465,6 +2469,17 @@ return {QRCode:M.index,L:M.QRErrorCorrectLevel}})();
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const ar=n=>String(n)==='0'?'0':String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+/* عدّاد الانتظار لأدوات الذكاء: يبيّن للمستخدم إن الطلب شغّال وكم باقي تقريبًا */
+/* لو السيرة أطول من صفحة بشي بسيط، نصغّرها شوي عشان ما تطلع صفحة ثانية فاضية */
+function fitPrint(c){try{c.style.transform='none';const t=document.createElement('div');t.style.cssText='position:absolute;left:-9999px;top:0;visibility:hidden';
+  const k=c.cloneNode(true);k.style.minHeight='0';k.querySelectorAll('.t-mod').forEach(x=>{x.style.minHeight='0';x.querySelectorAll('main,aside').forEach(y=>y.style.paddingBottom='10px')});
+  t.appendChild(k);document.body.appendChild(t);const h=k.offsetHeight;t.remove();
+  const max=1085;if(h>max&&h<max*1.08){const z=+(max/h).toFixed(3);c.style.zoom=z;c.style.width=Math.floor(794/z)+'px'}}catch(e){}return c}
+const TM=(e,bar)=>(bar?`<span class="aibar"><i></i></span>`:'')+`<span class="aitm" data-e="${e}"></span>`;
+setInterval(()=>{document.querySelectorAll('.aitm').forEach(el=>{const now=Date.now();if(!el.dataset.t0)el.dataset.t0=now;
+  const s=Math.floor((now-el.dataset.t0)/1000),e=+el.dataset.e||15;
+  el.textContent=s<e?`${ar(s)} ث من حوالي ${ar(e)} ث`:`${ar(s)} ث — شوي ويخلص…`;
+  const b=el.previousElementSibling;if(b&&b.classList.contains('aibar'))b.firstChild.style.width=Math.min(96,s<e?s/e*85:85+(s-e)/2)+'%'})},500);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 /* hero tilt */
@@ -2803,7 +2818,7 @@ function applyParsed(o){
 async function arrange(srcText){
   const fromFile=typeof srcText==='string',ta=form.querySelector('[data-sum]'),text=(fromFile?srcText:(ta?ta.value:S.summary)).trim();
   if(text.length<15){toast('اكتب عن نفسك أكثر — خبراتك، مهاراتك، لغاتك، شهاداتك…');ta&&ta.focus();return}
-  const btn=form.querySelector('[data-act="arrange"]');if(btn){btn.disabled=true;btn.innerHTML='<span class="spin"></span> نقرأ كلامك ونرتّب سيرتك…'}
+  const btn=form.querySelector('[data-act="arrange"]');if(btn){btn.disabled=true;btn.innerHTML='<span class="spin"></span> نقرأ كلامك ونرتّب سيرتك…'+TM(12)}
   let o=null,ai=true;
   try{o=await askAI('/arrange',{text,lang:S.dir},arrPrompt(text,S.dir))}catch(e){o=null}
   if(!o||o.error||typeof o!=='object'){o=localArrange(text);ai=false}
@@ -2837,7 +2852,7 @@ async function importCV(file){
   if(file.size>15e6){toast('الملف كبير — الحد ١٥ ميقا');return}
   const inDash=!$('#dashView').hidden;
   if(!inDash&&location.hash!=='#build')location.hash='#build';
-  open(`<div class="kwload"><div class="kwspin">${ic('file',22)}</div><b>نقرأ سيرتك القديمة…</b><span class="muted">${esc(file.name)}</span></div>`);
+  open(`<div class="kwload"><div class="kwspin">${ic('file',22)}</div><b>نقرأ سيرتك القديمة…</b><span class="muted">${esc(file.name)}</span>${TM(15,1)}</div>`);
   let text='';
   try{text=/\.pdf$/i.test(file.name)||file.type==='application/pdf'?await readPdf(file):/\.docx$/i.test(file.name)?await readDocx(file):await file.text()}catch(e){text=''}
   if(text.replace(/\s+/g,' ').trim().length<60){open(`<h3>ما قدرنا نقرأ الملف</h3><p class="muted">غالبًا الملف صورة ممسوحة (Scan) أو بصيغة ما نقرأها. جرّب ملف PDF أو Word نصّي، أو انسخ نص سيرتك والصقه في خانة «الملخص المهني» واضغط «رتّبها في سيرتي».</p>`);return}
@@ -3234,7 +3249,7 @@ $('#dlBtn').onclick=()=>{
   if(S.mode==='card'){const m=S.links.find(l=>l.u);toast('رابط بطاقتك: nubthah.com/'+(m?m.u.split('/').filter(Boolean).pop():'you'));return}
   let pr=$('#printRoot');if(!pr){pr=document.createElement('div');pr.id='printRoot';document.body.appendChild(pr)}
   pr.innerHTML='<table class="prt"><thead><tr><td><div class="sp"></div></td></tr></thead><tfoot><tr><td><div class="sp"></div></td></tr></tfoot><tbody><tr><td></td></tr></tbody></table>';
-  pr.querySelector('tbody td').appendChild($('#cv').cloneNode(true));
+  pr.querySelector('tbody td').appendChild(fitPrint($('#cv').cloneNode(true)));
   const t0=document.title;document.title=((S.p.name||'').trim()||'السيرة الذاتية')+' - CV';
   try{window.print()}catch(e){}
   setTimeout(()=>{document.title=t0},1500);
@@ -3558,7 +3573,7 @@ function dArrange(){
    <button class="btn btn-lime" id="aGo">${ic('spark',16)} رتّب سيرتي</button>${aiNote()}</div>
    <label class="dimp">${ic('file',22)}<div><b>أو ارفع سيرتك القديمة</b><span>PDF أو Word — ننقلها للتصميم الجديد ونقول لك وش ناقص</span></div><input type="file" class="cvimp" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" hidden></label>`);
   $('#aGo').onclick=async()=>{const t=$('#aTxt').value.trim();if(t.length<15){toast('اكتب عن نفسك أكثر — خبراتك، مهاراتك، لغاتك، شهاداتك…');$('#aTxt').focus();return}
-    const b=$('#aGo');b.disabled=true;b.innerHTML='<span class="spin"></span> نقرأ كلامك ونرتّب سيرتك…';
+    const b=$('#aGo');b.disabled=true;b.innerHTML='<span class="spin"></span> نقرأ كلامك ونرتّب سيرتك…'+TM(12);
     try{await arrange(t)}finally{if(dPage()==='arrange'&&$('#aGo')){b.disabled=false;b.innerHTML=ic('spark',16)+' رتّب سيرتي'}}
     dPrevShow();dPrevPaint()};
 }
@@ -3601,7 +3616,7 @@ function dTailor(){
   $('#tGo').onclick=async()=>{
     const job=$('#tJob').value.trim();if(job.length<30){toast('الصق إعلان الوظيفة كامل');return}
     if(isBlankCV()){toast('سيرتك فاضية — اكتبها أو ارفع سيرتك القديمة أول');return}
-    const b=$('#tGo');b.disabled=true;b.innerHTML='<span class="spin"></span> نقارن سيرتك بالإعلان…';
+    const b=$('#tGo');b.disabled=true;b.innerHTML='<span class="spin"></span> نقارن سيرتك بالإعلان…'+TM(10);
     const o=await aiCall('/tailor',{job,cv:JSON.parse(cvPayload()).data,lang:S.dir});b.disabled=false;b.innerHTML=ic('spark',16)+' جهّز نسخة لهذي الوظيفة';
     if(!o)return;lastTailor={...o,job};renderTailor();
   };
@@ -3643,7 +3658,7 @@ function dInterview(){
    <div class="dpanel"><label class="lbl">الوظيفة</label><textarea id="iJob" rows="4" placeholder="مثال: محاسب أول في شركة تجزئة — أو الصق الإعلان كامل">${esc(S.p.title||'')}</textarea>
    <button class="btn btn-lime" id="iGo">${ic('chat',16)} جهّز أسئلة المقابلة</button>${aiNote()}</div><div id="iOut"></div>`);
   $('#iGo').onclick=async()=>{const job=$('#iJob').value.trim();if(job.length<3){toast('اكتب الوظيفة');return}
-    const b=$('#iGo');b.disabled=true;b.innerHTML='<span class="spin"></span> نجهّز الأسئلة…';
+    const b=$('#iGo');b.disabled=true;b.innerHTML='<span class="spin"></span> نجهّز الأسئلة…'+TM(20);
     const o=await aiCall('/interview',{job,cv:isBlankCV()?null:JSON.parse(cvPayload()).data});b.disabled=false;b.innerHTML=ic('chat',16)+' جهّز أسئلة المقابلة';
     if(!o)return;
     $('#iOut').innerHTML=`<div class="dpanel"><div class="dres-h"><b>${esc(o.role||'')}</b><span class="muted">${ar((o.questions||[]).length)} سؤال</span></div>
@@ -3662,7 +3677,7 @@ function dTranslate(){
     <button class="btn btn-lime" id="trGo">${ic('globe',16)} ترجم سيرتي ${to==='en'?'للإنجليزي':'للعربي'}</button>
     ${other?`<button class="btn btn-ghost" id="trBack">${ic('undo',16)} ارجع للنسخة ${to==='en'?'الإنجليزية':'العربية'} المحفوظة</button>`:''}${aiNote()}</div>`);
   $('#trGo').onclick=async()=>{if(isBlankCV()){toast('سيرتك فاضية');return}
-    const b=$('#trGo');b.disabled=true;b.innerHTML='<span class="spin"></span> نترجم سيرتك…';
+    const b=$('#trGo');b.disabled=true;b.innerHTML='<span class="spin"></span> نترجم سيرتك…'+TM(12);
     const o=await aiCall('/translate',{cv:JSON.parse(cvPayload()).data,to});b.disabled=false;b.innerHTML=ic('globe',16)+' ترجم سيرتي';
     if(!o||!o.p||!Array.isArray(o.secs)){if(o)toast('ما قدرنا نترجمها — حاول مرة ثانية');return}
     try{localStorage.setItem('nubthah_lang_'+S.dir,JSON.stringify({p:S.p,summary:S.summary,secs:S.secs}))}catch(e){}
@@ -3958,7 +3973,7 @@ async function aiKeywords(field){
   kwCache.set(key,out);return out;
 }
 const dbField=f=>({n:f.n,h:parseKW(f.h),t:parseKW(f.t),s:parseKW(f.s+';'+SOFT_COMMON).filter((x,i,a)=>a.findIndex(y=>y.en===x.en)===i).slice(0,8),c:parseKW(f.c),src:'db'});
-const KW_SKEL=`<div class="kwload"><div class="kwspin">✦</div><b>نجهّز كلماتك المفتاحية بالذكاء الاصطناعي…</b><span class="muted">نحلّل تخصصك ونجمع أهم الكلمات اللي تدوّر عليها أنظمة التوظيف</span>
+const KW_SKEL=`<div class="kwload"><div class="kwspin">✦</div><b>نجهّز كلماتك المفتاحية بالذكاء الاصطناعي…</b><span class="muted">نحلّل تخصصك ونجمع أهم الكلمات اللي تدوّر عليها أنظمة التوظيف</span>${TM(8,1)}
   <div class="skel">${'<i></i>'.repeat(14)}</div></div>`;
 let kwBusy=0;
 async function kwSearch(q){
@@ -4177,7 +4192,7 @@ const planGet=()=>{try{return JSON.parse(localStorage.getItem('nubthah_plan')||'
 const planSet=a=>{try{localStorage.setItem('nubthah_plan',JSON.stringify(a))}catch(e){}};
 const planHas=it=>planGet().some(p=>p.en===it.en);
 let crField=null,crBusy=0;
-const CR_SKEL=`<div class="kwload"><div class="kwspin">✦</div><b>نجمع لك الدورات والشهادات المهمة لتخصصك…</b><span class="muted">نختار اللي يرفع قيمة سيرتك في سوق العمل السعودي</span><div class="skel">${'<i></i>'.repeat(9)}</div></div>`;
+const CR_SKEL=`<div class="kwload"><div class="kwspin">✦</div><b>نجمع لك الدورات والشهادات المهمة لتخصصك…</b><span class="muted">نختار اللي يرفع قيمة سيرتك في سوق العمل السعودي</span>${TM(15,1)}<div class="skel">${'<i></i>'.repeat(9)}</div></div>`;
 async function crSearch(q){
   q=q.trim();if(!q)return;const my=++crBusy;$('#crRes').innerHTML=CR_SKEL;
   let res=null,err=null;try{res=await aiCourses(q)}catch(e){err=e}
@@ -4284,7 +4299,7 @@ $('#dlBtn').onclick=()=>{
   if(S.mode==='card'){shareModal('card');return}
   let pr=$('#printRoot');if(!pr){pr=document.createElement('div');pr.id='printRoot';document.body.appendChild(pr)}
   pr.innerHTML='<table class="prt"><thead><tr><td><div class="sp"></div></td></tr></thead><tfoot><tr><td><div class="sp"></div></td></tr></tfoot><tbody><tr><td></td></tr></tbody></table>';
-  pr.querySelector('tbody td').appendChild($('#cv').cloneNode(true));
+  pr.querySelector('tbody td').appendChild(fitPrint($('#cv').cloneNode(true)));
   const t0=document.title;document.title=((S.p.name||'').trim()||'السيرة الذاتية')+' - CV';
   try{window.print()}catch(e){}
   setTimeout(()=>{document.title=t0},1500);
