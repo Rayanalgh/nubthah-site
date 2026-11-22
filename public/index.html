@@ -907,6 +907,11 @@ body.noscroll{overflow:hidden}
 .accbtn:hover{background:var(--raised)}
 .accbtn svg{width:16px;height:16px}.accbtn span{line-height:1;padding-top:3px}
 .price b.free{font-size:30px}
+.spbox{min-height:420px;border-radius:14px;overflow:hidden;background:#fff;margin:14px 0}
+.paym h3{display:flex;align-items:center;gap:8px}
+.okc{width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,#2FB67C,#5BE3A3);color:#fff;display:grid;place-items:center;margin:0 auto 18px}
+.substat{display:flex;align-items:center;gap:12px;margin-bottom:16px}.substat>div{flex:1}.substat b{display:block}.substat span{color:var(--muted);font-size:14px}
+.substat>svg{color:#5BE3A3}.substat.warn>svg{color:#F3CF6B}
 .accbtn.in{padding:4px 12px 4px 4px}
 .accbtn.in img,.accbtn.in i{width:28px;height:28px;border-radius:50%;object-fit:cover;font-style:normal;display:grid;place-items:center;background:var(--grad);color:#fff;font-size:13px}
 .nav .bar,.btop{position:relative}
@@ -3722,11 +3727,22 @@ async function dLink(){
 
 /* الاشتراك */
 function dPlan(){
-  const P=PLANS;
-  dSet('الاشتراك',`<div class="plans dplans">${P.map(p=>`<div class="plan ${p.hot?'hot':''}">${p.hot?'<span class="tag">الأكثر طلبًا</span>':''}<div><h3>${p.n}</h3><p class="desc">${p.d}</p></div>
+  const P=PLANS,u=user||{},dt=t=>new Date(t).toLocaleDateString('ar-SA-u-nu-arab',{day:'numeric',month:'long',year:'numeric'});
+  const st=u.team?`<div class="dpanel substat">${ic('check',18)} <div><b>حساب الفريق</b><span>Pro مفتوح دائمًا لهذا الحساب.</span></div></div>`
+   :u.sub==='canceling'&&u.pro_until?`<div class="dpanel substat warn">${ic('bell',18)} <div><b>اشتراكك ملغي وينتهي في ${dt(u.pro_until)}</b><span>تبقى مزايا Pro شغّالة لين هذا التاريخ، وما ينخصم منك شيء بعده.</span></div><button class="btn btn-ghost btn-sm" id="subResume">رجّع الاشتراك</button></div>`
+   :isProU()&&u.pro_until?`<div class="dpanel substat">${ic('check',18)} <div><b>اشتراك Pro فعّال</b><span>يتجدد تلقائيًا في ${dt(u.pro_until)}.</span></div>${u.sub?'<button class="btn btn-ghost btn-sm" id="subCancel">إلغاء الاشتراك</button>':''}</div>`:'';
+  dSet('الاشتراك',st+`<div class="plans dplans">${P.map(p=>`<div class="plan ${p.hot?'hot':''}">${p.hot?'<span class="tag">الأكثر طلبًا</span>':''}<div><h3>${p.n}</h3><p class="desc">${p.d}</p></div>
     <div class="price">${p.m===0?'<b class="free">مجانًا</b><span>بدون بطاقة دفع</span>':`<b>${ar(p.m)}</b><span>ر.س / شهريًا</span>`}</div><ul>${p.f.map(x=>`<li>${x}</li>`).join('')}${(p.no||[]).map(x=>`<li class="no">${x}</li>`).join('')}</ul>
     ${p.m===0?(isProU()?'':'<span class="btn btn-ghost" style="pointer-events:none">باقتك الحالية</span>'):(isProU()?'<span class="btn btn-lime" style="pointer-events:none">باقتك الحالية</span>':`<button class="btn btn-lime" data-plan="${p.n}">${p.cta}</button>`)}</div>`).join('')}</div>
    ${isProU()?'':aiNote()}`);
+  const sc=$('#subCancel'),sr=$('#subResume');
+  if(sc)sc.onclick=()=>open(`<h3>إلغاء اشتراك Pro؟</h3><p class="muted">يبقى Pro شغّال لين ${dt(u.pro_until)}، وبعدها يرجع حسابك مجاني وما ينخصم منك شيء.</p>
+    <div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn-ghost" id="cYes">إيه، ألغِ التجديد</button><button class="btn btn-lime" data-close>خلّه</button></div>`)||($('#cYes').onclick=()=>subAct('cancel'));
+  if(sr)sr.onclick=()=>subAct('resume');
+}
+async function subAct(a){
+  try{const x=await API('/pay/'+a,{method:'POST',body:'{}'});const j=await x.json();if(!x.ok)throw new Error(j.error);if(j.user)setUser(j.user);close();toast(a==='cancel'?'ألغينا التجديد التلقائي':'رجّعنا اشتراكك');if(dPage()==='plan')dPlan()}
+  catch(e){toast(e.message||'صار خطأ، جرّب مرة ثانية')}
 }
 document.addEventListener('click',e=>{if(e.target.closest('[data-dmenu]')){const s=document.querySelector('.dshell');s&&s.classList.toggle('open')}});
 
@@ -4380,40 +4396,67 @@ function close(){modal.classList.remove('on')}
 modal.onclick=e=>{if(e.target===modal||e.target.closest('[data-close]'))close()};
 addEventListener('keydown',e=>{if(e.key==='Escape')close()});
 
-function checkout(title,amount,sub){
-  const vat=+(amount*0.15).toFixed(2), tot=(amount+vat).toFixed(2);
-  open(`<h3>إتمام الطلب</h3><p style="color:var(--muted)">${title}${sub?' · '+sub:''}</p>
-   <div class="sum"><div><span>المبلغ</span><span>${ar(amount)} ر.س</span></div><div><span>ضريبة القيمة المضافة ١٥٪</span><span>${ar(vat)} ر.س</span></div><div class="tot"><span>الإجمالي</span><span>${ar(tot)} ر.س</span></div></div>
-   <div class="methods"><button class="on">مدى</button><button>Apple Pay</button><button>STC Pay</button></div>
-   <div class="f" style="margin-bottom:12px"><label>كود الخصم</label><div style="display:flex;gap:8px"><input id="cpn" placeholder="مثال: NUB20" dir="ltr"><button class="btn btn-ghost btn-sm" id="cpnB">تطبيق</button></div></div>
-   <button class="btn btn-lime" style="width:100%;justify-content:center" id="payB">ادفع ${ar(tot)} ر.س</button>
-   <p class="note">${ic('lock',14)} هذه معاينة للتصميم — يُربط الزر ببوابة دفع (مثل Moyasar أو Tap) عند الإطلاق.</p>`);
-  mbox.querySelector('.methods').onclick=e=>{const b=e.target.closest('button');if(b)mbox.querySelectorAll('.methods button').forEach(x=>x.classList.toggle('on',x===b))};
-  $('#cpnB').onclick=()=>toast($('#cpn').value.trim().toUpperCase()==='NUB20'?'تم تطبيق خصم ٢٠٪':'الكود غير صالح');
-  $('#payB').onclick=()=>{
-    if(/Pro|مدى الحياة/.test(title)){S.pro=true;render()}
-    open(`<div style="text-align:center;padding:10px 0"><div style="width:70px;height:70px;border-radius:50%;background:var(--lime);color:#000;display:grid;place-items:center;font-size:32px;margin:0 auto 18px">✓</div>
-    <h3>تمت الترقية (محاكاة)</h3><p style="color:var(--muted);margin:8px 0 20px">في المعاينة فتحنا لك ميزات PRO عشان تجربها: القوالب بدون علامة مائية، وتحسين الملخص.</p>
-    <a href="#build" class="btn btn-lime" data-close>ارجع للتصميم ←</a></div>`);
-  };
+/* ---------- الدفع: Stream داخل الموقع (العميل ما يطلع من nubthah.com) ---------- */
+let spSdk=null;
+function loadStreamSdk(){
+  if(window.Stream&&window.Stream.Checkout)return Promise.resolve();
+  if(!spSdk)spSdk=new Promise((ok,no)=>{const sc=document.createElement('script');sc.src='https://stream-embed.streampay.sa/sdk/embed.min.js';sc.async=true;sc.onload=ok;sc.onerror=()=>{spSdk=null;no()};document.head.appendChild(sc)});
+  return spSdk;
 }
+function payStop(){try{window._spCo&&window._spCo.destroy()}catch(e){}window._spCo=null;clearInterval(window._spPoll);window._spPoll=null}
+async function payPro(){
+  if(PUB)return;
+  if(!user||!user.id){authModal(payPro,'سجّل دخولك أول عشان نربط اشتراك Pro بحسابك.');return}
+  if(isProU()){location.hash='#home/plan';close();return}
+  open(`<div class="paym"><h3>${ic('lock',18)} الاشتراك في نُبذة Pro</h3><p class="muted">${ar(29)} ر.س شهريًا · يتجدد تلقائيًا · تقدر تلغيه أي وقت</p>
+   <div id="spCheckout" class="spbox"><p class="muted" style="text-align:center;padding:40px 0"><span class="spin"></span> نجهّز الدفع…</p></div>
+   <p class="note">${ic('lock',14)} الدفع آمن عبر بوابة مرخّصة، وما نحفظ بيانات بطاقتك · <a href="#refund">ضمان استرجاع ٧ أيام</a></p></div>`,'wide');
+  let r;try{r=await API('/pay/start',{method:'POST',body:'{}'}).then(x=>x.json().then(j=>({ok:x.ok,...j})))}catch(e){r={}}
+  if(!r.ok||!r.url){$('#spCheckout')&&($('#spCheckout').innerHTML=`<p style="text-align:center;padding:30px 0;color:var(--muted)">${esc(r.error||'ما قدرنا نجهّز الدفع، جرّب بعد شوي')}</p>`);return}
+  const away=()=>{payStop();location.href=r.url};
+  try{await Promise.race([loadStreamSdk(),new Promise((_,no)=>setTimeout(no,10000))])}catch(e){return away()}
+  if(!$('#spCheckout'))return;
+  $('#spCheckout').innerHTML='';
+  try{window._spCo=window.Stream.Checkout({paymentLink:r.url,container:'#spCheckout',minHeightPx:420,maxHeightPx:900,vhFraction:.72})}catch(e){return away()}
+  clearInterval(window._spPoll);
+  window._spPoll=setInterval(async()=>{
+    if(!$('#spCheckout'))return payStop();
+    const c=await payCheck({o:r.order});
+    if(c&&c.paid){payStop();paySuccess(c.user)}
+  },5000);
+}
+async function payCheck(args){try{const x=await API('/pay/check',{method:'POST',body:JSON.stringify(args)});return await x.json()}catch(e){return null}}
+function paySuccess(u){
+  if(u)setUser(u);
+  open(`<div style="text-align:center;padding:10px 0"><div class="okc">${ic('check',34)}</div>
+   <h3>أهلًا بك في نُبذة Pro</h3><p class="muted" style="margin:8px 0 20px">تفعّل اشتراكك، وانفتحت لك كل الميزات: القوالب المميزة، والذكاء الاصطناعي بلا حدود، ونسخة لكل وظيفة، وتجهيز المقابلة، والترجمة.</p>
+   <a href="#home" class="btn btn-lime" data-close>ابدأ من لوحة التحكم</a></div>`);
+}
+/* الرجوع من صفحة الدفع (لو اشتغل الدفع خارج الموقع) */
+(async()=>{
+  const q=new URLSearchParams(location.search),o=q.get('paid');if(!o)return;
+  history.replaceState(null,'',location.pathname+location.hash);
+  if(q.get('f')==='1'){setTimeout(()=>open(`<h3>ما تمّت عملية الدفع</h3><p class="muted">ما انخصم منك شيء. تقدر تحاول مرة ثانية.</p><button class="btn btn-lime" onclick="payPro()">حاول مرة ثانية</button>`),600);return}
+  setTimeout(async()=>{
+    open(`<div style="text-align:center;padding:20px 0"><span class="spin"></span><h3 style="margin-top:14px">نأكد الدفع</h3><p class="muted">ثواني بس</p></div>`);
+    for(let i=0;i<10;i++){const c=await payCheck({o,payment_id:q.get('payment_id')||''});if(c&&c.paid)return paySuccess(c.user);if(c&&c.error)break;await new Promise(z=>setTimeout(z,3000))}
+    open(`<h3>الدفع قيد التأكيد</h3><p class="muted">أحيانًا ياخذ دقيقة. أول ما يتأكد يتفعّل Pro لحاله، وتشوفه في حسابك.</p><a href="#home/plan" class="btn btn-lime" data-close>صفحة الاشتراك</a>`);
+  },800);
+})();
 function openUpsell(feature){
   open(`<span class="pro" style="font-size:12px;padding:3px 10px">PRO</span><h3 style="margin-top:12px">${feature}</h3>
    <p style="color:var(--muted)">هذه الميزة ضمن نُبذة Pro. ترقّى وافتح كل شي:</p>
    <div class="perks"><div>كل القوالب المميزة بدون علامة مائية</div><div>كتابة وتحسين بالذكاء الاصطناعي</div><div>فحص ATS مقابل أي وظيفة</div><div>رابط شخصي ورمز QR لبطاقتك</div></div>
    <button class="btn btn-lime" style="width:100%;justify-content:center" id="upB">ترقّى بـ ${ar(29)} ر.س / شهريًا</button>
    <p class="note">إلغاء بأي وقت · <a href="#refund">ضمان استرجاع ٧ أيام</a></p>`);
-  $('#upB').onclick=()=>checkout('نُبذة Pro',29,'شهري');
+  $('#upB').onclick=()=>payPro();
 }
 document.addEventListener('click',e=>{
   const p=e.target.closest('[data-plan]');
   if(p){const n=p.dataset.plan;
     if(n==='مجاني'){location.hash='#build';return}
-    const pl=PLANS.find(x=>x.n===n);
-    checkout('نُبذة '+n,pl.m,'شهري');
+    payPro();
   }
-  const b=e.target.closest('[data-buy]');
-  if(b){const [t,a]=b.dataset.buy.split('|');checkout(t,+a,'')}
 });
 
 
