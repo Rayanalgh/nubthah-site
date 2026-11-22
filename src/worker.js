@@ -339,6 +339,29 @@ async function stats(req, env){
   const rows = r.results || [], tot = rows.reduce((a, x) => ({ views: a.views + x.views, scans: a.scans + x.scans }), { views: 0, scans: 0 });
   return json({ days: rows, ...tot, pro: isPro(u) });
 }
+/* تنظيف بيانات الصفحة العامة: أي قيمة تدخل في ستايل أو رابط أو صورة لازم تكون من الشكل المتوقع، عشان ما أحد يحقن كود في صفحته ويضر زوّارها */
+function cleanPubData(d, docs){
+  const S_=(v,re,def='')=>typeof v==='string'&&re.test(v)?v:def, txt=v=>v==null?'':String(v).slice(0,4000);
+  const IMG=/^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$/, FILE=/^data:(image\/(png|jpe?g|webp|gif)|application\/pdf);base64,[A-Za-z0-9+/=]+$/;
+  const num=(v,a,b,def)=>{v=+v;return isFinite(v)?Math.min(b,Math.max(a,v)):def};
+  d=d&&typeof d==='object'?d:{};
+  const p={};for(const k of Object.keys(d.p||{}))p[k]=txt(d.p[k]);p.photo=S_(p.photo,IMG);
+  const f=d.fmt&&typeof d.fmt==='object'?d.fmt:{};
+  const secs=(Array.isArray(d.secs)?d.secs:[]).filter(s=>s&&typeof s==='object').slice(0,40).map(s=>{
+    const st=s.style&&typeof s.style==='object'?s.style:{};
+    return {...s,type:S_(s.type,/^[a-z]{1,16}$/,'custom'),id:S_(s.id,/^[\w-]{1,40}$/,'s'+Math.random().toString(36).slice(2,8)),title:s.title==null?null:txt(s.title),
+      items:Array.isArray(s.items)?s.items.filter(i=>i&&typeof i==='object').map(i=>({a:txt(i.a),b:txt(i.b),c:txt(i.c),d:txt(i.d)})):[],
+      tags:Array.isArray(s.tags)?s.tags.map(txt):[],lv:Array.isArray(s.lv)?s.lv.map(x=>num(x,1,5,4)):[],gr:Array.isArray(s.gr)?s.gr.map(x=>S_(x,/^[hts]?$/)):[],
+      style:{view:S_(st.view,/^[a-z]{0,12}$/),cols:num(st.cols,1,3,1)|0,group:!!st.group,...(st.sym!=null?{sym:txt(st.sym).slice(0,4)}:{})}};});
+  const out={p,summary:txt(d.summary),links:(Array.isArray(d.links)?d.links:[]).filter(l=>l&&typeof l==='object').map(l=>({t:txt(l.t).slice(0,40),u:txt(l.u).slice(0,300)})),
+    extra:(Array.isArray(d.extra)?d.extra:[]).filter(e=>e&&typeof e==='object').map(e=>({k:txt(e.k).slice(0,60),v:txt(e.v).slice(0,300)})),secs,
+    tpl:S_(d.tpl,/^(ats|modern|aca|eu)$/,'modern'),color:S_(d.color,/^#[0-9a-f]{3,8}$/i,'#6b3fd4'),dir:S_(d.dir,/^(rtl|ltr)$/,'rtl'),card:S_(d.card,/^[a-z0-9]{1,16}$/,'noir'),font:S_(d.font,/^[a-z0-9]{0,16}$/),
+    fmt:{font:S_(f.font,/^[a-z0-9]{0,16}$/),k:num(f.k,.6,1.6,1),g:num(f.g,.6,1.6,1),head:S_(f.head,/^[a-z0-9]{0,16}$/),bul:S_(f.bul,/^[^'"\;<>{}()]{0,2}$/),photo:f.photo!==false}};
+  const dc=(Array.isArray(docs)?docs:[]).filter(x=>x&&typeof x==='object').slice(0,60).map(x=>{const o={};for(const k of ['id','name','type','issuer','expiry','until','no'])if(x[k]!=null)o[k]=txt(x[k]).slice(0,200);
+    if(x.file&&typeof x.file==='object'&&S_(x.file.data,FILE)&&/^(image\/(png|jpe?g|webp|gif)|application\/pdf)$/.test(String(x.file.mime)))o.file={name:txt(x.file.name).slice(0,120),mime:String(x.file.mime),data:x.file.data};
+    if(o.until&&!/^\d{4}-\d{2}-\d{2}$/.test(o.until))delete o.until;return o});
+  return {data:out,docs:dc};
+}
 async function publicPage(req, env, ctx, key, byUsername){
   await ensureSchema(env);
   const u = await env.DB.prepare(`SELECT id,plan,username,pub FROM users WHERE ${byUsername ? 'username' : 'pub'}=?`).bind(key.toLowerCase()).first();
@@ -347,7 +370,8 @@ async function publicPage(req, env, ctx, key, byUsername){
     const cv = await env.DB.prepare('SELECT data,docs FROM cvs WHERE uid=?').bind(u.id).first();
     if (cv && cv.data) {
       const d = JSON.parse(cv.data);
-      payload = { data: { p: d.p, summary: d.summary, links: d.links, extra: d.extra, secs: d.secs, tpl: d.tpl, color: d.color, dir: d.dir, card: d.card, font: d.font, fmt: d.fmt }, docs: JSON.parse(cv.docs || '[]'), link: 'https://nubthah.com/' + (isPro(u) && u.username ? u.username : 'cv/' + u.pub) };
+      let docs = []; try { docs = JSON.parse(cv.docs || '[]'); } catch (e) {}
+      payload = { ...cleanPubData(d, docs), link: 'https://nubthah.com/' + (isPro(u) && u.username ? u.username : 'cv/' + u.pub) };
       countView(env, u.id, new URL(req.url).searchParams.get('s') === 'qr', ctx);
     }
   }
@@ -582,7 +606,7 @@ async function payStart(req, env){
   if (oc && !(r.ok && r.d && r.d.url)) { console.error('pay link w/ consumer', r.status, (r.t || '').slice(0, 300)); r = await mk(null); }
   if (!r.ok || !r.d || !r.d.url || !r.d.id) { console.error('pay link', r.status, (r.t || '').slice(0, 300)); return json({ error: 'ما قدرنا نفتح الدفع، جرّب بعد شوي' }, 502); }
   await env.DB.prepare("INSERT INTO orders(id,uid,link,status,created) VALUES(?,?,?,'pending',?)").bind(id, u.id, r.d.id, Date.now()).run();
-  return json({ url: r.d.url, order: id, ...(u.team && !oc ? { diag: u._cerr || 'no consumer' } : {}) });
+  return json({ url: r.d.url, order: id });
 }
 async function payCheck(req, env){
   const u = await sessionUser(req, env); if (!u) return json({ error: 'login' }, 401);
@@ -641,8 +665,8 @@ async function payWebhook(req, env){
       if (uid) await env.DB.prepare("UPDATE users SET plan='free', pro_until=? WHERE id=?").bind(Date.now(), uid).run();
       return json({ ok: true });
     }
-    if (/^SUBSCRIPTION_/.test(ev) || ev === 'INVOICE_COMPLETED') {
-      const subId = ev === 'INVOICE_COMPLETED' ? deepFind(d, ['subscription_id']) : (eid || deepFind(d, ['subscription_id']));
+    if (/^SUBSCRIPTION_/.test(ev) || /^(INVOICE_COMPLETED|CYCLE_RENEWED_SUCCESSFULLY|CYCLE_RENEWAL_FAILED|CANCEL_AT_PERIOD_END)$/.test(ev)) {
+      const subId = deepFind(d, ['subscription_id']) || (ev === 'INVOICE_COMPLETED' ? null : eid) || null;
       if (!subId) return json({ ok: true });
       // الحالة من البوابة نفسها
       const r = await stream(env, '/api/v2/subscriptions/' + encodeURIComponent(subId)); const st = String((r.d && r.d.status) || '').toUpperCase();
@@ -657,14 +681,28 @@ async function payWebhook(req, env){
       const cancelAt = r.d && (r.d.cancel_at_period_end || r.d.cancel_at);
       const status = st === 'ACTIVE' ? (cancelAt ? 'canceling' : 'active') : st === 'CANCELED' ? 'canceled' : st ? 'inactive' : null;
       if (status) await env.DB.prepare('UPDATE users SET sub_status=? WHERE id=?').bind(status, u.id).run();
+      // التجديد الشهري: الفاتورة اكتملت والاشتراك فعّال ← نمدّد Pro شهر من اليوم (ما يتكرر لنفس الإشعار)
+      if ((ev === 'INVOICE_COMPLETED' || ev === 'CYCLE_RENEWED_SUCCESSFULLY') && st === 'ACTIVE')
+        await grantPro(env, u.id, 'ev:' + ev + ':' + (eid || (subId + ':' + new Date().toISOString().slice(0, 10))), subId);
       return json({ ok: true });
     }
   } catch (e) { console.error('webhook', ev, String(e)); return json({ error: 'retry' }, 500); }
   return json({ ok: true, ignored: true });
 }
 
+const SEC_HEADERS = { 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin', 'strict-transport-security': 'max-age=31536000',
+  'permissions-policy': 'camera=(), microphone=(), geolocation=()', 'content-security-policy': "frame-ancestors 'self'" };
 export default {
   async fetch(req, env, ctx){
+    const res = await route(req, env, ctx);
+    if (!res || res.status === 101 || (res.status >= 300 && res.status < 400)) return res;
+    const out = new Response(res.body, res);
+    for (const [k, v] of Object.entries(SEC_HEADERS)) if (!out.headers.has(k)) out.headers.set(k, v);
+    return out;
+  },
+  async scheduled(event, env, ctx){ ctx.waitUntil(remindLicenses(env)); }
+};
+async function route(req, env, ctx){
     const url = new URL(req.url), p = url.pathname;
     // www → الدومين الرئيسي
     if (url.hostname === 'www.nubthah.com') return Response.redirect('https://nubthah.com' + p + url.search, 301);
@@ -706,6 +744,4 @@ export default {
       if (mm && !RESERVED.has(mm[1].toLowerCase())) return publicPage(req, env, ctx, mm[1], true);
     }
     return env.ASSETS.fetch(req);
-  },
-  async scheduled(event, env, ctx){ ctx.waitUntil(remindLicenses(env)); }
-};
+}
