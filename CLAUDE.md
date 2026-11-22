@@ -1,6 +1,7 @@
 # نُبذة — nubthah.com
 
 هذا المخزن هو **المصدر الوحيد** لموقع نُبذة (منشئ السير الذاتية وبطاقات الأعمال).
+المخزن: **github.com/nubthah/nubthah-site** (منظمة نُبذة في GitHub، مالكها حساب Rayanalgh). انتقل من Rayanalgh/nubthah-site في ٢٠٢٦-١١-٢٣، والرابط القديم يحوّل تلقائيًا.
 Cloudflare مربوط فيه (Workers Builds للـ Worker `nubthah`): أي push على `main` ينشر الموقع تلقائيًا خلال دقيقة.
 
 ## الملفات
