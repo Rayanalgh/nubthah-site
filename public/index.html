@@ -539,10 +539,15 @@ footer a:hover{color:var(--lime)}
 #printRoot{display:none}
 @media print{
   @page{size:A4;margin:0}
+  html,body{background:#fff!important}
   body>*{display:none!important}
   body::after{display:none}
   #printRoot{display:block!important}
-  #printRoot .cv{transform:none!important;box-shadow:none}
+  #printRoot .cv{transform:none!important;box-shadow:none;margin-top:-11mm;min-height:0}
+  #printRoot .cv,#printRoot .cv *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printRoot .prt{border-collapse:collapse;border-spacing:0}#printRoot .prt td{padding:0}
+  #printRoot .prt thead .sp{height:11mm}#printRoot .prt tfoot .sp{height:9mm}
+  #printRoot .demo-tag{display:none}
   #printRoot .wm{display:none}
 }
 @media (max-width:1050px){
@@ -3228,8 +3233,11 @@ $('#dlBtn').onclick=()=>{
   if(isProSel()&&!S.pro){openUpsell('تحميل بقالب PRO بدون علامة مائية');return}
   if(S.mode==='card'){const m=S.links.find(l=>l.u);toast('رابط بطاقتك: nubthah.com/'+(m?m.u.split('/').filter(Boolean).pop():'you'));return}
   let pr=$('#printRoot');if(!pr){pr=document.createElement('div');pr.id='printRoot';document.body.appendChild(pr)}
-  pr.innerHTML='';pr.appendChild($('#cv').cloneNode(true));
+  pr.innerHTML='<table class="prt"><thead><tr><td><div class="sp"></div></td></tr></thead><tfoot><tr><td><div class="sp"></div></td></tr></tfoot><tbody><tr><td></td></tr></tbody></table>';
+  pr.querySelector('tbody td').appendChild($('#cv').cloneNode(true));
+  const t0=document.title;document.title=((S.p.name||'').trim()||'السيرة الذاتية')+' - CV';
   try{window.print()}catch(e){}
+  setTimeout(()=>{document.title=t0},1500);
   toast('اختر "حفظ كـ PDF" من نافذة الطباعة');
 };
 drawForm();
@@ -4275,8 +4283,11 @@ $('#dlBtn').onclick=()=>{
   if(isBlankCV()){toast('اللي تشوفه مثال بس — اكتب بياناتك أول');focusLater('[data-p="name"]');return}
   if(S.mode==='card'){shareModal('card');return}
   let pr=$('#printRoot');if(!pr){pr=document.createElement('div');pr.id='printRoot';document.body.appendChild(pr)}
-  pr.innerHTML='';pr.appendChild($('#cv').cloneNode(true));
+  pr.innerHTML='<table class="prt"><thead><tr><td><div class="sp"></div></td></tr></thead><tfoot><tr><td><div class="sp"></div></td></tr></tfoot><tbody><tr><td></td></tr></tbody></table>';
+  pr.querySelector('tbody td').appendChild($('#cv').cloneNode(true));
+  const t0=document.title;document.title=((S.p.name||'').trim()||'السيرة الذاتية')+' - CV';
   try{window.print()}catch(e){}
+  setTimeout(()=>{document.title=t0},1500);
   setTimeout(()=>shareModal('cv'),250);
 };
 
