@@ -504,18 +504,20 @@ async function kvGet(env, k){ const r = await env.DB.prepare('SELECT v FROM kv W
 async function kvPut(env, k, v){ await env.DB.prepare('INSERT INTO kv(k,v) VALUES(?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v').bind(k, v).run(); }
 async function proProduct(env){
   if (env.STREAM_PRODUCT_PRO) return env.STREAM_PRODUCT_PRO;
-  const c = await kvGet(env, 'stream_product'); if (c) return c;
+  const ck = 'stream_product:' + (await sha(env.STREAM_API_KEY)).slice(0, 10); // مفتاح التجربة غير المفتاح الفعلي
+  const c = await kvGet(env, ck); if (c) return c;
   const r = await stream(env, '/api/v2/products?page=1&limit=100&active=true');
   if (!r.ok) throw new Error('products ' + r.status);
   const list = listOf(r.j).filter(p => p && p.id && p.is_active !== false && p.active !== false);
   const price = p => numOf(p.price) ?? numOf(p.amount) ?? numOf(p.unit_amount) ?? numOf((p.prices || [])[0]);
   const hit = list.find(p => /pro/i.test(p.name || '') && price(p) === PRO_PRICE) || list.find(p => price(p) === PRO_PRICE) || list.find(p => /pro/i.test(p.name || ''));
   if (!hit) return null;
-  await kvPut(env, 'stream_product', hit.id); return hit.id;
+  await kvPut(env, ck, hit.id); return hit.id;
 }
 // العميل في StreamPay: يتسجّل مرة وحدة بإيميل حسابه، فصفحة الدفع ما تطلب منه يكتب بياناته
 async function consumerFor(env, u){
-  if (u.spc) return u.spc;
+  const tag = (await sha(env.STREAM_API_KEY)).slice(0, 6);
+  if (u.spc && u.spc.startsWith(tag + ':')) return u.spc.slice(tag.length + 1);
   let id = null;
   try {
     const f = await stream(env, '/api/v2/consumers?search_term=' + encodeURIComponent(u.email));
@@ -529,7 +531,7 @@ async function consumerFor(env, u){
     if (!(r.ok && r.d && r.d.id)) { console.error('consumer', r.status, (r.t || '').slice(0, 300)); u._cerr = r.status + ' ' + (r.t || '').slice(0, 300); return null; }
     id = r.d.id;
   }
-  await env.DB.prepare('UPDATE users SET spc=? WHERE id=?').bind(id, u.id).run(); u.spc = id; return id;
+  await env.DB.prepare('UPDATE users SET spc=? WHERE id=?').bind(tag + ':' + id, u.id).run(); u.spc = tag + ':' + id; return id;
 }
 // تفعيل Pro: نهاية الفترة = بعد ٣١ يوم من الدفع (تكرار نفس الإشعار ما يزيد المدة)
 async function grantPro(env, uid, payId, subId){
@@ -551,7 +553,7 @@ async function settlePayment(env, payId, orderHint){
   if (o && !(findStr(x, o.link) || findStr(x, o.id))) o = null; // الدفعة لازم تخص نفس الطلب
   let uid = o && o.uid;
   if (!uid && subId) { const u = await env.DB.prepare('SELECT id FROM users WHERE sub_id=?').bind(subId).first(); uid = u && u.id; }
-  if (!uid) { const c = deepFind(x, ['organization_consumer_id', 'consumer_id']); if (c) { const u = await env.DB.prepare('SELECT id FROM users WHERE spc=?').bind(c).first(); uid = u && u.id; } }
+  if (!uid) { const c = deepFind(x, ['organization_consumer_id', 'consumer_id']); if (c) { const u = await env.DB.prepare("SELECT id FROM users WHERE spc LIKE '%:' || ?").bind(c).first(); uid = u && u.id; } }
   if (!uid) return null;
   await grantPro(env, uid, payId, subId);
   if (o && o.status !== 'paid') await env.DB.prepare("UPDATE orders SET status='paid', paid=?, pay_id=? WHERE id=?").bind(Date.now(), payId, o.id).run();
@@ -641,7 +643,7 @@ async function payWebhook(req, env){
       let u = await env.DB.prepare('SELECT id FROM users WHERE sub_id=?').bind(subId).first();
       if (!u && r.ok) { // أول مرة نشوف الاشتراك: نربطه بصاحبه عن طريق العميل أو الطلب
         const c = deepFind(r.d, ['organization_consumer_id', 'consumer_id']), oid = deepFind(r.d, ['order']);
-        if (c) u = await env.DB.prepare('SELECT id FROM users WHERE spc=?').bind(c).first();
+        if (c) u = await env.DB.prepare("SELECT id FROM users WHERE spc LIKE '%:' || ?").bind(c).first();
         if (!u && oid) { const o = await env.DB.prepare('SELECT uid FROM orders WHERE id=?').bind(oid).first(); if (o) u = { id: o.uid }; }
         if (u) await env.DB.prepare('UPDATE users SET sub_id=? WHERE id=?').bind(subId, u.id).run();
       }
