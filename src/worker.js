@@ -165,7 +165,9 @@ function ensureSchema(env){
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS rem_sent(uid TEXT, doc TEXT, stage INTEGER, sent INTEGER, PRIMARY KEY(uid, doc, stage))`)
   ]).then(async () => {
     // أعمدة جديدة (تُتجاهل لو موجودة)
-    for (const q of ['ALTER TABLE users ADD COLUMN username TEXT', 'ALTER TABLE users ADD COLUMN pub TEXT', 'ALTER TABLE cvs ADD COLUMN meta TEXT'])
+    for (const q of ['ALTER TABLE users ADD COLUMN username TEXT', 'ALTER TABLE users ADD COLUMN pub TEXT', 'ALTER TABLE cvs ADD COLUMN meta TEXT',
+      'ALTER TABLE users ADD COLUMN pro_until INTEGER', 'ALTER TABLE users ADD COLUMN sub_id TEXT', 'ALTER TABLE users ADD COLUMN sub_status TEXT', 'ALTER TABLE users ADD COLUMN spc TEXT',
+      'CREATE TABLE IF NOT EXISTS orders(id TEXT PRIMARY KEY, uid TEXT, link TEXT, status TEXT, created INTEGER, paid INTEGER, pay_id TEXT)'])
       await env.DB.prepare(q).run().catch(() => {});
     await env.DB.prepare('CREATE UNIQUE INDEX IF NOT EXISTS users_username ON users(username)').run().catch(() => {});
     await env.DB.prepare('CREATE UNIQUE INDEX IF NOT EXISTS users_pub ON users(pub)').run().catch(() => {});
@@ -200,11 +202,14 @@ async function sessionUser(req, env){
   let p; try { p = JSON.parse(atob(body.replace(/-/g,'+').replace(/_/g,'/'))); } catch (e) { return null; }
   if (!p.uid || p.exp < Date.now()) return null;
   await ensureSchema(env);
-  const u = await env.DB.prepare('SELECT id,email,name,picture,via,plan,ai_used,username,pub FROM users WHERE id=?').bind(p.uid).first();
+  const u = await env.DB.prepare('SELECT id,email,name,picture,via,plan,ai_used,username,pub,pro_until,sub_id,sub_status,spc FROM users WHERE id=?').bind(p.uid).first();
+  if (!u) return u;
   // حسابات الفريق: Pro دائمًا (PRO_EMAILS في wrangler.toml)
-  if (u && u.plan !== 'pro' && String(env.PRO_EMAILS || '').toLowerCase().split(/[\s,]+/).includes(u.email)) {
-    u.plan = 'pro'; await env.DB.prepare("UPDATE users SET plan='pro' WHERE id=?").bind(u.id).run().catch(() => {});
-  }
+  const team = String(env.PRO_EMAILS || '').toLowerCase().split(/[\s,]+/).includes(u.email);
+  // المشتركين: Pro لين نهاية الفترة المدفوعة (pro_until)
+  const want = team ? 'pro' : (u.pro_until ? (u.pro_until > Date.now() ? 'pro' : 'free') : (u.plan || 'free'));
+  if (want !== u.plan) { u.plan = want; await env.DB.prepare('UPDATE users SET plan=? WHERE id=?').bind(want, u.id).run().catch(() => {}); }
+  u.team = team;
   return u;
 }
 async function startSession(env, user){
@@ -222,7 +227,8 @@ async function upsertUser(env, u){
   await env.DB.prepare('INSERT INTO users(id,email,name,picture,via,created) VALUES(?,?,?,?,?,?)').bind(id, u.email, u.name || '', u.picture || '', u.via, Date.now()).run();
   return { id, email: u.email, name: u.name || '', picture: u.picture || '', via: u.via, plan: 'free', ai_used: 0 };
 }
-const pub = u => u && ({ id: u.id, email: u.email, name: u.name, picture: u.picture, via: u.via, plan: u.plan || 'free', ai_used: u.ai_used || 0, username: u.username || '', pub: u.pub || '', link: 'https://nubthah.com/' + (u.plan === 'pro' && u.username ? u.username : 'cv/' + (u.pub || '')) });
+const pub = u => u && ({ id: u.id, email: u.email, name: u.name, picture: u.picture, via: u.via, plan: u.plan || 'free', ai_used: u.ai_used || 0, username: u.username || '', pub: u.pub || '',
+  pro_until: u.pro_until || null, sub: u.sub_id ? (u.sub_status || 'active') : null, team: !!u.team, link: 'https://nubthah.com/' + (u.plan === 'pro' && u.username ? u.username : 'cv/' + (u.pub || '')) });
 async function ensurePub(env, u){
   if (!u || u.pub) return u;
   for (let i = 0; i < 5; i++) {
@@ -473,6 +479,182 @@ async function googleAuth(req, env){
   return json({ user: pub(user) }, 200, { 'set-cookie': await startSession(env, user) });
 }
 
+/* ---------- الدفع: StreamPay (منظمة نُبذة المستقلة) ---------- */
+const STREAM = 'https://stream-app-service.streampay.sa';
+const PRO_PRICE = 29, PERIOD = 31 * 864e5;
+async function stream(env, path, opt = {}){
+  if (!env.STREAM_API_KEY) throw new Error('no key');
+  const r = await fetch(STREAM + path, { ...opt, headers: { 'x-api-key': env.STREAM_API_KEY, 'content-type': 'application/json', accept: 'application/json', ...(opt.headers || {}) } });
+  const t = await r.text(); let j = null; try { j = JSON.parse(t); } catch (e) {}
+  return { ok: r.ok, status: r.status, j, t, d: j && (j.data || j) };
+}
+const listOf = j => Array.isArray(j) ? j : (j && (j.data || j.items || j.results || j.products)) || [];
+const numOf = v => { const n = parseFloat(typeof v === 'object' && v ? (v.amount ?? v.value ?? v.unit_amount) : v); return isFinite(n) ? n : null; };
+const okStatus = s => /^(SUCCEEDED|PAID|COMPLETED|SUCCESS|CAPTURED)$/i.test(String(s || ''));
+const findStr = (o, s) => { try { return !!s && JSON.stringify(o).includes(s); } catch (e) { return false; } };
+// يدوّر على مفتاح داخل أي مستوى من الرد (subscription_id مثلًا)
+function deepFind(o, keys, depth = 0){
+  if (!o || typeof o !== 'object' || depth > 6) return null;
+  for (const k of keys) if (typeof o[k] === 'string' && o[k]) return o[k];
+  if (o.subscription && typeof o.subscription === 'object' && o.subscription.id && keys.includes('subscription_id')) return o.subscription.id;
+  for (const v of Object.values(o)) { const x = deepFind(v, keys, depth + 1); if (x) return x; }
+  return null;
+}
+async function kvGet(env, k){ const r = await env.DB.prepare('SELECT v FROM kv WHERE k=?').bind(k).first(); return r ? r.v : null; }
+async function kvPut(env, k, v){ await env.DB.prepare('INSERT INTO kv(k,v) VALUES(?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v').bind(k, v).run(); }
+async function proProduct(env){
+  if (env.STREAM_PRODUCT_PRO) return env.STREAM_PRODUCT_PRO;
+  const c = await kvGet(env, 'stream_product'); if (c) return c;
+  const r = await stream(env, '/api/v2/products?page=1&limit=100&active=true');
+  if (!r.ok) throw new Error('products ' + r.status);
+  const list = listOf(r.j).filter(p => p && p.id && p.is_active !== false && p.active !== false);
+  const price = p => numOf(p.price) ?? numOf(p.amount) ?? numOf(p.unit_amount) ?? numOf((p.prices || [])[0]);
+  const hit = list.find(p => /pro/i.test(p.name || '') && price(p) === PRO_PRICE) || list.find(p => price(p) === PRO_PRICE) || list.find(p => /pro/i.test(p.name || ''));
+  if (!hit) return null;
+  await kvPut(env, 'stream_product', hit.id); return hit.id;
+}
+// العميل في StreamPay: يتسجّل مرة وحدة بإيميل حسابه، فصفحة الدفع ما تطلب منه يكتب بياناته
+async function consumerFor(env, u){
+  if (u.spc) return u.spc;
+  let id = null;
+  try {
+    const f = await stream(env, '/api/v2/consumers?search_term=' + encodeURIComponent(u.email));
+    const hit = f.ok && listOf(f.j).find(c => c && (c.external_id === u.id || String(c.email || '').toLowerCase() === u.email));
+    if (hit) id = hit.id;
+  } catch (e) {}
+  if (!id) {
+    const nm = (String(u.name || '').trim() || u.email.split('@')[0]).slice(0, 120);
+    let r = await stream(env, '/api/v2/consumers', { method: 'POST', body: JSON.stringify({ name: nm, email: u.email, external_id: u.id, communication_methods: ['EMAIL'], preferred_language: 'AR' }) });
+    if (!(r.ok && r.d && r.d.id)) r = await stream(env, '/api/v2/consumers', { method: 'POST', body: JSON.stringify({ name: nm, email: u.email, external_id: u.id, communication_methods: ['EMAIL'] }) });
+    if (!(r.ok && r.d && r.d.id)) { console.error('consumer', r.status, (r.t || '').slice(0, 300)); return null; }
+    id = r.d.id;
+  }
+  await env.DB.prepare('UPDATE users SET spc=? WHERE id=?').bind(id, u.id).run(); u.spc = id; return id;
+}
+// تفعيل Pro: نهاية الفترة = بعد ٣١ يوم من الدفع (تكرار نفس الإشعار ما يزيد المدة)
+async function grantPro(env, uid, payId, subId){
+  if (payId) { const seen = await kvGet(env, 'pay:' + payId); if (seen) return false; }
+  const u = await env.DB.prepare('SELECT pro_until,sub_id FROM users WHERE id=?').bind(uid).first(); if (!u) return false;
+  const until = Math.max(u.pro_until || 0, Date.now() + PERIOD);
+  await env.DB.prepare("UPDATE users SET plan='pro', pro_until=?, sub_id=COALESCE(?, sub_id), sub_status='active' WHERE id=?").bind(until, subId || null, uid).run();
+  if (payId) await kvPut(env, 'pay:' + payId, uid);
+  return true;
+}
+// نتأكد من الدفعة من البوابة نفسها، ونربطها بالطلب والمشترك
+async function settlePayment(env, payId, orderHint){
+  const r = await stream(env, '/api/v2/payments/' + encodeURIComponent(payId)); const x = r.d;
+  if (!r.ok || !x || !okStatus(x.status)) return null;
+  const subId = deepFind(x, ['subscription_id']);
+  let o = null;
+  const oid = orderHint || deepFind(x, ['order']);
+  if (oid) o = await env.DB.prepare('SELECT * FROM orders WHERE id=?').bind(oid).first();
+  if (o && !(findStr(x, o.link) || findStr(x, o.id))) o = null; // الدفعة لازم تخص نفس الطلب
+  let uid = o && o.uid;
+  if (!uid && subId) { const u = await env.DB.prepare('SELECT id FROM users WHERE sub_id=?').bind(subId).first(); uid = u && u.id; }
+  if (!uid) { const c = deepFind(x, ['organization_consumer_id', 'consumer_id']); if (c) { const u = await env.DB.prepare('SELECT id FROM users WHERE spc=?').bind(c).first(); uid = u && u.id; } }
+  if (!uid) return null;
+  await grantPro(env, uid, payId, subId);
+  if (o && o.status !== 'paid') await env.DB.prepare("UPDATE orders SET status='paid', paid=?, pay_id=? WHERE id=?").bind(Date.now(), payId, o.id).run();
+  return uid;
+}
+async function payStart(req, env){
+  const u = await sessionUser(req, env); if (!u) return json({ error: 'login' }, 401);
+  if (!env.STREAM_API_KEY) return json({ error: 'الدفع مو مفعّل' }, 503);
+  if (u.plan === 'pro' && u.sub_id && u.sub_status === 'active') return json({ error: 'اشتراكك فعّال' }, 409);
+  let pid = null; try { pid = await proProduct(env); } catch (e) {}
+  if (!pid) return json({ error: 'ما قدرنا نجهّز الدفع، جرّب بعد شوي' }, 503);
+  const id = b64u(crypto.getRandomValues(new Uint8Array(9))).replace(/[^A-Za-z0-9]/g, 'x');
+  let oc = null; try { oc = await consumerFor(env, u); } catch (e) {}
+  const mk = oc => stream(env, '/api/v2/payment_links', { method: 'POST', body: JSON.stringify({
+    name: 'نُبذة Pro', description: 'اشتراك نُبذة Pro الشهري — nubthah.com', items: [{ product_id: pid, quantity: 1 }], currency: 'SAR', max_number_of_payments: 1,
+    ...(oc ? { organization_consumer_id: oc } : { contact_information_type: 'EMAIL' }),
+    success_redirect_url: 'https://nubthah.com/?paid=' + id, failure_redirect_url: 'https://nubthah.com/?paid=' + id + '&f=1',
+    custom_metadata: { order: id, uid: u.id } }) });
+  let r = await mk(oc);
+  if (oc && !(r.ok && r.d && r.d.url)) { console.error('pay link w/ consumer', r.status, (r.t || '').slice(0, 300)); r = await mk(null); }
+  if (!r.ok || !r.d || !r.d.url || !r.d.id) { console.error('pay link', r.status, (r.t || '').slice(0, 300)); return json({ error: 'ما قدرنا نفتح الدفع، جرّب بعد شوي' }, 502); }
+  await env.DB.prepare("INSERT INTO orders(id,uid,link,status,created) VALUES(?,?,?,'pending',?)").bind(id, u.id, r.d.id, Date.now()).run();
+  return json({ url: r.d.url, order: id });
+}
+async function payCheck(req, env){
+  const u = await sessionUser(req, env); if (!u) return json({ error: 'login' }, 401);
+  let b = {}; try { b = await req.json(); } catch (e) {}
+  const o = await env.DB.prepare('SELECT * FROM orders WHERE id=?').bind(String(b.o || '')).first();
+  if (!o || o.uid !== u.id) return json({ error: 'not_found' }, 404);
+  if (o.status !== 'paid' && env.STREAM_API_KEY) {
+    try {
+      const pidQ = String(b.payment_id || '').replace(/[^\w-]/g, '');
+      if (pidQ) await settlePayment(env, pidQ, o.id);
+      if ((await env.DB.prepare('SELECT status FROM orders WHERE id=?').bind(o.id).first()).status !== 'paid') {
+        // نسأل البوابة عن مدفوعات هذا الرابط
+        const r = await stream(env, '/api/v2/payments?search_term=' + encodeURIComponent(o.link));
+        for (const pm of (r.ok ? listOf(r.j) : [])) if (pm && pm.id && findStr(pm, o.link) && okStatus(pm.status)) { await settlePayment(env, pm.id, o.id); break; }
+      }
+    } catch (e) {}
+  }
+  const o2 = await env.DB.prepare('SELECT status FROM orders WHERE id=?').bind(o.id).first();
+  const me = await sessionUser(req, env);
+  return json({ paid: o2.status === 'paid', user: pub(me) });
+}
+async function payCancel(req, env, resume){
+  const u = await sessionUser(req, env); if (!u) return json({ error: 'login' }, 401);
+  if (!u.sub_id) return json({ error: 'ما عندك اشتراك' }, 404);
+  const r = await stream(env, '/api/v2/subscriptions/' + encodeURIComponent(u.sub_id) + (resume ? '/uncancel' : '/cancel'), { method: 'POST', body: '{}' });
+  if (!r.ok) { console.error('sub cancel', r.status, (r.t || '').slice(0, 300)); return json({ error: 'ما قدرنا ننفّذ الطلب، راسلنا على help@nubthah.com' }, 502); }
+  await env.DB.prepare('UPDATE users SET sub_status=? WHERE id=?').bind(resume ? 'active' : 'canceling', u.id).run();
+  return json({ ok: true, user: pub(await sessionUser(req, env)) });
+}
+async function hmacHex(key, msg){
+  const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(key), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  return [...new Uint8Array(await crypto.subtle.sign('HMAC', k, new TextEncoder().encode(msg)))].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+const safeEq = (a, b) => { if (a.length !== b.length) return false; let x = 0; for (let i = 0; i < a.length; i++) x |= a.charCodeAt(i) ^ b.charCodeAt(i); return x === 0; };
+async function payWebhook(req, env){
+  const raw = await req.text(); let body = {}; try { body = JSON.parse(raw); } catch (e) { return json({ error: 'bad' }, 400); }
+  await ensureSchema(env);
+  // التوقيع: X-Webhook-Signature: t=...,v1=...  (HMAC-SHA256 على "t.body")
+  if (env.STREAM_WEBHOOK_SECRET) {
+    const parts = Object.fromEntries(String(req.headers.get('x-webhook-signature') || '').split(',').map(x => { const i = x.indexOf('='); return [x.slice(0, i).trim(), x.slice(i + 1).trim()]; }));
+    const ok = parts.t && parts.v1 && safeEq(await hmacHex(env.STREAM_WEBHOOK_SECRET, parts.t + '.' + raw), parts.v1);
+    if (!ok) return json({ error: 'bad_signature' }, 401);
+  }
+  const ev = String(body.event_type || ''), d = body.data || {}, eid = String(body.entity_id || '');
+  try {
+    if (ev === 'PAYMENT_SUCCEEDED') {
+      const payId = eid || (d.payment && d.payment.id);
+      const uid = payId && await settlePayment(env, payId, d.metadata && d.metadata.order);
+      return json({ ok: true, matched: !!uid });
+    }
+    if (ev === 'PAYMENT_REFUNDED') { // استرجاع: نوقف Pro
+      const subId = deepFind(d, ['subscription_id']), oid = d.metadata && d.metadata.order;
+      let uid = null;
+      if (oid) { const o = await env.DB.prepare('SELECT uid FROM orders WHERE id=?').bind(oid).first(); uid = o && o.uid; }
+      if (!uid && subId) { const u = await env.DB.prepare('SELECT id FROM users WHERE sub_id=?').bind(subId).first(); uid = u && u.id; }
+      if (uid) await env.DB.prepare("UPDATE users SET plan='free', pro_until=? WHERE id=?").bind(Date.now(), uid).run();
+      return json({ ok: true });
+    }
+    if (/^SUBSCRIPTION_/.test(ev) || ev === 'INVOICE_COMPLETED') {
+      const subId = ev === 'INVOICE_COMPLETED' ? deepFind(d, ['subscription_id']) : (eid || deepFind(d, ['subscription_id']));
+      if (!subId) return json({ ok: true });
+      // الحالة من البوابة نفسها
+      const r = await stream(env, '/api/v2/subscriptions/' + encodeURIComponent(subId)); const st = String((r.d && r.d.status) || '').toUpperCase();
+      let u = await env.DB.prepare('SELECT id FROM users WHERE sub_id=?').bind(subId).first();
+      if (!u && r.ok) { // أول مرة نشوف الاشتراك: نربطه بصاحبه عن طريق العميل أو الطلب
+        const c = deepFind(r.d, ['organization_consumer_id', 'consumer_id']), oid = deepFind(r.d, ['order']);
+        if (c) u = await env.DB.prepare('SELECT id FROM users WHERE spc=?').bind(c).first();
+        if (!u && oid) { const o = await env.DB.prepare('SELECT uid FROM orders WHERE id=?').bind(oid).first(); if (o) u = { id: o.uid }; }
+        if (u) await env.DB.prepare('UPDATE users SET sub_id=? WHERE id=?').bind(subId, u.id).run();
+      }
+      if (!u) return json({ ok: true, unknown: true });
+      const cancelAt = r.d && (r.d.cancel_at_period_end || r.d.cancel_at);
+      const status = st === 'ACTIVE' ? (cancelAt ? 'canceling' : 'active') : st === 'CANCELED' ? 'canceled' : st ? 'inactive' : null;
+      if (status) await env.DB.prepare('UPDATE users SET sub_status=? WHERE id=?').bind(status, u.id).run();
+      return json({ ok: true });
+    }
+  } catch (e) { console.error('webhook', ev, String(e)); return json({ error: 'retry' }, 500); }
+  return json({ ok: true, ignored: true });
+}
+
 export default {
   async fetch(req, env, ctx){
     const url = new URL(req.url), p = url.pathname;
@@ -490,6 +672,11 @@ export default {
         if (p === '/api/tailor' && m === 'POST') return await aiTool(req, env, ip, 'tailor');
         if (p === '/api/interview' && m === 'POST') return await aiTool(req, env, ip, 'interview');
         if (p === '/api/translate' && m === 'POST') return await aiTool(req, env, ip, 'translate');
+        if (p === '/api/pay/webhook' && m === 'POST') return await payWebhook(req, env);
+        if (p === '/api/pay/start' && m === 'POST') return await payStart(req, env);
+        if (p === '/api/pay/check' && m === 'POST') return await payCheck(req, env);
+        if (p === '/api/pay/cancel' && m === 'POST') return await payCancel(req, env, false);
+        if (p === '/api/pay/resume' && m === 'POST') return await payCancel(req, env, true);
         if (p === '/api/cv' && m === 'GET') return await cvGet(req, env);
         if (p === '/api/cv' && m === 'PUT') return await cvPut(req, env);
         if (m !== 'POST') return json({ error: 'method_not_allowed' }, 405);
