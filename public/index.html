@@ -806,7 +806,7 @@ body.noscroll{overflow:hidden}
 /* ---- editor: skills ---- */
 .skstyle{padding:12px;border-radius:14px;background:#0f0f14;border:1px solid var(--line);margin-bottom:12px}
 .sk-h{font-size:13px;font-weight:600;margin-bottom:8px}.sk-h small{color:var(--muted);font-weight:400;margin-inline-start:6px}
-.vgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .vgrid button{display:grid;gap:4px;justify-items:center;padding:8px 4px;border-radius:10px;border:1px solid var(--line);font-size:11.5px;color:#cfc6dc;transition:.15s}
 .vgrid button:hover{border-color:var(--line2)}
 .vgrid button.on{border-color:var(--lime);background:rgba(193,163,255,.12);color:#fff}
@@ -866,6 +866,9 @@ body.noscroll{overflow:hidden}
 .sk-list{list-style:none;padding:0;margin:0;display:grid;gap:3px 18px;font-size:calc(13px*var(--k,1))}
 .sk-list li{position:relative;padding-inline-start:16px}
 .sk-list li::before{position:absolute;inset-inline-start:0;color:var(--ac);font-weight:700}
+.sk-list.none li{padding-inline-start:0}.sk-list.custom li::before{content:none}.sk-list .bs{position:absolute;inset-inline-start:0;color:var(--ac);font-weight:700;font-style:normal;min-width:12px}.sk-list.custom.wide li{padding-inline-start:24px}
+.t-mod aside .sk-list .bs{color:#fff}
+.symrow{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;align-items:center}.symrow button{min-width:32px;height:32px;border-radius:9px;border:1px solid var(--line);color:#fff;font-size:15px}.symrow button.on{border-color:var(--lime);background:rgba(193,163,255,.14)}.symrow input{width:86px;height:32px;padding:0 8px;text-align:center;font-size:15px}
 .sk-list.dash li::before{content:"—"}.sk-list.dot li::before{content:"•"}.sk-list.check li::before{content:"✓"}
 .c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:1fr 1fr 1fr}
 .sk-line{font-size:calc(13px*var(--k,1));line-height:1.8}.sk-line i{font-style:normal;color:var(--ac)}
@@ -2875,7 +2878,8 @@ function undoArrange(){if(!arrSnap)return;Object.assign(S,JSON.parse(arrSnap));a
 /* ---------- تحكم كامل بالمهارات + التنسيق ---------- */
 const GR={h:['المهارات التخصصية','Technical Skills'],t:['الأدوات والبرامج','Tools & Software'],s:['المهارات الشخصية','Soft Skills'],'':['أخرى','Other']};
 const VIEWS=[['chips','شرائح','<i class="vi-chips"><b></b><b></b><b></b></i>'],['dash','شرطة','<i class="vi-list">— ـــ<br>— ـــ</i>'],['dot','نقاط','<i class="vi-list">• ـــ<br>• ـــ</i>'],
-  ['check','صح','<i class="vi-list">✓ ـــ<br>✓ ـــ</i>'],['line','سطر واحد','<i class="vi-list">ـــ · ـــ · ـــ</i>'],['bars','أشرطة مستوى','<i class="vi-bars"><b style="width:90%"></b><b style="width:65%"></b></i>'],['rating','تقييم بالنقاط','<i class="vi-list">ـــ ●●●○</i>']];
+  ['check','صح','<i class="vi-list">✓ ـــ<br>✓ ـــ</i>'],['line','سطر واحد','<i class="vi-list">ـــ · ـــ · ـــ</i>'],['bars','أشرطة مستوى','<i class="vi-bars"><b style="width:90%"></b><b style="width:65%"></b></i>'],['rating','تقييم بالنقاط','<i class="vi-list">ـــ ●●●○</i>'],['none','بدون رمز','<i class="vi-list">ـــ<br>ـــ</i>'],['custom','رمز حر','<i class="vi-list">★ ـــ<br>★ ـــ</i>']];
+const SYMS=['★','✦','◆','◇','■','▪','●','○','➤','▸','‣','➜','→','✔','☑','✧','♦','◉','–','+','»','#'];
 const LV_VIEWS=['bars','rating'];
 function ensureMeta(s){if(!s.tags)return;s.lv=s.lv||[];s.gr=s.gr||[];while(s.lv.length<s.tags.length)s.lv.push(4);while(s.gr.length<s.tags.length)s.gr.push('');s.lv.length=s.tags.length;s.gr.length=s.tags.length;s.style=s.style||{}}
 function moveTag(s,from,to){ensureMeta(s);if(to<0||to>=s.tags.length||from===to)return;[s.tags,s.lv,s.gr].forEach(a=>a.splice(to,0,a.splice(from,1)[0]))}
@@ -2902,6 +2906,7 @@ function styleHTML(si){
    <div class="vgrid">${VIEWS.map(([k,n,ic])=>`<button data-act="skView" data-v="${si}" data-k="${k}" class="${v===k?'on':''}">${ic}<span>${n}</span></button>`).join('')}</div>
    <div class="skopts"><span>الأعمدة</span><div class="segs">${[1,2,3].map(n=>`<button data-act="skCols" data-v="${si}" data-n="${n}" class="${(st.cols||1)===n?'on':''}">${ar(n)}</button>`).join('')}</div>
    <label class="chk2"><input type="checkbox" data-skgroup="${si}" ${st.group?'checked':''}> جمّعها حسب النوع</label></div>
+   ${v==='custom'?`<div class="symrow"><span class="muted" style="font-size:12px">اختر رمز أو اكتب أي رمز تبيه:</span>${SYMS.map(x=>`<button data-act="skSym" data-v="${si}" data-s="${esc(x)}" class="${(st.sym??'★')===x?'on':''}">${esc(x)}</button>`).join('')}<input data-sksym="${si}" maxlength="4" value="${esc(st.sym??'★')}" aria-label="رمز من اختيارك"></div>`:''}
    ${v?'':'<p class="muted" style="font-size:11.5px;margin-top:6px">حاليًا: الشكل الافتراضي للقالب.</p>'}</div>`;
 }
 function tagSecEditor(si){
@@ -2918,7 +2923,7 @@ function redrawTagSec(si){const s=S.secs[si],b=document.getElementById('b-'+s.id
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]');if(!b||!form.contains(b))return;
   const [x,y]=(b.dataset.v||'').split(',').map(Number),act=b.dataset.act;
-  if(!['editTag','teDone','teGr','teLv','teMove','skView','skCols'].includes(act))return;
+  if(!['editTag','teDone','teGr','teLv','teMove','skView','skCols','skSym'].includes(act))return;
   e.stopImmediatePropagation();const s=S.secs[x];if(s)ensureMeta(s);
   if(act==='editTag'){tagEdit=tagEdit&&tagEdit.si===x&&tagEdit.ti===y?null:{si:x,ti:y};redrawTagSec(x);const i=$('#teTxt');i&&i.focus();return}
   if(act==='teDone'){const si=tagEdit?.si;tagEdit=null;if(si!=null)redrawTagSec(si);return}
@@ -2927,9 +2932,11 @@ document.addEventListener('click',e=>{
   if(act==='teMove'){const to=y+(+b.dataset.d);moveTag(s,y,to);if(to>=0&&to<s.tags.length)tagEdit={si:x,ti:to}}
   if(act==='skView')s.style.view=s.style.view===b.dataset.k?'':b.dataset.k;
   if(act==='skCols')s.style.cols=+b.dataset.n;
+  if(act==='skSym')s.style.sym=b.dataset.s;
   redrawTagSec(x);schedule();
 },true);
 document.addEventListener('input',e=>{const t=e.target;
+  if(t.dataset&&t.dataset.sksym!==undefined){const si=+t.dataset.sksym,s=S.secs[si];ensureMeta(s);s.style.sym=t.value.trim().slice(0,4);form.querySelectorAll(`[data-act="skSym"][data-v="${si}"]`).forEach(x=>x.classList.toggle('on',x.dataset.s===s.style.sym));schedule();return}
   if(t.id==='teTxt'){const s=S.secs[+t.dataset.si];s.tags[+t.dataset.ti]=t.value;const c=form.querySelector(`.tg[data-si="${t.dataset.si}"][data-ti="${t.dataset.ti}"] b`);if(c)c.textContent=t.value;schedule()}
 });
 document.addEventListener('keydown',e=>{if(e.target.id==='teTxt'&&e.key==='Enter'){e.preventDefault();const si=tagEdit?.si;tagEdit=null;if(si!=null)redrawTagSec(si)}});
@@ -2951,6 +2958,7 @@ function tagsBody(s,side){
     if(view==='line')return `<p class="sk-line">${list.map(i=>esc(s.tags[i])).join('<i> · </i>')}</p>`;
     if(view==='bars')return `<div class="sk-bars c${cols}">${list.map(i=>`<div><span>${esc(s.tags[i])}</span><i><b style="width:${s.lv[i]*20}%"></b></i></div>`).join('')}</div>`;
     if(view==='rating')return `<div class="sk-rate c${cols}">${list.map(i=>`<div><span>${esc(s.tags[i])}</span><em>${'●'.repeat(s.lv[i])}<u>${'●'.repeat(5-s.lv[i])}</u></em></div>`).join('')}</div>`;
+    if(view==='custom'){const sy=String(st.sym??'★').slice(0,4);return `<ul class="sk-list ${sy?'custom':'none'}${[...sy].length>1?' wide':''} c${cols}">${list.map(i=>`<li>${sy?`<i class="bs">${esc(sy)}</i>`:''}${esc(s.tags[i])}</li>`).join('')}</ul>`}
     return `<ul class="sk-list ${view} c${cols}">${list.map(i=>`<li>${esc(s.tags[i])}</li>`).join('')}</ul>`;
   };
   if(!st.group)return one(idx);
