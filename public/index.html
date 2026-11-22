@@ -3638,7 +3638,7 @@ function dTailor(){
     if(isBlankCV()){toast('سيرتك فاضية — اكتبها أو ارفع سيرتك القديمة أول');return}
     const b=$('#tGo');b.disabled=true;b.innerHTML='<span class="spin"></span> نقارن سيرتك بالإعلان…'+TM(10);
     const o=await aiCall('/tailor',{job,img:tImg||undefined,cv:JSON.parse(cvPayload()).data,lang:S.dir});b.disabled=false;b.innerHTML=ic('spark',16)+' جهّز نسخة لهذي الوظيفة';
-    if(!o)return;lastTailor={...o,job};renderTailor();
+    if(!o)return;(o.xp||[]).forEach(x=>{if(Array.isArray(x.d))x.d=x.d.join('\n');else if(x.d!=null)x.d=String(x.d);x.i=+x.i});if(!Array.isArray(o.skills_order))o.skills_order=[];lastTailor={...o,job:job||'(صورة)'};renderTailor();
   };
 }
 function renderTailor(){
