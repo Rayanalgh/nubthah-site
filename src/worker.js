@@ -79,11 +79,11 @@ function limited(ip, key, max){
 }
 const normKey = s => String(s).trim().toLowerCase().replace(/[ً-ْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/\s+/g,' ');
 
-async function askClaude(env, prompt, maxTokens){
+async function askClaude(env, prompt, maxTokens, img){
   const r = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: env.AI_MODEL || MODEL, max_tokens: maxTokens, messages: [{ role: 'user', content: prompt }] })
+    body: JSON.stringify({ model: env.AI_MODEL || MODEL, max_tokens: maxTokens, messages: [{ role: 'user', content: img ? [{ type: 'image', source: { type: 'base64', media_type: img.type, data: img.data } }, { type: 'text', text: prompt }] : prompt }] })
   });
   if (!r.ok) { let m = ''; try { m = (await r.json()).error?.type || ''; } catch (e) {} throw new Error('ai_' + r.status + (m ? ':' + m : '')); }
   const d = await r.json(), m = (d.content || []).map(c => c.text || '').join('').match(/\{[\s\S]*\}/);
@@ -383,8 +383,8 @@ const Q3 = '"""';
 const AI_PROMPTS = {
   tailor: b => `You are an expert CV writer and ATS specialist for the Saudi / GCC job market.
 Here is a job posting:
-${Q3}${String(b.job || '').slice(0, 6000)}${Q3}
-Here is the candidate's CV as JSON:
+${Q3}${String(b.job || '').slice(0, 6000) || '(no text — the job posting is in the attached image)'}${Q3}
+${b.img ? 'The job posting (or part of it) is in the attached image/screenshot: read ALL of its text carefully (Arabic or English) and use it as the job posting. If the image is not a job posting at all, return {"error":"not_a_job"}.\n' : ''}Here is the candidate's CV as JSON:
 ${cvBrief(b.cv)}
 Tailor the CV to this job WITHOUT inventing anything: only reword, reorder and emphasize facts that already exist in the CV.
 Write in ${b.lang === 'ltr' ? 'professional English' : 'professional Modern Standard Arabic'}.
@@ -414,12 +414,18 @@ Return ONLY the translated JSON object with keys p, summary, secs.`
 async function aiTool(req, env, ip, kind){
   if (!env.ANTHROPIC_API_KEY) return json({ error: 'ai_not_configured' }, 503);
   const b = await req.json().catch(() => ({}));
-  if ((kind === 'tailor' || kind === 'interview') && String(b.job || '').trim().length < 5) return json({ error: 'job_required' }, 400);
+  let img = null;
+  if (kind === 'tailor' && b.img) {
+    const m = /^data:(image\/(?:jpeg|png|webp|gif));base64,([A-Za-z0-9+/=]+)$/.exec(String(b.img));
+    if (!m || m[2].length > 6e6) return json({ error: 'bad_image' }, 400);
+    img = { type: m[1], data: m[2] }; b.img = true;
+  } else b.img = false;
+  if ((kind === 'tailor' || kind === 'interview') && !img && String(b.job || '').trim().length < 5) return json({ error: 'job_required' }, 400);
   if ((kind === 'tailor' || kind === 'translate') && !b.cv) return json({ error: 'cv_required' }, 400);
   const g = await aiGate(req, env); if (g.res) return g.res;
   if (g.u && g.u.plan !== 'pro') return json({ error: 'pro_required' }, 402);
   if (limited(ip, kind, 20)) return json({ error: 'rate_limited' }, 429);
-  try { const out = await askClaude(env, AI_PROMPTS[kind](b), kind === 'translate' ? 8000 : 5000); await aiCount(env, g); return json(out); }
+  try { const out = await askClaude(env, AI_PROMPTS[kind](b), kind === 'translate' ? 8000 : 5000, img); if (out && out.error) return json({ error: String(out.error).slice(0, 40) }, 422); await aiCount(env, g); return json(out); }
   catch (e) { return json({ error: 'ai_failed', reason: String(e.message || e).slice(0, 80) }, 502); }
 }
 
