@@ -120,18 +120,19 @@ async function previewTool(req, env, ip, ctx, kind){
   const lim = o => (pro || o.error) ? o : (kind === 'kw' ? limitKW(o) : limitCR(o));
   const cache = caches.default, ck = new Request('https://cache.nubthah/' + kind + '/' + encodeURIComponent(normKey(f)));
   const hit = await cache.match(ck);
-  if (hit) { try { return json(lim(await hit.json())); } catch (e) {} }
+  if (hit) { try { const o = await hit.json(); bump(env, ctx, 'ai_' + kind); return json(lim(o)); } catch (e) {} }
   if (limited(ip, kind, 30)) return json({ error: 'rate_limited' }, 429);
   try {
     const out = await askClaude(env, kind === 'kw' ? kwPrompt(f) : crPrompt(f), kind === 'kw' ? 4000 : 4500);
     if (!out.error) ctx.waitUntil(cache.put(ck, json(out, 200, { 'cache-control': 'public, max-age=2592000' })));
+    if (!out.error) bump(env, ctx, 'ai_' + kind);
     return json(lim(out));
   } catch (e) { return json({ error: 'ai_failed', reason: String(e.message || e).slice(0, 80) }, 502); }
 }
 const keywords = (req, env, ip, ctx) => previewTool(req, env, ip, ctx, 'kw');
 const courses = (req, env, ip, ctx) => previewTool(req, env, ip, ctx, 'cr');
 
-async function arrange(req, env, ip){
+async function arrange(req, env, ip, ctx){
   if (!env.ANTHROPIC_API_KEY) return json({ error: 'ai_not_configured' }, 503);
   const { text = '', lang = 'rtl' } = await req.json().catch(() => ({}));
   const t = String(text).trim();
@@ -139,7 +140,7 @@ async function arrange(req, env, ip){
   if (t.length > 20000) return json({ error: 'text_too_long' }, 413);
   const g = await aiGate(req, env); if (g.res) return g.res;
   if (limited(ip, 'arr', 20)) return json({ error: 'rate_limited' }, 429);
-  try { const out = await askClaude(env, arrPrompt(t, lang === 'ltr' ? 'ltr' : 'rtl'), 7000); await aiCount(env, g); return json(out); }
+  try { const out = await askClaude(env, arrPrompt(t, lang === 'ltr' ? 'ltr' : 'rtl'), 7000); await aiCount(env, g); bump(env, ctx, 'ai_arr'); return json(out); }
   catch (e) { return json({ error: 'ai_failed', reason: String(e.message || e).slice(0, 80) }, 502); }
 }
 
@@ -156,7 +157,8 @@ function ensureSchema(env){
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS cv_hist_uid ON cv_hist(uid, saved)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS views(uid TEXT, day TEXT, views INTEGER DEFAULT 0, scans INTEGER DEFAULT 0, PRIMARY KEY(uid, day))`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS tracker(uid TEXT PRIMARY KEY, data TEXT, updated INTEGER)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS rem_sent(uid TEXT, doc TEXT, stage INTEGER, sent INTEGER, PRIMARY KEY(uid, doc, stage))`)
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS rem_sent(uid TEXT, doc TEXT, stage INTEGER, sent INTEGER, PRIMARY KEY(uid, doc, stage))`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS daily(day TEXT, k TEXT, n INTEGER DEFAULT 0, PRIMARY KEY(day, k))`)
   ]).then(async () => {
     // أعمدة جديدة (تُتجاهل لو موجودة)
     for (const q of ['ALTER TABLE users ADD COLUMN username TEXT', 'ALTER TABLE users ADD COLUMN pub TEXT', 'ALTER TABLE cvs ADD COLUMN meta TEXT',
@@ -219,7 +221,7 @@ async function upsertUser(env, u){
   }
   const id = 'u_' + b64u(crypto.getRandomValues(new Uint8Array(12)));
   await env.DB.prepare('INSERT INTO users(id,email,name,picture,via,created) VALUES(?,?,?,?,?,?)').bind(id, u.email, u.name || '', u.picture || '', u.via, Date.now()).run();
-  return { id, email: u.email, name: u.name || '', picture: u.picture || '', via: u.via, plan: 'free', ai_used: 0 };
+  return { id, email: u.email, name: u.name || '', picture: u.picture || '', via: u.via, plan: 'free', ai_used: 0, _new: true };
 }
 const pub = u => u && ({ id: u.id, email: u.email, name: u.name, picture: u.picture, via: u.via, plan: u.plan || 'free', ai_used: u.ai_used || 0, username: u.username || '', pub: u.pub || '',
   pro_until: u.pro_until || null, sub: u.sub_id ? (u.sub_status || 'active') : null, team: !!u.team, link: 'https://nubthah.com/' + (u.plan === 'pro' && u.username ? u.username : 'cv/' + (u.pub || '')) });
@@ -263,7 +265,7 @@ async function emailStart(req, env, ip){
   if (!r.ok) return json({ error: 'send_failed' }, 502);
   return json({ ok: true });
 }
-async function emailVerify(req, env){
+async function emailVerify(req, env, ctx){
   if (!env.DB) return json({ error: 'email_not_configured' }, 503);
   const { email = '', code = '' } = await req.json().catch(() => ({}));
   const e = String(email).trim().toLowerCase(), c = String(code).replace(/\D/g, '');
@@ -277,6 +279,7 @@ async function emailVerify(req, env){
   }
   await env.DB.prepare('DELETE FROM codes WHERE email=?').bind(e).run();
   const user = await upsertUser(env, { email: e, name: row.name, via: 'email' });
+  if (user._new) bump(env, ctx, 'signup');
   return json({ user: pub(user) }, 200, { 'set-cookie': await startSession(env, user) });
 }
 async function cvGet(req, env){
@@ -306,6 +309,55 @@ async function cvPut(req, env){
   await env.DB.prepare('INSERT INTO cvs(uid,data,docs,meta,updated) VALUES(?,?,?,?,?) ON CONFLICT(uid) DO UPDATE SET data=excluded.data, docs=COALESCE(excluded.docs,cvs.docs), meta=excluded.meta, updated=excluded.updated')
     .bind(u.id, JSON.stringify(b.data), b.docs ? JSON.stringify(b.docs) : null, meta, now).run();
   return json({ ok: true, updated: now });
+}
+
+/* ---------- إحصائيات الموقع (للوحة الإدارة) ---------- */
+const today = () => new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10); // بتوقيت السعودية
+function bump(env, ctx, k, n = 1){
+  if (!env.DB || !ctx) return;
+  ctx.waitUntil(ensureSchema(env).then(() => env.DB.prepare('INSERT INTO daily(day,k,n) VALUES(?,?,?) ON CONFLICT(day,k) DO UPDATE SET n=n+excluded.n').bind(today(), k, n).run()).catch(() => {}));
+}
+const EVENTS = new Set(['pdf', 'card_share', 'qr_dl', 'vcard', 'checkout', 'cv_import', 'ats_check', 'signup_open']);
+const BOT = /bot|crawl|spider|slurp|facebookexternalhit|whatsapp|telegram|preview|monitor|curl|wget|python|headless/i;
+async function trackEvent(req, env, ctx, ip){
+  const { e = '' } = await req.json().catch(() => ({}));
+  if (!EVENTS.has(e) || limited(ip, 'ev', 400)) return json({ ok: false });
+  bump(env, ctx, 'ev_' + e); return json({ ok: true });
+}
+const isAdmin = (env, u) => !!u && String(env.ADMIN_EMAILS || env.PRO_EMAILS || '').toLowerCase().split(/[\s,]+/).filter(Boolean).includes(u.email);
+async function adminStats(req, env){
+  const u = await sessionUser(req, env); if (!isAdmin(env, u)) return json({ error: 'forbidden' }, 403);
+  const days = Math.min(90, Math.max(7, +new URL(req.url).searchParams.get('days') || 30));
+  const since = new Date(Date.now() + 3 * 3600e3 - (days - 1) * 864e5).toISOString().slice(0, 10), sinceMs = Date.parse(since) - 3 * 3600e3, now = Date.now();
+  const team = String(env.PRO_EMAILS || '').toLowerCase().split(/[\s,]+/).filter(Boolean);
+  const q = (sql, ...a) => env.DB.prepare(sql).bind(...a);
+  const [daily, pv, users, signups, pro, orders, recentUsers, subs, cvs] = await env.DB.batch([
+    q('SELECT day,k,n FROM daily WHERE day>=?', since),
+    q('SELECT day,SUM(views) v,SUM(scans) s FROM views WHERE day>=? GROUP BY day', since),
+    q('SELECT COUNT(*) n, SUM(created>=?) recent, SUM(via=\'google\') g FROM users', sinceMs),
+    q("SELECT strftime('%Y-%m-%d', created/1000 + 10800, 'unixepoch') day, COUNT(*) n FROM users WHERE created>=? GROUP BY day", sinceMs),
+    q("SELECT SUM(pro_until>?) active, SUM(pro_until>? AND sub_status='canceling') canceling, SUM(pro_until IS NOT NULL) ever FROM users", now, now),
+    q("SELECT COUNT(*) started, SUM(status='paid') paid, SUM(status='paid' AND paid>=?) paid_recent, SUM(created>=?) started_recent FROM orders", sinceMs, sinceMs),
+    q('SELECT email,name,via,plan,created,pro_until FROM users ORDER BY created DESC LIMIT 25'),
+    q("SELECT u.email,u.name,u.pro_until,u.sub_status,(SELECT MAX(paid) FROM orders o WHERE o.uid=u.id AND o.status='paid') paid FROM users u WHERE u.pro_until IS NOT NULL ORDER BY u.pro_until DESC LIMIT 50"),
+    q('SELECT COUNT(*) n FROM cvs')
+  ]);
+  const D = {}; const row = d => D[d] || (D[d] = { day: d });
+  for (let i = 0; i < days; i++) row(new Date(Date.parse(since) + i * 864e5).toISOString().slice(0, 10));
+  for (const r of daily.results || []) if (D[r.day]) D[r.day][r.k] = r.n;
+  for (const r of pv.results || []) if (D[r.day]) { D[r.day].pv = r.v || 0; D[r.day].scan = r.s || 0; }
+  for (const r of signups.results || []) if (D[r.day]) D[r.day].signup = r.n;
+  const tot = await q('SELECT k,SUM(n) n FROM daily GROUP BY k').all();
+  const allT = Object.fromEntries((tot.results || []).map(r => [r.k, r.n]));
+  const pvAll = await q('SELECT SUM(views) v,SUM(scans) s FROM views').first();
+  const U = users.results[0] || {}, PR = pro.results[0] || {}, O = orders.results[0] || {};
+  return json({ days, since, daily: Object.values(D).sort((a, b) => a.day < b.day ? -1 : 1),
+    totals: { users: U.n || 0, users_recent: U.recent || 0, users_google: U.g || 0, cvs: (cvs.results[0] || {}).n || 0,
+      pro_active: PR.active || 0, pro_canceling: PR.canceling || 0, pro_ever: PR.ever || 0,
+      orders_started: O.started || 0, orders_paid: O.paid || 0, paid_recent: O.paid_recent || 0, started_recent: O.started_recent || 0, price: PRO_PRICE,
+      all: allT, pv_all: (pvAll && pvAll.v) || 0, scan_all: (pvAll && pvAll.s) || 0 },
+    recent_users: (recentUsers.results || []).map(r => ({ ...r, team: team.includes(r.email) })),
+    subscribers: (subs.results || []).filter(r => !team.includes(r.email)) });
 }
 
 /* ---------- الرابط الشخصي + الصفحة العامة + الإحصائيات ---------- */
@@ -429,7 +481,7 @@ CV JSON:
 ${cvBrief(b.cv)}
 Return ONLY the translated JSON object with keys p, summary, secs.`
 };
-async function aiTool(req, env, ip, kind){
+async function aiTool(req, env, ip, kind, ctx){
   if (!env.ANTHROPIC_API_KEY) return json({ error: 'ai_not_configured' }, 503);
   const b = await req.json().catch(() => ({}));
   let img = null;
@@ -443,7 +495,7 @@ async function aiTool(req, env, ip, kind){
   const g = await aiGate(req, env); if (g.res) return g.res;
   if (g.u && g.u.plan !== 'pro') return json({ error: 'pro_required' }, 402);
   if (limited(ip, kind, 20)) return json({ error: 'rate_limited' }, 429);
-  try { const out = await askClaude(env, AI_PROMPTS[kind](b), kind === 'translate' ? 8000 : 5000, img); if (out && out.error) return json({ error: String(out.error).slice(0, 40) }, 422); await aiCount(env, g); return json(out); }
+  try { const out = await askClaude(env, AI_PROMPTS[kind](b), kind === 'translate' ? 8000 : 5000, img); if (out && out.error) return json({ error: String(out.error).slice(0, 40) }, 422); await aiCount(env, g); bump(env, ctx, 'ai_' + kind); return json(out); }
   catch (e) { return json({ error: 'ai_failed', reason: String(e.message || e).slice(0, 80) }, 502); }
 }
 
@@ -488,7 +540,7 @@ async function remindLicenses(env){
 }
 
 const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-async function googleAuth(req, env){
+async function googleAuth(req, env, ctx){
   if (!env.GOOGLE_CLIENT_ID || !env.DB) return json({ error: 'google_not_configured' }, 503);
   const { credential = '' } = await req.json().catch(() => ({}));
   if (!credential || credential.length > 4096) return json({ error: 'missing_credential' }, 400);
@@ -500,6 +552,7 @@ async function googleAuth(req, env){
   if (Number(t.exp) * 1000 < Date.now()) return json({ error: 'expired' }, 401);
   if (String(t.email_verified) !== 'true') return json({ error: 'email_not_verified' }, 401);
   const user = await upsertUser(env, { email: String(t.email).toLowerCase(), name: t.name || '', picture: t.picture || '', via: 'google' });
+  if (user._new) bump(env, ctx, 'signup');
   return json({ user: pub(user) }, 200, { 'set-cookie': await startSession(env, user) });
 }
 
@@ -704,14 +757,15 @@ async function route(req, env, ctx){
       const ip = req.headers.get('cf-connecting-ip') || 'x', m = req.method;
       try {
         if (p === '/api/auth/config' && m === 'GET') return json({ google: !!(env.GOOGLE_CLIENT_ID && env.DB), email: !!(env.RESEND_API_KEY && env.DB), googleClientId: env.GOOGLE_CLIENT_ID || '', db: !!env.DB, ai: !!env.ANTHROPIC_API_KEY });
-        if (p === '/api/me' && m === 'GET') { const u = await ensurePub(env, await sessionUser(req, env)); return u ? json({ user: pub(u) }) : json({ user: null }); }
+        if (p === '/api/me' && m === 'GET') { const u = await ensurePub(env, await sessionUser(req, env)); return u ? json({ user: { ...pub(u), admin: isAdmin(env, u) } }) : json({ user: null }); }
         if (p === '/api/username' && m === 'POST') return await setUsername(req, env);
         if (p === '/api/stats' && m === 'GET') return await stats(req, env);
+        if (p === '/api/admin/stats' && m === 'GET') return await adminStats(req, env);
         if (p === '/api/tracker' && m === 'GET') return await trackerGet(req, env);
         if (p === '/api/tracker' && m === 'PUT') return await trackerPut(req, env);
-        if (p === '/api/tailor' && m === 'POST') return await aiTool(req, env, ip, 'tailor');
-        if (p === '/api/interview' && m === 'POST') return await aiTool(req, env, ip, 'interview');
-        if (p === '/api/translate' && m === 'POST') return await aiTool(req, env, ip, 'translate');
+        if (p === '/api/tailor' && m === 'POST') return await aiTool(req, env, ip, 'tailor', ctx);
+        if (p === '/api/interview' && m === 'POST') return await aiTool(req, env, ip, 'interview', ctx);
+        if (p === '/api/translate' && m === 'POST') return await aiTool(req, env, ip, 'translate', ctx);
         if (p === '/api/pay/webhook' && m === 'POST') return await payWebhook(req, env);
         if (p === '/api/pay/start' && m === 'POST') return await payStart(req, env);
         if (p === '/api/pay/check' && m === 'POST') return await payCheck(req, env);
@@ -722,14 +776,27 @@ async function route(req, env, ctx){
         if (m !== 'POST') return json({ error: 'method_not_allowed' }, 405);
         if (p === '/api/keywords') return await keywords(req, env, ip, ctx);
         if (p === '/api/courses') return await courses(req, env, ip, ctx);
-        if (p === '/api/arrange') return await arrange(req, env, ip);
-        if (p === '/api/auth/google') return await googleAuth(req, env);
+        if (p === '/api/arrange') return await arrange(req, env, ip, ctx);
+        if (p === '/api/ev') return await trackEvent(req, env, ctx, ip);
+        if (p === '/api/auth/google') return await googleAuth(req, env, ctx);
         if (p === '/api/auth/email/start') return await emailStart(req, env, ip);
-        if (p === '/api/auth/email/verify') return await emailVerify(req, env);
+        if (p === '/api/auth/email/verify') return await emailVerify(req, env, ctx);
         if (p === '/api/auth/logout') return json({ ok: true }, 200, { 'set-cookie': 'nb_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0' });
       } catch (e) { return json({ error: 'server_error' }, 500); }
       return json({ error: 'not_found' }, 404);
     }
+    // زيارات الموقع: نحسب تحميل الصفحات (مو الملفات)، والزائر الفريد مرة باليوم عن طريق كوكي
+    let visitCookie = null;
+    if (req.method === 'GET' && env.DB && !/\.[a-z0-9]{2,5}$/i.test(p) && !BOT.test(req.headers.get('user-agent') || '')) {
+      const d = today(); bump(env, ctx, 'visit');
+      if (cookieOf(req, 'nb_v') !== d) { bump(env, ctx, 'uniq'); visitCookie = `nb_v=${d}; Path=/; Max-Age=172800; Secure; SameSite=Lax`; }
+      if (/^\/(cv|c)\//.test(p) || (p.length > 1 && !RESERVED.has(p.slice(1).replace(/\/$/, '').toLowerCase()))) bump(env, ctx, 'visit_pub');
+    }
+    const pageRes = await servePage(req, env, ctx, p);
+    if (visitCookie && pageRes && pageRes.status < 300) { const r2 = new Response(pageRes.body, pageRes); r2.headers.append('set-cookie', visitCookie); return r2; }
+    return pageRes;
+}
+async function servePage(req, env, ctx, p){
     // الصفحة العامة: nubthah.com/cv/xxxx أو nubthah.com/username
     if (req.method === 'GET' && env.DB) {
       let mm = p.match(/^\/(?:cv|c)\/([a-z0-9]{5,12})\/?$/i);
