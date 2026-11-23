@@ -148,7 +148,13 @@ async function arrange(req, env, ip, ctx){
 let schemaReady = null;
 function ensureSchema(env){
   if (!env.DB) return Promise.resolve(false);
-  if (!schemaReady) schemaReady = env.DB.batch([
+  if (!schemaReady) schemaReady = env.DB.prepare("SELECT v FROM kv WHERE k='schema_v'").first().catch(() => null).then(r => (r && r.v === SCHEMA_V) ? true : migrate(env)).catch(e => { schemaReady = null; throw e; });
+  return schemaReady;
+}
+// رقم نسخة الجداول: إذا تطابق نتخطى إنشاء الجداول (أسرع بكثير عند تشغيل السيرفر)، ولو أضفنا جدول أو عمود نزيد الرقم
+const SCHEMA_V = '8';
+function migrate(env){
+  return env.DB.batch([
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS users(id TEXT PRIMARY KEY, email TEXT UNIQUE, name TEXT, picture TEXT, via TEXT, plan TEXT DEFAULT 'free', ai_used INTEGER DEFAULT 0, created INTEGER)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS cvs(uid TEXT PRIMARY KEY, data TEXT, docs TEXT, updated INTEGER)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS codes(email TEXT PRIMARY KEY, hash TEXT, name TEXT, exp INTEGER, tries INTEGER DEFAULT 0, sent INTEGER)`),
@@ -167,9 +173,9 @@ function ensureSchema(env){
       await env.DB.prepare(q).run().catch(() => {});
     await env.DB.prepare('CREATE UNIQUE INDEX IF NOT EXISTS users_username ON users(username)').run().catch(() => {});
     await env.DB.prepare('CREATE UNIQUE INDEX IF NOT EXISTS users_pub ON users(pub)').run().catch(() => {});
+    await env.DB.prepare("INSERT INTO kv(k,v) VALUES('schema_v',?) ON CONFLICT(k) DO UPDATE SET v=excluded.v").bind(SCHEMA_V).run().catch(() => {});
     return true;
-  }).catch(e => { schemaReady = null; throw e; });
-  return schemaReady;
+  });
 }
 // مفتاح توقيع الجلسات: من الأسرار إن وُجد، وإلا يتولّد مرة وحدة ويُحفظ في القاعدة
 let secretCache = null;
