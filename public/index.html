@@ -256,6 +256,19 @@ a.feat:hover{border-color:rgba(193,163,255,.5);transform:translateY(-4px)}
 .dstat:hover{border-color:rgba(193,163,255,.45)}.dstat span{font-size:12.5px;color:var(--muted)}.dstat b{font-size:26px;font-family:var(--fd);display:flex;align-items:center;min-height:34px}.dstat b svg{color:var(--lime)}
 .dstat small{font-size:12px;color:var(--muted);line-height:1.5}.dstat.alert{border-color:rgba(227,163,245,.55);background:linear-gradient(180deg,rgba(227,163,245,.08),transparent),var(--card)}
 .dh3{font-size:16px;margin-top:6px}
+.adm-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.adm-seg button{padding:7px 14px}
+.adm-charts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.adm-plot{position:relative;padding-inline-start:0}.adm-plot svg{width:100%;height:150px;display:block;overflow:visible}
+.abar{fill:#8B5CF6}.ab:hover .abar{fill:#C1A3FF}.abase{stroke:var(--line2);stroke-width:1}
+.adm-y{position:absolute;top:-4px;inset-inline-end:0;font-size:11px;color:var(--muted)}
+.adm-x{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;direction:ltr}
+.adm-tip{position:absolute;top:6px;left:50%;transform:translateX(-50%);background:var(--ink);color:#1a1225;font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px;pointer-events:none;white-space:nowrap}
+.adm-tools{display:grid;gap:8px}.adm-t{display:grid;grid-template-columns:150px 1fr 48px;gap:10px;align-items:center;font-size:13px}
+.adm-t i{height:8px;border-radius:9px;background:rgba(255,255,255,.06);overflow:hidden}.adm-t i b{display:block;height:100%;background:#8B5CF6;border-radius:9px}.adm-t em{font-style:normal;color:var(--muted);text-align:end;font-variant-numeric:tabular-nums}
+.adm-tbl{overflow-x:auto}.adm-tbl table{width:100%;border-collapse:collapse;font-size:13px}.adm-tbl th{text-align:start;color:var(--muted);font-weight:600;padding:8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.adm-tbl td{padding:9px 8px;border-bottom:1px solid rgba(255,255,255,.05);white-space:nowrap}
+.adm-st{padding:3px 9px;border-radius:99px;font-size:11.5px;font-weight:700}.adm-st.ok{background:rgba(124,243,181,.14);color:#7CF3B5}.adm-st.warn{background:rgba(255,200,87,.14);color:#FFC857}.adm-st.off{background:rgba(255,255,255,.06);color:var(--muted)}
+@media (max-width:860px){.adm-charts{grid-template-columns:1fr}.adm-t{grid-template-columns:110px 1fr 40px}}
 .dpanel{padding:18px;border-radius:18px;border:1px solid var(--line);background:var(--card);display:grid;gap:12px}
 .dpanel textarea,.dpanel input,.dpanel select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line2);background:var(--bg);font-size:14.5px;outline:none}
 .dpanel textarea:focus,.dpanel input:focus{border-color:var(--lime)}
@@ -675,6 +688,12 @@ footer a:hover{color:var(--lime)}
 .kg-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:14px}
 .kg-h button{font-size:12.5px;color:var(--lime);font-weight:600}
 .kchips{display:flex;flex-wrap:wrap;gap:6px}
+.kc.lock{border-style:dashed;border-color:rgba(193,163,255,.6);color:var(--lime);font-weight:700;display:inline-flex;gap:6px;align-items:center}
+.kc.ghost{filter:blur(3px);opacity:.5;pointer-events:none;user-select:none}
+.kwup{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding:12px 14px;border-radius:14px;background:linear-gradient(115deg,rgba(130,66,229,.22),rgba(86,57,201,.1));border:1px solid rgba(193,163,255,.3)}
+.kwup b{display:flex;gap:6px;align-items:center;font-size:14px}.kwup span{font-size:12.5px;color:var(--muted)}.kwup .btn{flex-shrink:0}
+.crc.ghost{filter:blur(3px);opacity:.5;pointer-events:none;user-select:none}
+.crc.lock{display:grid;place-items:center;align-content:center;gap:4px;text-align:center;border-style:dashed;border-color:rgba(193,163,255,.6);color:var(--lime);min-height:110px;cursor:pointer}.crc.lock span{font-size:12px;color:var(--muted)}
 .kc{padding:7px 12px;border-radius:99px;border:1px solid var(--line2);font-size:13px;color:#d6cce3;transition:background .15s,border-color .15s;text-align:start}
 .kc small{opacity:.65;font-size:11px;margin-inline-start:6px}
 .kc:hover{border-color:var(--lime)}
@@ -2640,7 +2659,7 @@ function renderProfile(){
   const th=$('#profileView .pv-thumb');const cv=th.firstElementChild;const fit2=()=>{cv.style.transform=`scale(${th.clientWidth/794})`};fit2();requestAnimationFrame(fit2);
   $('#pvCv').onclick=viewCV;
   $('#profileView').querySelectorAll('[data-pvdoc]').forEach(b=>b.onclick=()=>viewDoc(D[+b.dataset.pvdoc]));
-  $('#pvSave').onclick=async()=>{
+  $('#pvSave').onclick=async()=>{track('vcard');
     const txt=vcard(),name=(P.name||'contact')+'.vcf';
     try{const a=document.createElement('a');a.href='data:text/vcard;charset=utf-8,'+encodeURIComponent(txt);a.download=name;document.body.appendChild(a);a.click();a.remove()}catch(e){}
     toast(window.claude?'في الموقع الفعلي تنحفظ جهة الاتصال مباشرة في الجوال':'تم تنزيل جهة الاتصال ✓');
@@ -2884,7 +2903,7 @@ async function readDocx(file){
     p+=46+fl+xl+cl}
   throw 0;
 }
-async function importCV(file){
+async function importCV(file){if(file)track('cv_import');
   if(!file)return;
   if(file.size>15e6){toast('الملف كبير — الحد ١٥ ميقا');return}
   const inDash=!$('#dashView').hidden;
@@ -3311,7 +3330,7 @@ $('#dlBtn').onclick=()=>{
   pr.innerHTML='<table class="prt"><thead><tr><td><div class="sp"></div></td></tr></thead><tfoot><tr><td><div class="sp"></div></td></tr></tfoot><tbody><tr><td></td></tr></tbody></table>';
   pr.querySelector('tbody td').appendChild(fitPrint($('#cv').cloneNode(true)));
   const t0=document.title;document.title=((S.p.name||'').trim()||'السيرة الذاتية')+' - CV';
-  try{window.print()}catch(e){}
+  track('pdf');try{window.print()}catch(e){}
   setTimeout(()=>{document.title=t0},1500);
   toast('اختر "حفظ كـ PDF" من نافذة الطباعة');
 };
@@ -3355,6 +3374,7 @@ function passHTML(kind,link){
    <div class="pass-qr">${qrSVG(qrOf(link),2)}</div><div class="pass-link" dir="ltr">${link.replace('https://','')}</div></div>`;
 }
 function shareModal(kind){
+  track(kind==='card'?'card_share':'cv_share');
   const link=kind==='card'?cardLink():cvLink();
   open(`<div class="share"><div class="ok-badge">✓</div>
    <h3>${kind==='card'?'بطاقتك جاهزة للمشاركة':'سيرتك جاهزة!'}</h3>
@@ -3374,7 +3394,7 @@ function shareModal(kind){
     (async()=>{const bin=atob(url.split(',')[1]),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);const blob=new Blob([u8],{type:'image/png'});
       const dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;
       if(dl&&blob){try{await dl.save({filename:'nubthah-qr.png',data:blob});toast('تم حفظ الباركود ✓')}catch(e){if(e.code!=='declined')toast('اضغط مطوّلًا على الباركود واحفظه كصورة')}return}
-      try{const a=document.createElement('a');a.href=url;a.download='nubthah-qr.png';document.body.appendChild(a);a.click();a.remove();toast('تم تنزيل الباركود ✓')}catch(e){toast('اضغط مطوّلًا على الباركود واحفظه كصورة')}})();
+      try{const a=document.createElement('a');a.href=url;a.download='nubthah-qr.png';document.body.appendChild(a);a.click();a.remove();track('qr_dl');toast('تم تنزيل الباركود ✓')}catch(e){toast('اضغط مطوّلًا على الباركود واحفظه كصورة')}})();
   };
   $('#copyLink').onclick=async()=>{try{await navigator.clipboard.writeText(link);toast('تم نسخ الرابط')}catch(e){toast(link)}};
   mbox.querySelectorAll('[data-wallet]').forEach(b=>b.onclick=()=>{
@@ -3475,6 +3495,8 @@ document.addEventListener('click',e=>{
 /* ---------- الحسابات الحقيقية + المزامنة ---------- */
 const AUTH={google:false,email:false,loaded:false};
 function authOn(){return AUTH.google||AUTH.email}
+const track=e=>{try{if(window.NUBTHAH_API&&!PUB_OWNER_SKIP())fetch(window.NUBTHAH_API+'/ev',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json'},body:JSON.stringify({e})}).catch(()=>{})}catch(_){}};
+const PUB_OWNER_SKIP=()=>false;
 const API=(p,o={})=>fetch(window.NUBTHAH_API+p,{credentials:'include',...o,headers:{'Content-Type':'application/json',...(o.headers||{})}});
 let cvSyncT=0,serverLoaded=false;
 function cvPayload(){const{mode,pro,docs,...data}=S;return JSON.stringify({data,docs:docs||[],base:cvBase})}
@@ -3577,10 +3599,57 @@ Object.assign(IC_P,{eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 1
   plus:'<path d="M12 5v14M5 12h14"/>',trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',undo:'<path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>'});
 const dPage=()=>(location.hash.split('/')[1]||'');
 async function refreshMe(){try{const m=await API('/me').then(r=>r.json());if(m.user)setUser(m.user)}catch(e){}}
+/* ---------- لوحة الإدارة (لريان فقط — الصلاحية من السيرفر) ---------- */
+let admDays=30;
+const AD_LBL={ai_kw:'الكلمات المفتاحية',ai_cr:'الدورات والشهادات',ai_arr:'رتّب سيرتي بالذكاء',ai_tailor:'نسخة لكل وظيفة',ai_interview:'تجهيز المقابلة',ai_translate:'ترجمة السيرة',
+  ev_cv_import:'رفع سيرة قديمة',ev_ats_check:'فحص ATS',ev_card_share:'مشاركة البطاقة',ev_cv_share:'مشاركة السيرة',ev_qr_dl:'تنزيل الباركود',ev_vcard:'حفظ جهة الاتصال',ev_checkout:'فتح صفحة الدفع'};
+const fmtD=t=>{if(!t)return '—';const d=new Date(+t+3*3600e3);return ar(d.getUTCDate())+'/'+ar(d.getUTCMonth()+1)+'/'+ar(d.getUTCFullYear())};
+function admBars(rows,key,label){
+  const v=rows.map(r=>+r[key]||0),mx=Math.max(1,...v),W=600,H=150,bw=W/v.length,tot=v.reduce((a,b)=>a+b,0);
+  const bars=v.map((x,i)=>{const h=x?Math.max(3,x/mx*(H-22)):0;return `<g class="ab"><rect x="${i*bw}" y="0" width="${bw}" height="${H}" fill="transparent"/><rect class="abar" x="${i*bw+bw*.18}" y="${H-h}" width="${bw*.64}" height="${h}" rx="${Math.min(4,bw*.3)}"/><title>${rows[i].day} — ${x}</title></g>`}).join('');
+  return `<div class="dpanel adm-ch"><div class="dres-h"><b>${label}</b><span class="muted">${ar(tot)} بالفترة</span></div>
+   <div class="adm-plot"><span class="adm-y">${ar(mx)}</span><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${bars}<line x1="0" x2="${W}" y1="${H}" y2="${H}" class="abase"/></svg>
+   <div class="adm-x"><span>${fmtDay(rows[0].day)}</span><span>${fmtDay(rows[rows.length-1].day)}</span></div><div class="adm-tip" hidden></div></div></div>`;
+}
+const fmtDay=d=>{const [y,m,dd]=d.split('-');return ar(+dd)+'/'+ar(+m)};
+function dAdmin(){
+  if(!user||!user.admin){location.hash='#home';return}
+  dSet('لوحة الإدارة',`<div class="kwload"><div class="kwspin">${ic('chart',22)}</div><b>نجمع الأرقام…</b></div>`);
+  API('/admin/stats?days='+admDays).then(r=>r.ok?r.json():Promise.reject(r.status)).then(d=>{if(dPage()!=='admin')return;
+    const R=d.daily,T=d.totals,sum=k=>R.reduce((a,r)=>a+(+r[k]||0),0),now=Date.now();
+    const subs=d.subscribers,active=subs.filter(x=>x.pro_until>now),canc=active.filter(x=>x.sub_status==='canceling');
+    const conv=T.started_recent?Math.round(T.paid_recent/T.started_recent*100):0;
+    const tools=Object.keys(AD_LBL).map(k=>[k,sum(k)]).sort((a,b)=>b[1]-a[1]),tmx=Math.max(1,...tools.map(t=>t[1]));
+    dSet('لوحة الإدارة',`<div class="adm-top"><p class="dlead">كل أرقام نُبذة في مكان واحد. الزيارات والتنزيلات تنحسب من يوم تفعيل اللوحة.</p>
+      <div class="segs adm-seg">${[7,30,90].map(n=>`<button data-admd="${n}" class="${admDays===n?'on':''}">${ar(n)} يوم</button>`).join('')}</div></div>
+     <div class="dstats">
+      <div class="dstat"><span>زيارات الموقع</span><b>${ar(sum('visit'))}</b><small>${ar(sum('uniq'))} زائر مختلف</small></div>
+      <div class="dstat"><span>تنزيلات PDF</span><b>${ar(sum('ev_pdf'))}</b><small>الإجمالي ${ar((T.all.ev_pdf)||0)}</small></div>
+      <div class="dstat"><span>الحسابات</span><b>${ar(T.users)}</b><small>+${ar(T.users_recent)} جديد بالفترة · ${ar(T.cvs)} سيرة محفوظة</small></div>
+      <div class="dstat${active.length?' alert':''}"><span>المشتركين الحاليين</span><b>${ar(active.length)}</b><small>${canc.length?ar(canc.length)+' ألغوا التجديد · ':''}الإيراد بالفترة ${ar(T.paid_recent*T.price)} ر.س</small></div>
+     </div>
+     <div class="dstats">
+      <div class="dstat"><span>زيارات الصفحات العامة</span><b>${ar(sum('pv'))}</b><small>منها ${ar(sum('scan'))} مسح باركود</small></div>
+      <div class="dstat"><span>فتحوا صفحة الدفع</span><b>${ar(T.started_recent)}</b><small>دفعوا ${ar(T.paid_recent)} (${ar(conv)}٪)</small></div>
+      <div class="dstat"><span>استخدام الذكاء الاصطناعي</span><b>${ar(tools.filter(t=>t[0].startsWith('ai_')).reduce((a,t)=>a+t[1],0))}</b><small>طلب بالفترة</small></div>
+      <div class="dstat"><span>إجمالي الإيراد</span><b>${ar(T.orders_paid*T.price)}</b><small>ر.س من ${ar(T.orders_paid)} دفعة</small></div>
+     </div>
+     <div class="adm-charts">${admBars(R,'visit','الزيارات يوميًا')}${admBars(R,'signup','حسابات جديدة يوميًا')}${admBars(R,'ev_pdf','تنزيلات PDF يوميًا')}${admBars(R,'pv','زيارات الصفحات العامة يوميًا')}</div>
+     <div class="dpanel"><div class="dres-h"><b>وش يستخدمون</b><span class="muted">بالفترة</span></div>
+      <div class="adm-tools">${tools.map(([k,n])=>`<div class="adm-t"><span>${AD_LBL[k]}</span><i><b style="width:${n/tmx*100}%"></b></i><em>${ar(n)}</em></div>`).join('')}</div></div>
+     <div class="dpanel"><div class="dres-h"><b>المشتركين</b><span class="muted">${ar(subs.length)}</span></div>
+      ${subs.length?`<div class="adm-tbl"><table><thead><tr><th>الإيميل</th><th>الحالة</th><th>ينتهي</th><th>آخر دفع</th></tr></thead><tbody>${subs.map(x=>{const on=x.pro_until>now;return `<tr><td dir="ltr">${esc(x.email)}</td><td><span class="adm-st ${on?(x.sub_status==='canceling'?'warn':'ok'):'off'}">${on?(x.sub_status==='canceling'?'ألغى التجديد':'فعّال'):'منتهي'}</span></td><td>${fmtD(x.pro_until)}</td><td>${fmtD(x.paid)}</td></tr>`}).join('')}</tbody></table></div>`:'<p class="muted">ما فيه مشتركين للحين.</p>'}</div>
+     <div class="dpanel"><div class="dres-h"><b>آخر الحسابات</b><span class="muted">آخر ${ar(d.recent_users.length)}</span></div>
+      <div class="adm-tbl"><table><thead><tr><th>الإيميل</th><th>الاسم</th><th>الدخول</th><th>الخطة</th><th>التسجيل</th></tr></thead><tbody>${d.recent_users.map(x=>`<tr><td dir="ltr">${esc(x.email)}</td><td>${esc(x.name||'—')}</td><td>${x.via==='google'?'Google':'إيميل'}</td><td>${x.team?'فريق':x.pro_until>now?'<span class="adm-st ok">Pro</span>':'مجاني'}</td><td>${fmtD(x.created)}</td></tr>`).join('')}</tbody></table></div></div>`);
+    $('#dBody').querySelectorAll('.adm-plot').forEach(pl=>{const tip=pl.querySelector('.adm-tip');pl.querySelectorAll('.ab').forEach(g=>{const t=g.querySelector('title').textContent;
+      g.onmouseenter=()=>{tip.hidden=false;tip.textContent=t.replace(/(\d{4})-(\d\d)-(\d\d)/,(m,y,mo,da)=>ar(+da)+'/'+ar(+mo)).replace(/\d+$/,n=>ar(n))};g.onmouseleave=()=>tip.hidden=true;g.onclick=g.onmouseenter})});
+  }).catch(e=>{dSet('لوحة الإدارة',`<p class="muted">${e===403?'هذي الصفحة للإدارة بس.':'ما قدرنا نجيب الأرقام الحين — حاول بعد شوي.'}</p>`)});
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-admd]');if(b){admDays=+b.dataset.admd;dAdmin()}});
 function proChip(kind){if(isProU())return '';return kind==='pro'?'<em class="dpro">PRO</em>':kind==='ai'?'<em class="dpro ai">AI</em>':''}
 function renderDash(){
   const pg=dPage(),dv=$('#dashView');
-  const nav=DNAV.map(([k,i,t,kind])=>k==='#'?`<div class="dsec">${t}</div>`:k[0]==='!'?`<button class="dnav" data-${k.slice(1)}>${ic(i,18)}<span>${t}</span>${proChip(kind)}</button>`:
+  const nav=(user&&user.admin?[['#',null,'الإدارة'],['admin','chart','لوحة الإدارة']]:[]).concat(DNAV).map(([k,i,t,kind])=>k==='#'?`<div class="dsec">${t}</div>`:k[0]==='!'?`<button class="dnav" data-${k.slice(1)}>${ic(i,18)}<span>${t}</span>${proChip(kind)}</button>`:
     `<a href="${k.startsWith('@')?k.slice(1):'#home'+(k?'/'+k:'')}" class="dnav${!k.startsWith('@')&&k===pg?' on':''}">${ic(i,18)}<span>${t}</span>${proChip(kind)}</a>`).join('');
   const left=aiLeft();
   const pon=dPrevOn();
@@ -3597,7 +3666,7 @@ function renderDash(){
     <div class="dprev-s"><div class="dprev-box" id="dPrevBox"></div></div>
     <div class="dprev-f"><a href="#build" class="btn btn-lime btn-sm">${ic('edit',15)} عدّل سيرتي</a><button class="btn btn-ghost btn-sm" data-dpdf>تحميل PDF</button></div></aside></div>`;
   drawAccount();
-  const pages={'':dHome,arrange:dArrange,tailor:dTailor,interview:dInterview,translate:dTranslate,tracker:dTracker,licenses:dLicenses,link:dLink,plan:dPlan};
+  const pages={admin:dAdmin,'':dHome,arrange:dArrange,tailor:dTailor,interview:dInterview,translate:dTranslate,tracker:dTracker,licenses:dLicenses,link:dLink,plan:dPlan};
   (pages[pg]||dHome)();
   dPrevPaint();
 }
@@ -4038,7 +4107,7 @@ async function aiKeywords(field){
   }
   if(!v)return null;
   if(v.error)return {error:v.error};
-  const out={n:String(v.field||field).slice(0,60),h:toItems(v.h),t:toItems(v.t),s:toItems(v.s),c:toItems(v.c),src:'ai'};
+  const out={n:String(v.field||field).slice(0,60),h:toItems(v.h),t:toItems(v.t),s:toItems(v.s),c:toItems(v.c),src:'ai',more:v.more&&typeof v.more==='object'?v.more:null};
   if(!out.h.length)return null;
   kwCache.set(key,out);return out;
 }
@@ -4072,18 +4141,28 @@ function kwModal(q){
   mbox.querySelector('.allf').onclick=e=>{const b=e.target.closest('[data-f]');if(b)show(KW[+b.dataset.f])};
   if(q.trim())kwSearch(q);else $('#kwIn').focus();
 }
+/* المجاني يشوف عيّنة من الكلمات والدورات، والقائمة كاملة في Pro */
+const KW_FREE={h:4,t:2,s:2,c:1},CR_FREE=3;
+function freeKW(f){if(isProU())return f;const o={...f,more:{...(f.more||{})}};for(const k in KW_FREE){const a=f[k]||[];o[k]=a.slice(0,KW_FREE[k]);o.more[k]=(+o.more[k]||0)+Math.max(0,a.length-o[k].length)}return o}
+function freeCR(f){if(isProU())return f;const a=f.items||[],pick=[];['L','C','S'].forEach(t=>{const x=a.find(i=>i.t===t);if(x)pick.push(x)});
+  for(const x of a){if(pick.length>=CR_FREE)break;if(!pick.includes(x))pick.push(x)}const items=pick.slice(0,CR_FREE);return {...f,items,more:(+f.more||0)+Math.max(0,a.length-items.length)}}
+const kwMoreN=f=>f.more?Object.values(f.more).reduce((a,b)=>a+(+b||0),0):0;
+function upBar(n,what){return n?`<div class="kwup"><div><b>${ics('crown')} هذي عيّنة مجانية</b><span>فيه ${ar(n)} ${what} زيادة لتخصصك في Pro</span></div><button class="btn btn-lime btn-sm" data-kwup>اعرضها كلها</button></div>`:''}
+const ics=n=>typeof ic==='function'?ic(n,15):'';
 function renderKW(near=[]){
-  const f=kwField,G=[['h','المهارات التخصصية',f.h,1],['t','الأدوات والبرامج',f.t,1],['s','المهارات الشخصية',f.s,0],['c','الشهادات المهنية',f.c,0]].filter(g=>g[2].length);
+  const f=freeKW(kwField),G=[['h','المهارات التخصصية',f.h,1],['t','الأدوات والبرامج',f.t,1],['s','المهارات الشخصية',f.s,0],['c','الشهادات المهنية',f.c,0]].filter(g=>g[2].length);
   const lang=S.dir==='ltr'?'en':'ar';
   $('#kwRes').innerHTML=`<div class="kwhead"><b>${esc(f.n)}</b>${f.src==='ai'?'<span class="aibadge">✦ مولّدة بالذكاء الاصطناعي</span><button class="regen" id="kwRegen">↻ ولّد من جديد</button>':'<span class="aibadge db">من قاعدة نُبذة</span>'}</div><p class="muted" style="font-size:12.5px;margin-top:4px">اضغط على الكلمة لتحديدها أو إلغائها</p>
    ${near.length?`<div class="near">تخصصات قريبة: ${near.map(x=>`<button data-near="${KW.indexOf(x)}">${x.n}</button>`).join('')}</div>`:''}
    ${G.map(([g,title,items,pre])=>`<div class="kg"><div class="kg-h"><b>${title}</b><button data-all="${g}">تحديد الكل</button></div>
      ${g==='c'?'<p class="muted" style="font-size:12px;margin:-4px 0 8px">حدّد الشهادة بس إذا كانت عندك فعلًا — تنضاف لقسم الشهادات.</p>':''}
      <div class="kchips">${items.map(k=>{const label=k[lang],have=inCV(k.ar)||inCV(k.en);
-       return `<button class="kc${have?' have':pre?' on':''}" data-g="${g}" data-ar="${esc(k.ar)}" data-en="${esc(k.en)}" ${have?'disabled title="موجودة في سيرتك"':''}>${have?'✓ ':''}${esc(label)}${k.ar!==k.en?`<small>${esc(lang==='ar'?k.en:k.ar)}</small>`:''}</button>`}).join('')}</div></div>`).join('')}
+       return `<button class="kc${have?' have':pre?' on':''}" data-g="${g}" data-ar="${esc(k.ar)}" data-en="${esc(k.en)}" ${have?'disabled title="موجودة في سيرتك"':''}>${have?'✓ ':''}${esc(label)}${k.ar!==k.en?`<small>${esc(lang==='ar'?k.en:k.ar)}</small>`:''}</button>`}).join('')}${f.more&&f.more[g]?`<span class="kc ghost" aria-hidden="true">●●●●●●●</span><span class="kc ghost" aria-hidden="true">●●●●●</span><button class="kc lock" data-kwup>${ics('crown')} +${ar(f.more[g])} في Pro</button>`:''}</div></div>`).join('')}
+   ${upBar(kwMoreN(f),'كلمة')}
    <div class="kfoot"><button class="btn btn-lime" id="kwAdd"></button><span class="muted" style="font-size:12.5px">${lang==='ar'?'تنضاف بالعربي لأن سيرتك عربية':'Added in English (CV is in English)'}</span></div>`;
   const upd=()=>{const n=mbox.querySelectorAll('.kc.on').length;const b=$('#kwAdd');b.textContent=n?`أضف المحددة لسيرتي (${ar(n)})`:'حدّد كلمات لإضافتها';b.disabled=!n;b.style.opacity=n?1:.5};upd();
-  $('#kwRes').onclick=e=>{const c=e.target.closest('.kc:not(.have)');if(c){c.classList.toggle('on');upd();return}
+  $('#kwRes').onclick=e=>{if(e.target.closest('[data-kwup]')){openUpsell('الكلمات المفتاحية كاملة لتخصصك');return}
+    const c=e.target.closest('.kc:not(.have):not(.lock):not(.ghost)');if(c){c.classList.toggle('on');upd();return}
     const a=e.target.closest('[data-all]');if(a){const cs=[...mbox.querySelectorAll(`.kc[data-g="${a.dataset.all}"]:not(.have)`)];const all=cs.every(x=>x.classList.contains('on'));cs.forEach(x=>x.classList.toggle('on',!all));upd();return}
     const nr=e.target.closest('[data-near]');if(nr){kwBusy++;kwField=dbField(KW[+nr.dataset.near]);renderKW();return}
     if(e.target.closest('#kwRegen')){kwCache.delete(norm($('#kwIn').value).trim());kwSearch($('#kwIn').value)}};
@@ -4255,7 +4334,7 @@ async function aiCourses(field){
   const items=(Array.isArray(v.items)?v.items:[]).map(x=>({t:['L','C','S'].includes(x.t)?x.t:'C',ar:String(x.ar||x.en||'').trim(),en:String(x.en||x.ar||'').trim(),
     by:String(x.by||'').trim(),lvl:String(x.lvl||'').trim(),why:String(x.why||'').trim(),free:!!x.free})).filter(x=>x.ar).slice(0,14);
   if(!items.length)return null;
-  const out={n:String(v.field||field).slice(0,60),items,src:'ai'};crCache.set(key,out);return out;
+  const out={n:String(v.field||field).slice(0,60),items,src:'ai',more:+v.more||0};crCache.set(key,out);return out;
 }
 /* خطة التطوير: الدورات اللي يبيها المستخدم (تنحفظ في المتصفح) */
 const planGet=()=>{try{return JSON.parse(localStorage.getItem('nubthah_plan')||'[]')}catch(e){return[]}};
@@ -4292,11 +4371,12 @@ function crCard(it,i){
    <div class="crc-a">${have?'<span class="ok">✓ موجودة في سيرتك</span>':`<button class="btn btn-lime btn-sm" data-crhave="${i}">عندي ✓ أضفها لسيرتي</button><button class="btn btn-ghost btn-sm${inPlan?' on':''}" data-crplan="${i}">${inPlan?'★ في خطتي':'☆ أبيها في خطتي'}</button>`}</div></div>`;
 }
 function renderCR(){
-  const f=crField;
+  const f=freeCR(crField);
   $('#crRes').innerHTML=`<div class="kwhead"><b>${esc(f.n)}</b>${f.src==='ai'?'<span class="aibadge">✦ بالذكاء الاصطناعي</span><button class="regen" id="crRegen">↻ ولّد من جديد</button>':'<span class="aibadge db">من قاعدة نُبذة</span>'}</div>
    ${['L','C','S'].map(t=>{const g=f.items.map((it,i)=>[it,i]).filter(([it])=>it.t===t);return g.length?`<div class="kg"><div class="kg-h"><b>${CR_T[t]}</b></div><div class="crg">${g.map(([it,i])=>crCard(it,i)).join('')}</div></div>`:''}).join('')}
+   ${f.more?`<div class="crg" style="margin-top:12px"><div class="crc ghost" aria-hidden="true"><div class="crc-h"><b>●●●●●● ●●●●</b></div><p>●●●● ●●●●●● ●●● ●●●●●●●</p></div><button class="crc lock" data-kwup>${ics('crown')}<b>+${ar(f.more)} دورة وشهادة</b><span>متاحة في Pro</span></button></div>${upBar(f.more,'دورة وشهادة')}`:''}
    <p class="muted" style="font-size:12px;margin-top:14px">اضغط «عندي» بس للشهادات اللي حصلت عليها فعلًا. وتأكد من الشروط والرسوم من الجهة المانحة قبل التسجيل.</p>`;
-  $('#crRes').onclick=e=>{
+  $('#crRes').onclick=e=>{if(e.target.closest('[data-kwup]')){openUpsell('كل الدورات والشهادات لتخصصك');return}
     const h=e.target.closest('[data-crhave]');if(h){addCredential(f.items[+h.dataset.crhave]);renderCR();renderPlan();return}
     const p=e.target.closest('[data-crplan]');if(p){togglePlan(f.items[+p.dataset.crplan]);renderCR();return}
     if(e.target.closest('#crRegen')){crCache.delete(norm($('#crIn').value).trim());crSearch($('#crIn').value)}};
@@ -4323,7 +4403,7 @@ document.addEventListener('click',e=>{
 });
 
 function countUp(el,to){let v=0;const st=performance.now();const f=t=>{v=Math.min(1,(t-st)/900);el.textContent=ar(Math.round(to*(1-Math.pow(1-v,3))));if(v<1)requestAnimationFrame(f)};requestAnimationFrame(f)}
-function runAts(){
+function runAts(){track('ats_check');
   if($('#jd').value.trim()&&!isProU()){openUpsell('مطابقة سيرتك مع إعلان الوظيفة');return}
   const text=atsSrc==='mine'?cvText():atsSrc==='file'?fileText:$('#srcPaste').value;
   if(!text||text.trim().length<40){toast(atsSrc==='file'?'ارفع ملف سيرتك أول':'السيرة فاضية — اكتبها أو الصقها أول');return}
@@ -4371,7 +4451,7 @@ $('#dlBtn').onclick=()=>{
   pr.innerHTML='<table class="prt"><thead><tr><td><div class="sp"></div></td></tr></thead><tfoot><tr><td><div class="sp"></div></td></tr></tfoot><tbody><tr><td></td></tr></tbody></table>';
   pr.querySelector('tbody td').appendChild(fitPrint($('#cv').cloneNode(true)));
   const t0=document.title;document.title=((S.p.name||'').trim()||'السيرة الذاتية')+' - CV';
-  try{window.print()}catch(e){}
+  track('pdf');try{window.print()}catch(e){}
   setTimeout(()=>{document.title=t0},1500);
   setTimeout(()=>shareModal('cv'),250);
 };
@@ -4470,8 +4550,8 @@ $('#mpvScrim').onclick=()=>mpv(false);
 
 /* ---------- PRICING ---------- */
 const PLANS=[
- {n:'مجاني',d:'جرّب نُبذة وصمّم سيرتك الأولى',m:0,f:['سيرة ذاتية بقالبين أساسيين','تحميل PDF','بطاقة أعمال بباركود','فحص ATS عام','٣ تجارب للذكاء الاصطناعي'],no:['القوالب المميزة','الذكاء الاصطناعي بلا حدود','مطابقة سيرتك مع إعلان الوظيفة','تجهيز المقابلة وترجمة السيرة','رابط باسمك وإحصائيات الزيارات','تذكير الرخص وتتبع التقديمات'],cta:'ابدأ مجانًا'},
- {n:'Pro',d:'للباحث عن عمل بجدية',m:29,hot:1,f:['كل القوالب المميزة بدون علامة مائية','الذكاء الاصطناعي بلا حدود: رتّب سيرتي، الكلمات المفتاحية، الدورات','نسخة مطابقة لكل وظيفة + فحص ATS مقابل الإعلان','تجهيز المقابلة بأسئلة متوقعة وإجابات','ترجمة السيرة عربي ↔ إنجليزي','رابط باسمك وإحصائيات الزيارات والباركود','تذكير قبل انتهاء الرخص والشهادات','تتبع كل تقديماتك في مكان واحد','الميزات الجديدة توصلك أول'],cta:'اشترك في Pro'}
+ {n:'مجاني',d:'جرّب نُبذة وصمّم سيرتك الأولى',m:0,f:['سيرة ذاتية بقالبين أساسيين','تحميل PDF','بطاقة أعمال بباركود','فحص ATS عام','عيّنة من الكلمات المفتاحية والدورات','٣ تجارب لترتيب السيرة بالذكاء'],no:['القوالب المميزة','الكلمات المفتاحية والدورات كاملة','مطابقة سيرتك مع إعلان الوظيفة','تجهيز المقابلة وترجمة السيرة','رابط باسمك وإحصائيات الزيارات','تذكير الرخص وتتبع التقديمات'],cta:'ابدأ مجانًا'},
+ {n:'Pro',d:'للباحث عن عمل بجدية',m:29,hot:1,f:['كل القوالب المميزة بدون علامة مائية','الكلمات المفتاحية والدورات والشهادات كاملة لتخصصك','ترتيب السيرة بالذكاء بلا حدود','نسخة مطابقة لكل وظيفة + فحص ATS مقابل الإعلان','تجهيز المقابلة بأسئلة متوقعة وإجابات','ترجمة السيرة عربي ↔ إنجليزي','رابط باسمك وإحصائيات الزيارات والباركود','تذكير قبل انتهاء الرخص والشهادات','تتبع كل تقديماتك في مكان واحد','الميزات الجديدة توصلك أول'],cta:'اشترك في Pro'}
 ];
 function drawPlans(){
   $('#plans').innerHTML=PLANS.map(p=>{
@@ -4504,6 +4584,7 @@ async function payPro(){
   if(PUB)return;
   if(!user||!user.id){authModal(payPro,'سجّل دخولك أول عشان نربط اشتراك Pro بحسابك.');return}
   if(isProU()){location.hash='#home/plan';close();return}
+  track('checkout');
   open(`<div class="paym"><h3>${ic('lock',18)} الاشتراك في نُبذة Pro</h3><p class="muted">${ar(29)} ر.س شهريًا · يتجدد تلقائيًا · تقدر تلغيه أي وقت</p>
    <div id="spCheckout" class="spbox"><p class="muted" style="text-align:center;padding:40px 0"><span class="spin"></span> نجهّز الدفع…</p></div>
    <p class="note">${ic('lock',14)} الدفع آمن عبر بوابة مرخّصة، وما نحفظ بيانات بطاقتك · <a href="#refund">ضمان استرجاع ٧ أيام</a></p></div>`,'wide');
@@ -4522,7 +4603,7 @@ async function payPro(){
   },5000);
 }
 async function payCheck(args){try{const x=await API('/pay/check',{method:'POST',body:JSON.stringify(args)});return await x.json()}catch(e){return null}}
-function paySuccess(u){
+function paySuccess(u){try{kwCache.clear();crCache.clear()}catch(e){}
   if(u)setUser(u);
   open(`<div style="text-align:center;padding:10px 0"><div class="okc">${ic('check',34)}</div>
    <h3>أهلًا بك في نُبذة Pro</h3><p class="muted" style="margin:8px 0 20px">تفعّل اشتراكك، وانفتحت لك كل الميزات: القوالب المميزة، والذكاء الاصطناعي بلا حدود، ونسخة لكل وظيفة، وتجهيز المقابلة، والترجمة.</p>
