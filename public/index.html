@@ -869,6 +869,9 @@ body.noscroll{overflow:hidden}
 /* ---- format panel ---- */
 .fmtbtn{padding:8px 13px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid var(--line2);background:rgba(193,163,255,.08)}
 .fmtbtn:hover{border-color:var(--lime)}
+.pgchip{display:inline-flex;align-items:center;gap:6px}.pgchip.over{color:var(--ink)}.pgchip.ok{color:#7CF3B5;border-color:rgba(124,243,181,.35);background:rgba(124,243,181,.06)}
+.fp-one{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:14px;border:1px solid rgba(193,163,255,.35);background:linear-gradient(115deg,rgba(130,66,229,.18),rgba(86,57,201,.06))}
+.fp-one b{display:block;font-size:14px}.fp-one small{font-size:12px;color:var(--muted)}.fp-one.ok{border-color:rgba(124,243,181,.35);background:rgba(124,243,181,.06)}
 .canvas{position:relative}
 .fmtpanel{position:absolute;top:62px;inset-inline-end:14px;z-index:20;width:min(380px,calc(100% - 28px));max-height:calc(100% - 80px);overflow:auto;background:var(--card);border:1px solid var(--line2);border-radius:20px;padding:16px;box-shadow:0 30px 70px -20px rgba(0,0,0,.8);animation:pop .3s var(--ease);display:grid;gap:14px}
 .fp-h{display:flex;justify-content:space-between;align-items:center}
@@ -1207,7 +1210,7 @@ body.noscroll{overflow:hidden}
       <div class="toolbar">
         <div class="tpls" id="tpls"></div>
         <div class="swatches" id="sw"></div>
-        <div class="sp"><button class="fmtbtn" id="fmtBtn"><svg class="i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/></svg> التنسيق</button><div class="lang" id="dirT"><button class="on" data-d="rtl">ع</button><button data-d="ltr">EN</button></div></div>
+        <div class="sp"><button class="fmtbtn" id="fmtBtn"><svg class="i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/></svg> التنسيق</button><button class="fmtbtn pgchip" id="pgChip" hidden></button><div class="lang" id="dirT"><button class="on" data-d="rtl">ع</button><button data-d="ltr">EN</button></div></div>
       </div>
       <div class="fmtpanel" id="fmtPanel" hidden></div>
       <div class="zoomc" id="zoomc"><button type="button" data-z="-" aria-label="تصغير">−</button><button type="button" id="zmV" data-z="0" aria-label="رجّع الحجم">١٠٠٪</button><button type="button" data-z="+" aria-label="تكبير">+</button></div>
@@ -2731,7 +2734,7 @@ const SAMPLES={
   cert:['Google Ads Certification','Google','٢٠٢٢'],cn:'Nawaf Al-Harbi'}
 };
 const SAMPLE_NAMES=['سارة القحطاني',...Object.values(SAMPLES).map(x=>x.p.name)];
-function sampleData(k='main'){const D=SAMPLES[k]||SAMPLES.main;return{
+function sampleData(k='main',lite){const D=SAMPLES[k]||SAMPLES.main;return{
   p:{...D.p},summary:D.summary,links:D.links.map(l=>({...l})),extra:[{k:'الجنسية',v:'سعودي'}],
   secs:[
     sec('xp',{items:D.xp.map(x=>({...x}))}),
@@ -2739,7 +2742,7 @@ function sampleData(k='main'){const D=SAMPLES[k]||SAMPLES.main;return{
     sec('skills',{tags:[...D.skills]}),
     sec('langs',{items:[{a:'العربية',b:'اللغة الأم'},{a:'الإنجليزية',b:'متقدم'}]}),
     sec('certs',{items:[{a:D.cert[0],b:D.cert[1],c:D.cert[2]}]})
-  ],docs:[{id:'demo',name:D.cert[0],type:'cert',issuer:D.cert[1],expiry:'',file:{name:'certificate.jpg',mime:'image/jpeg',data:demoCert(D.cn)}}]}}
+  ],docs:lite?[]:[{id:'demo',name:D.cert[0],type:'cert',issuer:D.cert[1],expiry:'',file:{name:'certificate.jpg',mime:'image/jpeg',data:demoCert(D.cn)}}]}}
 function blankData(){return{p:{name:'',title:'',email:'',phone:'',city:'',photo:''},summary:'',links:[{t:'LinkedIn',u:''}],extra:[],
   secs:[sec('xp',{items:[empty('xp')]}),sec('edu',{items:[empty('edu')]}),sec('skills'),sec('langs',{items:[{a:'العربية',b:'اللغة الأم'}]})],docs:[]}}
 
@@ -3028,9 +3031,27 @@ function fmt(){S.fmt={...DEF_FMT,...(S.fmt||{})};return S.fmt}
 function cvVars(){const F=fmt(),f=FONTS.find(x=>x[0]===F.font);return `--ac:${S.color};--k:${F.k};--g:${F.g};--bul:'${F.bul==='▸'&&S.dir==='rtl'?'◂':(F.bul||'•')}'${f?`;--cvf:${f[2].replace(/"/g,"'")}`:''}`}
 function cvAttr(){const F=fmt();return `style="${cvVars()}"${F.head?` data-head="${F.head}"`:''}${F.font?' data-font':''}${F.bul?' data-bul':''}${F.photo?'':' data-nophoto'}`}
 function decoCV(el){const F=fmt();el.style.cssText=cvVars();el.toggleAttribute('data-font',!!F.font);el.toggleAttribute('data-bul',!!F.bul);el.toggleAttribute('data-nophoto',!F.photo);if(F.head)el.dataset.head=F.head;else delete el.dataset.head}
+/* صفحة وحدة: نقيس طول السيرة بالحجم الحقيقي، ونصغّر المسافات ثم الخط خطوة خطوة لين تدخل في صفحة A4 */
+const PAGE_H=1085,PAGE_TOL=1.08; /* التنزيل يصغّر تلقائيًا لين ٨٪ */
+function cvNatH(k,g){const c=$('#cv').cloneNode(true);c.style.transform='none';c.style.minHeight='0';if(k!=null){c.style.setProperty('--k',k);c.style.setProperty('--g',g)}
+  [c,...c.querySelectorAll('.t-mod')].forEach(x=>{if(x.classList.contains('t-mod')){x.style.minHeight='0';x.querySelectorAll('main,aside').forEach(y=>y.style.paddingBottom='10px')}});
+  c.querySelectorAll('.demo-tag,.wm').forEach(x=>x.remove());
+  const t=document.createElement('div');t.style.cssText='position:absolute;left:-9999px;top:0;visibility:hidden;width:794px';t.appendChild(c);document.body.appendChild(t);const h=c.offsetHeight;t.remove();return h}
+function cvPages(){try{const h=cvNatH();return h<=PAGE_H*PAGE_TOL?1:Math.ceil(h/PAGE_H)}catch(e){return 1}}
+function onePage(){
+  const F=fmt();if(cvPages()===1){toast('سيرتك أصلًا صفحة وحدة ✓');return}
+  const steps=[[F.k,.85],[F.k,.7],[.96,.7],[.92,.7],[.88,.7]].filter(([k,g])=>k<=F.k&&g<=F.g);
+  for(const [k,g] of steps){if(cvNatH(k,g)<=PAGE_H*PAGE_TOL){const onlyG=k===F.k;F.k=k;F.g=g;drawFmt();schedule();toast(onlyG?'صارت صفحة وحدة ✓ — ضغطنا المسافات':'صارت صفحة وحدة ✓ — ضغطنا المسافات وصغّرنا الخط شوي',3500);return}}
+  toast('سيرتك أطول من صفحة وحدة بخط مقروء، فخليناها مثل ما هي — وتقدر تتحكم بالخط والمسافات بنفسك',4500);
+}
+let pgT=0;function pgUpdate(){clearTimeout(pgT);pgT=setTimeout(()=>{const b=$('#pgChip');if(!b)return;if(S.mode!=='cv'||isBlankCV()){b.hidden=true;return}
+  const n=cvPages();b.hidden=false;b.className='fmtbtn pgchip '+(n===1?'ok':'over');b.innerHTML=n===1?'✓ صفحة وحدة':`📄 ${n===2?'صفحتين':ar(n)+' صفحات'}`;b.title='تبيها صفحة وحدة؟ اضغط';
+  const fo=$('#fpOne');if(fo){fo.classList.toggle('ok',n===1);fo.querySelector('small').textContent=n===1?'سيرتك الحين صفحة وحدة ✓':`سيرتك الحين ${n===2?'صفحتين':ar(n)+' صفحات'}`}},350)}
 function fmtHTML(){
   const F=fmt();const seg=(key,opts)=>`<div class="segs">${opts.map(([v,n])=>`<button data-fmt="${key}" data-val="${v}" class="${String(F[key])===String(v)?'on':''}">${n}</button>`).join('')}</div>`;
+  const n=S.mode==='cv'?cvPages():1;
   return `<div class="fp-h"><b>${ic('palette',16)} تنسيق السيرة</b><button class="ib" id="fmtClose" aria-label="إغلاق">✕</button></div>
+   ${S.mode==='cv'?`<div class="fp-one${n===1?' ok':''}" id="fpOne"><div><b>📄 سيرة بصفحة وحدة</b><small>${n===1?'سيرتك الحين صفحة وحدة ✓':`سيرتك الحين ${n===2?'صفحتين':ar(n)+' صفحات'}`}</small></div><button class="btn btn-lime btn-sm" id="fpOneBtn">خلّها صفحة وحدة</button></div>`:''}
    <div class="fp-sec"><span>الخط</span><div class="fonts">${FONTS.map(([id,n,fam])=>`<button data-fmt="font" data-val="${id==='plex'?'':id}" class="${(F.font||'plex')===id?'on':''}" style="font-family:${fam.replace(/"/g,"'")}">${n}<small>نُبذة عنك</small></button>`).join('')}</div></div>
    <div class="fp-sec"><span>حجم الخط</span>${seg('k',[[.92,'صغير'],[1,'متوسط'],[1.08,'كبير']])}</div>
    <div class="fp-sec"><span>المسافات</span>${seg('g',[[.7,'مضغوطة'],[1,'عادية'],[1.35,'واسعة']])}</div>
@@ -3041,10 +3062,12 @@ function fmtHTML(){
    <button class="fp-reset" id="fmtReset">↺ رجّع التنسيق الافتراضي</button>`;
 }
 function drawFmt(){const p=$('#fmtPanel');if(!p.hidden)p.innerHTML=fmtHTML()}
+$('#pgChip').onclick=e=>{e.stopPropagation();onePage()};
 $('#fmtBtn').onclick=e=>{e.stopPropagation();const p=$('#fmtPanel');p.hidden=!p.hidden;if(!p.hidden){p.innerHTML=fmtHTML();FONTS.forEach(f=>loadFont(f[0]))}};
 $('#fmtPanel').addEventListener('click',e=>{
   if(e.target.closest('#fmtClose')){$('#fmtPanel').hidden=true;return}
   if(e.target.closest('#fmtReset')){S.fmt={...DEF_FMT};drawFmt();schedule();return}
+  if(e.target.closest('#fpOneBtn')){onePage();return}
   const c=e.target.closest('[data-fmtc]');if(c){S.color=c.dataset.fmtc;drawFmt();schedule();return}
   const b=e.target.closest('[data-fmt]');if(!b)return;const F=fmt(),k=b.dataset.fmt;let v=b.dataset.val;
   if(k==='k'||k==='g')v=+v;F[k]=v;if(k==='font')loadFont(v);drawFmt();schedule();
@@ -3299,6 +3322,7 @@ function render(){
     cv.innerHTML=(demo?'<div class="demo-tag">مثال توضيحي — اكتب بياناتك وتتغيّر هنا مباشرة</div>'+withSample(cvHTML):cvHTML())+(isProSel()&&!S.pro?'<div class="wm"><span>نُبذة PRO</span></div>':'');fit();
   }else{const demo=isBlankCV();$('#cardBox').style.setProperty('--ac',S.color);$('#cardBox').classList.toggle('demo',demo);demo?withSample(cardHTML):cardHTML()}
   if($('#dPrevBox'))dPrevPaint();
+  pgUpdate();
 }
 let raf=0,st=0;
 function schedule(){
@@ -3311,6 +3335,7 @@ var ZM=1;const ZMIN=.6,ZMAX=3;
 function setZoom(z,keep){const vp=$('#vp'),cx=vp.scrollLeft+vp.clientWidth/2,cy=vp.scrollTop+vp.clientHeight/2,o=ZM;ZM=Math.min(ZMAX,Math.max(ZMIN,+z.toFixed(2)));fit();
   if(keep!==false&&o){const r=ZM/o;vp.scrollLeft=cx*r-vp.clientWidth/2;vp.scrollTop=cy*r-vp.clientHeight/2}}
 function fit(){
+  if(!$('#vp').offsetParent)return; /* المحرر مخفي: نقيس لما يظهر (ResizeObserver) */
   const vp=$('#vp'),w=vp.clientWidth-(innerWidth<=900?20:40),sc=Math.min(1,w/794)*ZM,cv=$('#cv');vp.classList.toggle('zin',ZM>1.001);const zl=$('#zmV');if(zl)zl.textContent=ar(Math.round(ZM*100))+'٪';
   cv.style.transform=`scale(${sc})`;$('#cvBox').style.width=(794*sc)+'px';$('#cvBox').style.height=(cv.offsetHeight*sc)+'px';
 }
@@ -4460,8 +4485,8 @@ $('#dlBtn').onclick=()=>{
 (function gallery(){
   const keep={p:S.p,summary:S.summary,links:S.links,extra:S.extra,secs:S.secs,tpl:S.tpl,dir:S.dir};
   const names={ats:['ATS','الأوضح لأنظمة التوظيف'],modern:['حديث','بعمود جانبي ملوّن'],aca:['أكاديمي','كلاسيكي للبحث والتعليم'],eu:['أوروبي','عصري بخط زمني']};
-  Object.assign(S,sampleData(),{dir:'rtl'});
-  $('#tgal').innerHTML=TPL.map(t=>{Object.assign(S,sampleData(t.id==='modern'?'main':t.id));S.tpl=t.id;return `<a href="#build" class="tcard rv" data-use="${t.id}"><div class="tthumb"><div class="cv" ${cvAttr()}>${cvHTML()}</div></div>
+  Object.assign(S,sampleData(undefined,1),{dir:'rtl'});
+  $('#tgal').innerHTML=TPL.map(t=>{Object.assign(S,sampleData(t.id==='modern'?'main':t.id,1));S.tpl=t.id;return `<a href="#build" class="tcard rv" data-use="${t.id}"><div class="tthumb"><div class="cv" ${cvAttr()}>${cvHTML()}</div></div>
     <div class="meta"><div><b>${names[t.id][0]}</b> ${t.pro?'<span class="pro">PRO</span>':''}<div class="muted">${names[t.id][1]}</div></div><span>استخدمه ←</span></div></a>`}).join('');
   Object.assign(S,keep);
   const fitT=()=>$$('.tthumb').forEach(b=>{b.firstElementChild.style.transform=`scale(${b.clientWidth/794})`});
@@ -4638,7 +4663,7 @@ document.addEventListener('click',e=>{
 
 
 /* toast */
-let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600)}
+let tt;function toast(m,ms=2600){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),ms)}
 
 
 
